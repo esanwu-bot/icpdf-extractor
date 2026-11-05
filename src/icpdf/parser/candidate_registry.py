@@ -12,27 +12,14 @@ from icpdf.domain.candidate import (
     SourceTextType,
 )
 from icpdf.domain.table import ExtractionMethod, Table
+from icpdf.parser.header_semantics import role_for_header
 
 _NUMERIC = re.compile(r"^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)(?:e[+-]?\d+)?$", re.I)
 
 
 def column_role(header: str | None) -> ColumnRole:
-    token = (header or "").casefold().strip()
-    if not token:
-        return ColumnRole.UNKNOWN
-    if "min" in token:
-        return ColumnRole.MIN
-    if "typ" in token:
-        return ColumnRole.TYP
-    if "max" in token:
-        return ColumnRole.MAX
-    if "unit" in token:
-        return ColumnRole.UNIT
-    if "condition" in token or "test" in token:
-        return ColumnRole.CONDITION
-    if "symbol" in token or "parameter" in token or "name" in token:
-        return ColumnRole.SYMBOL
-    return ColumnRole.VALUE
+    """Backward-compatible alias for the Layer 4 role mapper."""
+    return role_for_header(header)
 
 
 def _candidate_type(role: ColumnRole, is_first: bool) -> CandidateType:
@@ -53,10 +40,12 @@ def _normalized(text: str) -> str | None:
 
 
 def build_candidates(run_id: str, document_id: str,
-                     tables: list[Table]) -> CandidateSet:
+                     tables: list[Table],
+                     column_roles: dict[str, list[ColumnRole]] | None = None) -> CandidateSet:
     candidates: list[Candidate] = []
     for table in tables:
-        roles = [column_role(h) for h in table.headers]
+        roles = (column_roles or {}).get(table.table_id) \
+            or [column_role(h) for h in table.headers]
         unit_text: str | None = None
         for row_index, row in enumerate(table.rows, 1):
             for cell in row.cells:

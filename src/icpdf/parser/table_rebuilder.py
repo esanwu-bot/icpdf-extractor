@@ -44,7 +44,7 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
         table_type=detected.table_type,          # parser hypothesis only
         headers=detected.headers,
         rows=rows,
-        detection_method="text_alignment",
+        detection_method=detected.detection_method,
         confidence=detected.confidence,
         reconstruction_status=detected.reconstruction_status,
         uncertainty_reason=detected.uncertainty_reason,

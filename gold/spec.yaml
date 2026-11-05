@@ -1,0 +1,491 @@
+# Phase 1.2 Gold Table Set specification.
+#
+# Every table is proposed by tools/goldset/rules.py (an independent rule-lattice
+# annotator) and must be visually reviewed before `verdict` becomes `accepted`.
+# The production detector is never used to create gold data.
+#
+# Coordinates are PDF points in the page's post-crop/post-rotate coordinate
+# system, identical to the parser's PageGeometry.
+
+schema_version: "gold-schema/v1"
+annotation_version: "gold-2026-11-05.1"
+reviewed_at: "2026-11-05"
+annotator: "icpdf rule-lattice annotator + overlay inspection"
+review_method: "every overlay checked for table/cell/header alignment; roles assigned from datasheet headings"
+reviewer: "icpdf Phase 1.2 reviewer (independent sign-off pending)"
+default_verdict: accepted
+
+pdfs:
+  lm358:
+    label: "LM358"
+    path: "E:/workspace/IcPdfParser/data/pdfs/LM358__lm358.pdf"
+    sha256: "8277dff7b89138c63b3582d37f378065a1dea3cae5ed1e2926ddc2779eb7e3a2"
+  ads1299:
+    label: "ADS1299"
+    path: "E:/workspace/IcPdfParser/data/pdfs/ADS1299IPAGR__ads1299.pdf"
+    sha256: "9ef667389897f02dae8d94e8c3daecbe8cbd2ab45f4d62e1db1c474544180075"
+  adc12dj5200:
+    label: "ADC12DJ5200"
+    path: "E:/workspace/IcPdfParser/data/pdfs/ADC12DJ5200SEAAV__adc12dj5200se.pdf"
+    sha256: "398fd1f1adc1957236ec95b65b8a2ea0cebbedeb95327ba37261e1f9f5857a74"
+
+tables:
+  # ---------------- LM358 (12 tables) ----------------
+  - id: LM358-P04-T01
+    pdf: lm358
+    page: 4
+    component: 0
+    header_rows: 1
+    table_type: absolute_maximum
+    column_roles: [parameter, condition, condition, min, max, unit]
+    notes: "5.3 Absolute Maximum Ratings"
+  - id: LM358-P04-T02
+    pdf: lm358
+    page: 4
+    component: 1
+    header_rows: 1
+    full_width_rows: [1, 4]
+    table_type: absolute_maximum
+    column_roles: [group, condition, value, unit]
+    notes: "5.2 ESD Ratings; VALUE/UNIT header, merged device-group row"
+  - id: LM358-P05-T01
+    pdf: lm358
+    page: 5
+    component: 0
+    header_rows: 1
+    table_type: recommended_operating
+    column_roles: [parameter, condition, min, max, unit]
+    column_boundaries: [56.7, 267.6, 419.9, 487.0, 517.3, 555.3]
+    notes: "MIN and MAX drawn without an internal rule; split at header midpoint 487.0"
+  - id: LM358-P05-T02
+    pdf: lm358
+    page: 5
+    component: 1
+    header_rows: 3
+    table_type: thermal
+    column_roles: [parameter, condition, condition, condition, condition, condition, condition, condition, condition, unit]
+    notes: "5.4 Thermal Information; three-row header (group / package / pin count)"
+  - id: LM358-P06-T01
+    pdf: lm358
+    page: 6
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 9, 14, 20, 23, 26, 29, 36]
+    table_type: electrical_characteristics
+    column_roles: [symbol, parameter, condition, min, typ, max, unit]
+    merges: [[0, 0, 0, 1]]
+    column_boundaries: [56.7, 85.0, 181.3, 442.0, 471.0, 501.5, 527.1, 555.3]
+    notes: "6.5 Electrical Characteristics; MIN/TYP/MAX have no internal rules"
+  - id: LM358-P08-T01
+    pdf: lm358
+    page: 8
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 9, 14, 20, 23, 26, 29, 36, 51]
+    table_type: electrical_characteristics
+    column_roles: [symbol, parameter, condition, min, typ, max, unit]
+    merges: [[0, 0, 0, 1]]
+    column_boundaries: [56.7, 85.0, 181.3, 442.0, 471.0, 501.5, 527.1, 555.3]
+    notes: "6.7 Electrical Characteristics (continued)"
+  - id: LM358-P10-T01
+    pdf: lm358
+    page: 10
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 10, 16, 27, 29, 32, 35, 47]
+    table_type: electrical_characteristics
+    column_roles: [parameter, condition, min, typ, max, unit]
+    column_boundaries: [56.7, 180.0, 386.4, 438.0, 487.4, 512.8, 555.3]
+    notes: "6.9 Electrical Characteristics (continued); nested test-condition sub-rules collapsed"
+  - id: LM358-P11-T01
+    pdf: lm358
+    page: 11
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 9, 13, 21, 23, 26, 29]
+    table_type: electrical_characteristics
+    column_roles: [parameter, condition, min, typ, max, unit]
+    column_boundaries: [56.7, 184.9, 412.8, 455.5, 492.8, 524.4, 555.3]
+    notes: "6.11 Electrical Characteristics (continued); A-suffix nested conditions collapsed"
+  - id: LM358-P12-T01
+    pdf: lm358
+    page: 12
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 10, 16, 27, 29, 32, 35]
+    table_type: electrical_characteristics
+    column_roles: [parameter, condition, min, typ, max, unit]
+    column_boundaries: [56.7, 192.0, 410.0, 455.5, 494.0, 522.8, 555.3]
+    notes: "6.13 Electrical Characteristics (continued)"
+  - id: LM358-P14-T01
+    pdf: lm358
+    page: 14
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 10, 16, 27, 29, 32, 35, 47]
+    table_type: electrical_characteristics
+    column_roles: [parameter, condition, min, typ, max, unit]
+    column_boundaries: [56.7, 192.0, 410.0, 455.5, 494.0, 522.8, 555.3]
+    notes: "6.15 Electrical Characteristics (continued)"
+  - id: LM358-P33-T01
+    pdf: lm358
+    page: 33
+    component: 0
+    header_rows: 1
+    table_type: ordering_information
+    column_roles: [part_number, status, material_type, package, package_qty, rohs, lead_finish, msl, op_temp, part_marking]
+    column_boundaries: [22.7, 133.9, 176.0, 239.3, 315.7, 412.7, 462.7, 539.5, 639.3, 720.7, 816.4]
+    notes: "Packaging Information; wide landscape page, boundaries shared with ADS1299 p76"
+
+  # ---------------- ADS1299 (15 tables) ----------------
+  - id: ADS1299-P17-T01
+    pdf: ads1299
+    page: 17
+    component: 0
+    header_rows: 2
+    table_type: electrical_characteristics
+    column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value]
+    column_boundaries: [54.1, 99.7, 141.3, 197.8, 233.8, 269.8, 305.8, 341.8, 377.8, 413.8, 449.8, 485.8, 521.7, 557.7]
+    merges: [[0, 0, 3, 7], [0, 0, 8, 12]]
+    notes: "Table 2 noise measurements, PGA gain = 4 / 6; two-row header"
+  - id: ADS1299-P17-T02
+    pdf: ads1299
+    page: 17
+    component: 1
+    header_rows: 2
+    table_type: electrical_characteristics
+    column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value]
+    column_boundaries: [54.1, 99.7, 141.3, 197.8, 233.8, 269.8, 305.8, 341.8, 377.8, 413.8, 449.8, 485.8, 521.7, 557.7]
+    merges: [[0, 0, 3, 7], [0, 0, 8, 12]]
+    notes: "Table 3 noise measurements, PGA gain = 8 / 12"
+  - id: ADS1299-P17-T03
+    pdf: ads1299
+    page: 17
+    component: 2
+    header_rows: 2
+    table_type: electrical_characteristics
+    column_roles: [symbol, value, value, value, value, value, value, value]
+    column_boundaries: [54.1, 125.6, 187.5, 274.9, 331.5, 388.0, 444.6, 501.2, 557.7]
+    merges: [[0, 0, 3, 7]]
+    notes: "Table 4 noise measurements, PGA gain = 24"
+  - id: ADS1299-P23-T01
+    pdf: ads1299
+    page: 23
+    component: 0
+    header_rows: 1
+    table_type: electrical_characteristics
+    column_roles: [parameter, value]
+    notes: "PGA gain vs nominal bandwidth"
+  - id: ADS1299-P27-T01
+    pdf: ads1299
+    page: 27
+    component: 0
+    header_rows: 1
+    table_type: pin_functions
+    column_roles: [symbol, condition, condition, description]
+    notes: "CLKSEL pin clock-source truth table"
+  - id: ADS1299-P35-T01
+    pdf: ads1299
+    page: 35
+    component: 0
+    header_rows: 1
+    table_type: electrical_characteristics
+    column_roles: [symbol, value, unit]
+    notes: "DR[2:0] normal-mode conversion timing"
+  - id: ADS1299-P37-T01
+    pdf: ads1299
+    page: 37
+    component: 0
+    header_rows: 1
+    table_type: electrical_characteristics
+    column_roles: [parameter, min, unit]
+    notes: "START/STOP setup and hold timing"
+  - id: ADS1299-P40-T01
+    pdf: ads1299
+    page: 40
+    component: 0
+    header_rows: 1
+    full_width_rows: [1, 7, 11]
+    table_type: other
+    column_roles: [symbol, description, value, value]
+    notes: "Command definitions, multi-line command groups"
+  - id: ADS1299-P44-T01
+    pdf: ads1299
+    page: 44
+    component: 0
+    header_rows: 2
+    table_type: other
+    column_roles: [address, register, default, bit, bit, bit, bit, bit, bit, bit, bit]
+    merges: [[0, 0, 3, 10]]
+    full_width_rows: [2, 4, 9, 23, 26]
+    notes: "Table 11 register assignments; five full-width group rows"
+  - id: ADS1299-P45-T01
+    pdf: ads1299
+    page: 45
+    component: 1
+    header_rows: 1
+    table_type: other
+    column_roles: [bit, field, type, reset, description]
+    notes: "Table 12 ID register field descriptions"
+  - id: ADS1299-P52-T01
+    pdf: ads1299
+    page: 52
+    component: 1
+    header_rows: 1
+    table_type: other
+    column_roles: [bit, field, type, reset, description]
+    notes: "Table 19 BIAS_SENSN field descriptions"
+  - id: ADS1299-P67-T01
+    pdf: ads1299
+    page: 67
+    component: 2
+    header_rows: 1
+    table_type: other
+    column_roles: [parameter, value]
+    notes: "EEG application design requirements"
+  - id: ADS1299-P70-T01
+    pdf: ads1299
+    page: 70
+    component: 1
+    header_rows: 1
+    table_type: electrical_characteristics
+    column_roles: [symbol, description, min, max, unit]
+    column_boundaries: [54.1, 112.0, 391.4, 465.0, 501.5, 557.9]
+    notes: "Table 30 power-up / reset timing; single data row; MIN/MAX share one drawn column"
+  - id: ADS1299-P74-T01
+    pdf: ads1299
+    page: 74
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [part_number, value, value, value, value, value]
+    notes: "Related Links"
+  - id: ADS1299-P76-T01
+    pdf: ads1299
+    page: 76
+    component: 0
+    header_rows: 1
+    table_type: ordering_information
+    column_roles: [part_number, status, material_type, package, package_qty, rohs, lead_finish, msl, op_temp, part_marking]
+    notes: "Packaging Information, landscape page"
+
+  # ---------------- ADC12DJ5200 (15 tables) ----------------
+  - id: ADC12DJ5200-P39-T01
+    pdf: adc12dj5200
+    page: 39
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [part_number, value, value, value, value, value, value]
+    notes: "Device family comparison; dual/single decimation cell is genuinely merged"
+  - id: ADC12DJ5200-P41-T01
+    pdf: adc12dj5200
+    page: 41
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [value, value, value, value]
+    notes: "Overrange sample encodings"
+  - id: ADC12DJ5200-P43-T01
+    pdf: adc12dj5200
+    page: 43
+    component: 1
+    header_rows: 1
+    table_type: other
+    column_roles: [parameter, value, value]
+    notes: "Device clock mode table; two data rows"
+  - id: ADC12DJ5200-P46-T01
+    pdf: adc12dj5200
+    page: 46
+    component: 0
+    header_rows: 2
+    table_type: electrical_characteristics
+    column_roles: [value, value, value, value]
+    merges: [[0, 0, 0, 2]]
+    notes: "SYSREF_POS examples; three delay bytes under one spanning header"
+  - id: ADC12DJ5200-P47-T01
+    pdf: adc12dj5200
+    page: 47
+    component: 1
+    header_rows: 1
+    table_type: other
+    column_roles: [parameter, value, value, value, value, value]
+    notes: "PFIR modes; single data row (must not be discarded as non-table)"
+  - id: ADC12DJ5200-P54-T01
+    pdf: adc12dj5200
+    page: 54
+    component: 0
+    header_rows: 1
+    table_type: electrical_characteristics
+    column_roles: [condition, value]
+    notes: "NCO_RDIV vs fCLK"
+  - id: ADC12DJ5200-P61-T01
+    pdf: adc12dj5200
+    page: 61
+    component: 0
+    header_rows: 1
+    table_type: pin_functions
+    column_roles: [signal, pin, value, value, description]
+    notes: "JESD204C signals and pins"
+  - id: ADC12DJ5200-P61-T02
+    pdf: adc12dj5200
+    page: 61
+    component: 1
+    header_rows: 1
+    table_type: other
+    column_roles: [symbol, condition, description, value]
+    notes: "Table 6-18 supported JESD204C features; 13 lettered data rows"
+  - id: ADC12DJ5200-P72-T01
+    pdf: adc12dj5200
+    page: 72
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [parameter, description, condition, value]
+    notes: "Operating mode configuration parameters"
+  - id: ADC12DJ5200-P78-T01
+    pdf: adc12dj5200
+    page: 78
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [symbol, condition, description]
+    notes: "JMODE symbol definitions"
+  - id: ADC12DJ5200-P78-T02
+    pdf: adc12dj5200
+    page: 78
+    component: 1
+    header_rows: 2
+    table_type: other
+    column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value]
+    merges:
+      - [0, 0, 1, 2]
+      - [0, 0, 3, 4]
+      - [0, 0, 5, 6]
+      - [0, 0, 7, 8]
+      - [0, 0, 9, 10]
+      - [0, 0, 11, 12]
+      - [0, 0, 13, 14]
+      - [0, 0, 15, 16]
+    notes: "Table 6-27 octet/nibble mapping; OCTET canopy spans two nibble columns"
+  - id: ADC12DJ5200-P78-T03
+    pdf: adc12dj5200
+    page: 78
+    component: 2
+    header_rows: 2
+    table_type: other
+    column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value]
+    merges:
+      - [0, 0, 1, 2]
+      - [0, 0, 3, 4]
+      - [0, 0, 5, 6]
+      - [0, 0, 7, 8]
+      - [0, 0, 9, 10]
+      - [0, 0, 11, 12]
+      - [0, 0, 13, 14]
+      - [0, 0, 15, 16]
+    notes: "Table 6-28 JMODES 1 and 40 octet/nibble mapping; 16 data rows"
+  - id: ADC12DJ5200-P78-T04
+    pdf: adc12dj5200
+    page: 78
+    component: 3
+    header_rows: 2
+    table_type: other
+    column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value]
+    merges:
+      - [0, 0, 1, 2]
+      - [0, 0, 3, 4]
+      - [0, 0, 5, 6]
+      - [0, 0, 7, 8]
+      - [0, 0, 9, 10]
+      - [0, 0, 11, 12]
+      - [0, 0, 13, 14]
+      - [0, 0, 15, 16]
+    cross_page: {group: adc-jmode-2-31, part: 1, relation: continued}
+    notes: "Table 6-29 JMODES 2 and 31; first five data rows on p78, replaced header repeats on p79"
+  - id: ADC12DJ5200-P79-T01
+    pdf: adc12dj5200
+    page: 79
+    component: 0
+    header_rows: 2
+    table_type: other
+    column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value]
+    merges:
+      - [0, 0, 1, 2]
+      - [0, 0, 3, 4]
+      - [0, 0, 5, 6]
+      - [0, 0, 7, 8]
+      - [0, 0, 9, 10]
+      - [0, 0, 11, 12]
+      - [0, 0, 13, 14]
+      - [0, 0, 15, 16]
+    cross_page: {group: adc-jmode-2-31, part: 2, relation: continued}
+    notes: "Table 6-29 continuation; repeated two-row header and DB1-DB3"
+  - id: ADC12DJ5200-P98-T01
+    pdf: adc12dj5200
+    page: 98
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [address, symbol, description, value]
+    cross_page: {group: adc-spi-register-map, part: 1, relation: continued}
+    notes: "SPI register map index, first page"
+  - id: ADC12DJ5200-P100-T01
+    pdf: adc12dj5200
+    page: 100
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [address, symbol, description, value]
+    cross_page: {group: adc-spi-register-map, part: 2, relation: continued}
+    notes: "SPI register map index, continued on page 100 (page 99 also holds rows)"
+  - id: ADC12DJ5200-P102-T01
+    pdf: adc12dj5200
+    page: 102
+    component: 0
+    header_rows: 1
+    table_type: other
+    column_roles: [bit, field, type, reset, description]
+    notes: "Table 6-69 CONFIG_A field descriptions"
+  - id: ADC12DJ5200-P102-T02
+    pdf: adc12dj5200
+    page: 102
+    component: 2
+    header_rows: 1
+    table_type: other
+    column_roles: [bit, field, type, reset, description]
+    notes: "Table 6-70 DEVICE_CONFIG field descriptions"
+  - id: ADC12DJ5200-P102-T03
+    pdf: adc12dj5200
+    page: 102
+    component: 4
+    header_rows: 1
+    table_type: other
+    column_roles: [bit, field, type, reset, description]
+    notes: "Table 6-71 field descriptions"
+
+negatives:
+  # ---------------- LM358 (5) ----------------
+  - {id: LM358-N01-P01-PROSE, pdf: lm358, page: 1, negative_kind: prose, bbox: [54, 100, 560, 340], notes: "Features, Applications and Description prose"}
+  - {id: LM358-N02-P02-TOC, pdf: lm358, page: 2, negative_kind: toc, bbox: [54, 96, 558, 335], notes: "Table of Contents with dot leaders"}
+  - {id: LM358-N03-P03-PINS, pdf: lm358, page: 3, negative_kind: pin_diagram, bbox: [50, 110, 545, 390], notes: "Pin configuration drawings and labels"}
+  - {id: LM358-N04-P15-CHART, pdf: lm358, page: 15, negative_kind: chart_annotations, bbox: [57, 120, 558, 315], notes: "Histogram chart axes/labels"}
+  - {id: LM358-N05-P31-REVHIST, pdf: lm358, page: 31, negative_kind: revision_history, bbox: [54, 70, 558, 720], notes: "Revision history bullet prose"}
+
+  # ---------------- ADS1299 (7) ----------------
+  - {id: ADS1299-N01-P01-PROSE, pdf: ads1299, page: 1, negative_kind: prose, bbox: [54, 115, 300, 675], notes: "Features / Applications / Description bullets"}
+  - {id: ADS1299-N02-P02-TOC, pdf: ads1299, page: 2, negative_kind: toc, bbox: [54, 75, 558, 520], notes: "Table of Contents and Revision History"}
+  - {id: ADS1299-N03-P16-PROSE, pdf: ads1299, page: 16, negative_kind: prose, bbox: [50, 90, 560, 470], notes: "Equation-heavy prose introducing noise measurements"}
+  - {id: ADS1299-N04-P19-PINS, pdf: ads1299, page: 19, negative_kind: pin_diagram, bbox: [54, 70, 558, 710], notes: "Functional block / pin diagram"}
+  - {id: ADS1299-N05-P26-CHART, pdf: ads1299, page: 26, negative_kind: chart_annotations, bbox: [57, 120, 558, 650], notes: "Frequency-response chart axes/labels"}
+  - {id: ADS1299-N06-P70-TIMING, pdf: ads1299, page: 70, negative_kind: timing_diagram, bbox: [170, 400, 460, 550], notes: "Power-up timing diagram; ruled boxes are annotations, not a table"}
+  - {id: ADS1299-N07-P84-NOTICE, pdf: ads1299, page: 84, negative_kind: legal_notice, bbox: [54, 70, 558, 330], notes: "Important Notice and Disclaimer prose"}
+
+  # ---------------- ADC12DJ5200 (6) ----------------
+  - {id: ADC12DJ5200-N01-P01-FEATURES, pdf: adc12dj5200, page: 1, negative_kind: prose, bbox: [54, 115, 560, 650], notes: "Features / Applications bullets"}
+  - {id: ADC12DJ5200-N02-P02-TOC, pdf: adc12dj5200, page: 2, negative_kind: toc, bbox: [54, 96, 558, 330], notes: "Table of Contents with dot leaders"}
+  - {id: ADC12DJ5200-N03-P03-PINS, pdf: adc12dj5200, page: 3, negative_kind: pin_diagram, bbox: [54, 70, 560, 710], notes: "144-ball pin configuration drawing"}
+  - {id: ADC12DJ5200-N04-P29-CHART, pdf: adc12dj5200, page: 29, negative_kind: chart_annotations, bbox: [57, 115, 558, 670], notes: "Typical characteristics chart axes/legend"}
+  - {id: ADC12DJ5200-N05-P102-BITFIELD, pdf: adc12dj5200, page: 102, negative_kind: bit_field_diagram, bbox: [56, 340, 556, 392], notes: "DEVICE_CONFIG bit-field diagram (ruled row, not a table)"}
+  - {id: ADC12DJ5200-N06-P180-NOTICE, pdf: adc12dj5200, page: 180, negative_kind: legal_notice, bbox: [54, 70, 558, 330], notes: "Important Notice and Disclaimer prose"}
+  - {id: ADC12DJ5200-N07-P102-BITFIELD, pdf: adc12dj5200, page: 102, negative_kind: bit_field_diagram, bbox: [56, 596, 556, 648], notes: "CHIP_TYPE register bit-field diagram (ruled rows, not a table)"}

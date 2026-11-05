@@ -144,3 +144,43 @@ validation of candidate ownership + evidence alignment.
   and build a human-labelled table gold set.
 
 
+
+---
+
+## Round 4 — Phase 1.2 Gold Set and five-layer detector (2026-11-05)
+
+**Status:** first refactor round complete; reviewer approval requested. Phase 2 frozen.
+
+- Frozen baseline: commit `1d8c7220601db734b63437abd41c36739a42aa89`, tag
+  `phase1.1-baseline`. All comparisons use `gold/gold_table_set.jsonl`
+  (annotation `gold-2026-11-05.1`, 45 tables + 19 negatives).
+- New layers, each in its own module:
+  `parser/layout.py` (page layout) -> `parser/table_regions.py` (region
+  detection) -> `parser/structure.py` (structure) ->
+  `parser/header_semantics.py` (header/roles/type) ->
+  `parser/candidate_registry.py` (candidate binding).
+  `parser/table_detector.py` is orchestration only.
+- Config additions (`configs/parser.yaml` -> `TableParams`):
+  `rule_min_width_pt=70.0`, `rule_min_height_pt=15.0`, `alignment_min_rows=3`.
+- Behaviour: rule lattices are the only region source; text alignment is a
+  fallback for pages with no vector rules and needs >= 3 visual rows. Hard
+  column rules must cover >= 55% of the table height and be crossed by text in
+  < 40% of bands. Soft boundaries need header labels or recurring body gutters
+  and are skipped where a hard rule or header words already own the interval.
+  Ragged data rows now force `partial` rather than `reconstructed`.
+- Gold set tooling: `tools/goldset/rules.py`, `annotate.py`, `inspect_components.py`,
+  `evaluate.py`, `compare.py`; visual overlays in `gold/overlays/`, gallery
+  `gold/review.html`.
+- Results on the same Gold Set (`gold/comparison.md`):
+  P 0.0492 -> 0.9070, R 0.3556 -> 0.8667, F1 0.0865 -> 0.8864;
+  FP 309 -> 4; negative FP 59 -> 4; out-of-scope 68 -> 7.
+  Row exact 5/16 -> 38/39; column exact 12/16 -> 34/39;
+  header column accuracy 0.0413 -> 0.5932; role accuracy 0.0331 -> 0.6398;
+  table-type accuracy 0 -> 0.5128. Mean overlapping predictions 5.911 -> 0.867.
+- Physical chain unchanged: 60/60 sampled non-empty candidates still cover ink.
+- Tests: `python -m pytest -q` -> 48 passed.
+- Remaining failures and known trade-offs are listed in
+  `docs/PHASE1_2_ARCHITECTURE.md` (6 FN, 4 negative FP, six structure
+  mismatches, including the intentionally dropped partial sub-rule in
+  `LM358-P04-T01`).
+- No LLM, no DashScope, no automatic parameter generation in this round.

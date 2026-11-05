@@ -27,6 +27,9 @@ class TableParams(BaseModel):
     max_title_chars: int = Field(default=120, ge=1)
     max_cell_chars: int = Field(default=80, ge=1)
     min_numeric_cells: int = Field(default=2, ge=0)
+    rule_min_width_pt: float = Field(default=70.0, gt=0)
+    rule_min_height_pt: float = Field(default=15.0, gt=0)
+    alignment_min_rows: int = Field(default=3, ge=2)
 
 
 class ParserConfig(BaseModel):

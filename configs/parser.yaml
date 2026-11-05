@@ -18,3 +18,8 @@ tables:
   max_cell_chars: 80
   # A non-headed table must contain at least this many numeric-looking cells.
   min_numeric_cells: 2
+  # Minimum size of a connected vector-rule lattice considered a table region.
+  rule_min_width_pt: 70.0
+  rule_min_height_pt: 15.0
+  # Text-only fallback: require at least this many visual rows (header + data).
+  alignment_min_rows: 3

@@ -1,0 +1,50 @@
+{
+  "schema_version": "gold-schema/v1",
+  "annotation_version": "gold-2026-11-05.1",
+  "generated_at": "2026-11-05T13:34:06+00:00",
+  "annotator": "icpdf rule-lattice annotator + overlay inspection",
+  "reviewed_at": "2026-11-05",
+  "review_method": "every overlay checked for table/cell/header alignment; roles assigned from datasheet headings",
+  "independent_review": "pending",
+  "baseline_tag": "phase1.1-baseline",
+  "baseline_commit": "1d8c7220601db734b63437abd41c36739a42aa89",
+  "pdfs": {
+    "lm358": {
+      "label": "LM358",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/LM358__lm358.pdf",
+      "sha256": "8277dff7b89138c63b3582d37f378065a1dea3cae5ed1e2926ddc2779eb7e3a2"
+    },
+    "ads1299": {
+      "label": "ADS1299",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/ADS1299IPAGR__ads1299.pdf",
+      "sha256": "9ef667389897f02dae8d94e8c3daecbe8cbd2ab45f4d62e1db1c474544180075"
+    },
+    "adc12dj5200": {
+      "label": "ADC12DJ5200",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/ADC12DJ5200SEAAV__adc12dj5200se.pdf",
+      "sha256": "398fd1f1adc1957236ec95b65b8a2ea0cebbedeb95327ba37261e1f9f5857a74"
+    }
+  },
+  "counts": {
+    "tables": 45,
+    "negatives": 19,
+    "negative_kinds": [
+      "bit_field_diagram",
+      "chart_annotations",
+      "legal_notice",
+      "pin_diagram",
+      "prose",
+      "revision_history",
+      "timing_diagram",
+      "toc"
+    ],
+    "tables_per_pdf": {
+      "lm358": 11,
+      "ads1299": 15,
+      "adc12dj5200": 19
+    }
+  },
+  "human_verdicts": {
+    "accepted": 64
+  }
+}

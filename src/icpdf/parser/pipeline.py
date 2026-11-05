@@ -11,6 +11,7 @@ import pymupdf as fitz
 
 from icpdf import PARSER_VERSION, __version__
 from icpdf.domain import Product
+from icpdf.domain.candidate import ColumnRole
 from icpdf.parser.candidate_registry import build_candidates
 from icpdf.parser.config import load_config
 from icpdf.parser.page_renderer import render_page
@@ -57,6 +58,8 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
 
     all_blocks: list[dict] = []
     all_tables = []
+    table_roles: dict[str, list[ColumnRole]] = {}
+    detection_methods: dict[str, int] = {}
     rendered_pages: list[int] = []
     with fitz.open(str(loaded.path)) as doc:
         for page_index, page in enumerate(doc):
@@ -64,18 +67,23 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
             geometry = loaded.geometries[page_index]
             blocks = extract_text_blocks(page, page_number, geometry)
             all_blocks.extend(block.model_dump(mode="json") for block in blocks)
-            detected = detect_tables(blocks, page_number, config.tables)
+            detected = detect_tables(blocks, page_number, config.tables,
+                                     page=page, geometry=geometry)
             if detected:
                 rendered_pages.append(page_number)
                 render_page(loaded.path, page_number,
                             run.dir / "pages" / f"page-{page_number:04d}.png",
                             dpi=effective_dpi)
             for index, item in enumerate(detected, 1):
-                all_tables.append(build_table(item, document.document_id, index))
+                table = build_table(item, document.document_id, index)
+                all_tables.append(table)
+                table_roles[table.table_id] = [ColumnRole(role) for role in item.column_roles]
+                detection_methods[item.detection_method] = \
+                    detection_methods.get(item.detection_method, 0) + 1
 
     run.write_json("text_blocks.json", all_blocks)
     run.write_json("tables.json", [t.model_dump(mode="json") for t in all_tables])
-    candidates = build_candidates(run.run_id, document.document_id, all_tables)
+    candidates = build_candidates(run.run_id, document.document_id, all_tables, table_roles)
     run.write_json("candidates.json", candidates.model_dump(mode="json"))
 
     product = Product(
@@ -106,6 +114,7 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
         "page_count": document.page_count,
         "table_count": len(all_tables),
         "candidate_count": len(candidates.candidates),
+        "detection_methods": detection_methods,
         "rendered_pages": rendered_pages,
         "model": os.getenv("ICPDF_LLM_MODEL", ""),
         "prompt_version": "",

@@ -1,0 +1,3513 @@
+{
+  "label": "after-5layer-v4",
+  "generated_at": "2026-11-05T14:11:49+00:00",
+  "annotation_version": "gold-2026-11-05.1",
+  "baseline": {
+    "tag": "phase1.1-baseline",
+    "commit": "1d8c7220601db734b63437abd41c36739a42aa89",
+    "annotation_version": "gold-2026-11-05.1",
+    "pdf_sha256": {
+      "lm358": "8277dff7b89138c63b3582d37f378065a1dea3cae5ed1e2926ddc2779eb7e3a2",
+      "ads1299": "9ef667389897f02dae8d94e8c3daecbe8cbd2ab45f4d62e1db1c474544180075",
+      "adc12dj5200": "398fd1f1adc1957236ec95b65b8a2ea0cebbedeb95327ba37261e1f9f5857a74"
+    }
+  },
+  "runs": [
+    {
+      "pdf_id": "adc12dj5200",
+      "run_id": "20261105T141031Z-1d7e93",
+      "run_dir": "runs\\phase12_after5\\20261105T141031Z-1d7e93",
+      "parser_config_sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
+      "parser_version": "0.1.0-phase1"
+    },
+    {
+      "pdf_id": "ads1299",
+      "run_id": "20261105T141010Z-9985ab",
+      "run_dir": "runs\\phase12_after5\\20261105T141010Z-9985ab",
+      "parser_config_sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
+      "parser_version": "0.1.0-phase1"
+    },
+    {
+      "pdf_id": "lm358",
+      "run_id": "20261105T140950Z-9aefb4",
+      "run_dir": "runs\\phase12_after5\\20261105T140950Z-9aefb4",
+      "parser_config_sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
+      "parser_version": "0.1.0-phase1"
+    }
+  ],
+  "protocol": {
+    "iou_match": 0.5,
+    "scope_overlap": 0.25,
+    "scope": "prediction must overlap an annotated table or negative region"
+  },
+  "overall": {
+    "tables": 45,
+    "tp": 39,
+    "fp": 4,
+    "fn": 6,
+    "precision": 0.907,
+    "recall": 0.8667,
+    "f1": 0.8864,
+    "out_of_scope_predictions": 7,
+    "predictions_on_gold_pages": 50,
+    "negative_items": 19,
+    "negative_items_with_fp": 3,
+    "negative_fp": 4
+  },
+  "per_pdf": {
+    "adc12dj5200": {
+      "tables": 19,
+      "tp": 14,
+      "fp": 3,
+      "fn": 5,
+      "precision": 0.8235,
+      "recall": 0.7368,
+      "f1": 0.7778,
+      "out_of_scope_predictions": 3,
+      "predictions_on_gold_pages": 20,
+      "negative_items": 7
+    },
+    "ads1299": {
+      "tables": 15,
+      "tp": 14,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.9333,
+      "f1": 0.9655,
+      "out_of_scope_predictions": 1,
+      "predictions_on_gold_pages": 15,
+      "negative_items": 7
+    },
+    "lm358": {
+      "tables": 11,
+      "tp": 11,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.9167,
+      "recall": 1.0,
+      "f1": 0.9565,
+      "out_of_scope_predictions": 3,
+      "predictions_on_gold_pages": 15,
+      "negative_items": 5
+    }
+  },
+  "gold_composition": {
+    "table_types": {
+      "absolute_maximum": 2,
+      "electrical_characteristics": 15,
+      "ordering_information": 2,
+      "other": 22,
+      "pin_functions": 2,
+      "recommended_operating": 1,
+      "thermal": 1
+    },
+    "tables_per_pdf": {
+      "adc12dj5200": 19,
+      "ads1299": 15,
+      "lm358": 11
+    },
+    "negatives_per_pdf": {
+      "adc12dj5200": 7,
+      "ads1299": 7,
+      "lm358": 5
+    }
+  },
+  "fragmentation": {
+    "mean_overlapping_predictions": 0.867,
+    "max_overlapping_predictions": 1,
+    "max_items": [
+      "ADC12DJ5200-P39-T01",
+      "ADC12DJ5200-P41-T01",
+      "ADC12DJ5200-P46-T01",
+      "ADC12DJ5200-P47-T01",
+      "ADC12DJ5200-P54-T01",
+      "ADC12DJ5200-P61-T01",
+      "ADC12DJ5200-P72-T01",
+      "ADC12DJ5200-P78-T01",
+      "ADC12DJ5200-P78-T02",
+      "ADC12DJ5200-P98-T01"
+    ],
+    "distribution": {
+      "0": 6,
+      "1": 39
+    }
+  },
+  "structure": {
+    "matched": 39,
+    "row_count_exact": 38,
+    "column_count_exact": 34,
+    "row_and_column_exact": 33,
+    "cell_text_tp": 2305,
+    "cell_text_fp": 500,
+    "cell_text_fn": 443,
+    "cell_text_f1": 0.8302,
+    "header_column_accuracy": 0.5932,
+    "header_tables_exact": 20,
+    "column_role_accuracy": 0.6398,
+    "column_role_tables_exact": 12,
+    "table_type_accuracy": 0.5128,
+    "reconstruction_status": {
+      "reconstructed": 19,
+      "partial": 20
+    },
+    "row_error_distribution": {
+      "0": 38,
+      "3": 1
+    },
+    "column_error_distribution": {
+      "-4": 1,
+      "-2": 1,
+      "-1": 2,
+      "0": 34,
+      "1": 1
+    }
+  },
+  "single_row_tables": {
+    "count": 1,
+    "matched": 1,
+    "items": [
+      {
+        "item_id": "ADC12DJ5200-P47-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 47,
+        "gold_rows": 2,
+        "gold_columns": 6,
+        "gold_data_rows": 1,
+        "gold_table_type": "other",
+        "cross_page": null,
+        "overlapping_predictions": 1,
+        "matched": true,
+        "prediction_id": "p047-t01",
+        "iou": 0.9979,
+        "pred_rows": 5,
+        "pred_columns": 6,
+        "pred_table_type": "unknown",
+        "reconstruction_status": "partial",
+        "structure": {
+          "rows": {
+            "gold": 2,
+            "pred": 5,
+            "exact": false,
+            "error": 3
+          },
+          "columns": {
+            "gold": 6,
+            "pred": 6,
+            "exact": true,
+            "error": 0
+          },
+          "cells": {
+            "gold": 12,
+            "pred": 17,
+            "tp": 7,
+            "fp": 10,
+            "fn": 5
+          },
+          "headers": {
+            "column_hits": 0,
+            "columns": 6,
+            "all_exact": false,
+            "comparable": true
+          },
+          "roles": {
+            "column_hits": 0,
+            "columns": 6,
+            "all_exact": false,
+            "gold": [
+              "symbol",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value"
+            ],
+            "pred": [
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown"
+            ],
+            "comparable": true
+          },
+          "table_type": {
+            "gold": "other",
+            "pred": "unknown",
+            "exact": false
+          },
+          "reconstruction_status": "partial"
+        }
+      }
+    ]
+  },
+  "cross_page_tables": {
+    "count": 4,
+    "matched": 2,
+    "items": [
+      {
+        "item_id": "ADC12DJ5200-P78-T04",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_rows": 7,
+        "gold_columns": 17,
+        "gold_data_rows": 5,
+        "gold_table_type": "other",
+        "cross_page": {
+          "group": "adc-jmode-2-31",
+          "part": 1,
+          "relation": "continued"
+        },
+        "overlapping_predictions": 0,
+        "matched": false,
+        "prediction_id": null,
+        "iou": 0.0,
+        "best_iou": 0.0
+      },
+      {
+        "item_id": "ADC12DJ5200-P79-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 79,
+        "gold_rows": 5,
+        "gold_columns": 17,
+        "gold_data_rows": 3,
+        "gold_table_type": "other",
+        "cross_page": {
+          "group": "adc-jmode-2-31",
+          "part": 2,
+          "relation": "continued"
+        },
+        "overlapping_predictions": 0,
+        "matched": false,
+        "prediction_id": null,
+        "iou": 0.0,
+        "best_iou": 0.0
+      },
+      {
+        "item_id": "ADC12DJ5200-P98-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 98,
+        "gold_rows": 42,
+        "gold_columns": 4,
+        "gold_data_rows": 41,
+        "gold_table_type": "other",
+        "cross_page": {
+          "group": "adc-spi-register-map",
+          "part": 1,
+          "relation": "continued"
+        },
+        "overlapping_predictions": 1,
+        "matched": true,
+        "prediction_id": "p098-t01",
+        "iou": 1.0,
+        "pred_rows": 42,
+        "pred_columns": 4,
+        "pred_table_type": "other",
+        "reconstruction_status": "reconstructed",
+        "structure": {
+          "rows": {
+            "gold": 42,
+            "pred": 42,
+            "exact": true,
+            "error": 0
+          },
+          "columns": {
+            "gold": 4,
+            "pred": 4,
+            "exact": true,
+            "error": 0
+          },
+          "cells": {
+            "gold": 168,
+            "pred": 168,
+            "tp": 168,
+            "fp": 0,
+            "fn": 0
+          },
+          "headers": {
+            "column_hits": 4,
+            "columns": 4,
+            "all_exact": true,
+            "comparable": true
+          },
+          "roles": {
+            "column_hits": 2,
+            "columns": 4,
+            "all_exact": false,
+            "gold": [
+              "value",
+              "symbol",
+              "value",
+              "value"
+            ],
+            "pred": [
+              "value",
+              "value",
+              "symbol",
+              "value"
+            ],
+            "comparable": true
+          },
+          "table_type": {
+            "gold": "other",
+            "pred": "other",
+            "exact": true
+          },
+          "reconstruction_status": "reconstructed"
+        }
+      },
+      {
+        "item_id": "ADC12DJ5200-P100-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "gold_rows": 38,
+        "gold_columns": 4,
+        "gold_data_rows": 37,
+        "gold_table_type": "other",
+        "cross_page": {
+          "group": "adc-spi-register-map",
+          "part": 2,
+          "relation": "continued"
+        },
+        "overlapping_predictions": 1,
+        "matched": true,
+        "prediction_id": "p100-t01",
+        "iou": 1.0,
+        "pred_rows": 38,
+        "pred_columns": 4,
+        "pred_table_type": "other",
+        "reconstruction_status": "reconstructed",
+        "structure": {
+          "rows": {
+            "gold": 38,
+            "pred": 38,
+            "exact": true,
+            "error": 0
+          },
+          "columns": {
+            "gold": 4,
+            "pred": 4,
+            "exact": true,
+            "error": 0
+          },
+          "cells": {
+            "gold": 152,
+            "pred": 152,
+            "tp": 152,
+            "fp": 0,
+            "fn": 0
+          },
+          "headers": {
+            "column_hits": 4,
+            "columns": 4,
+            "all_exact": true,
+            "comparable": true
+          },
+          "roles": {
+            "column_hits": 2,
+            "columns": 4,
+            "all_exact": false,
+            "gold": [
+              "value",
+              "symbol",
+              "value",
+              "value"
+            ],
+            "pred": [
+              "value",
+              "value",
+              "symbol",
+              "value"
+            ],
+            "comparable": true
+          },
+          "table_type": {
+            "gold": "other",
+            "pred": "other",
+            "exact": true
+          },
+          "reconstruction_status": "reconstructed"
+        }
+      }
+    ]
+  },
+  "negatives": {
+    "by_kind": {
+      "prose": {
+        "items": 4,
+        "items_with_fp": 1,
+        "fp": 1
+      },
+      "toc": {
+        "items": 3,
+        "items_with_fp": 2,
+        "fp": 3
+      },
+      "pin_diagram": {
+        "items": 3,
+        "items_with_fp": 0,
+        "fp": 0
+      },
+      "chart_annotations": {
+        "items": 3,
+        "items_with_fp": 0,
+        "fp": 0
+      },
+      "revision_history": {
+        "items": 1,
+        "items_with_fp": 0,
+        "fp": 0
+      },
+      "timing_diagram": {
+        "items": 1,
+        "items_with_fp": 0,
+        "fp": 0
+      },
+      "legal_notice": {
+        "items": 2,
+        "items_with_fp": 0,
+        "fp": 0
+      },
+      "bit_field_diagram": {
+        "items": 2,
+        "items_with_fp": 0,
+        "fp": 0
+      }
+    },
+    "by_item": {
+      "LM358-N01-P01-PROSE": 0,
+      "LM358-N02-P02-TOC": 1,
+      "LM358-N03-P03-PINS": 0,
+      "LM358-N04-P15-CHART": 0,
+      "LM358-N05-P31-REVHIST": 0,
+      "ADS1299-N01-P01-PROSE": 0,
+      "ADS1299-N02-P02-TOC": 0,
+      "ADS1299-N03-P16-PROSE": 0,
+      "ADS1299-N04-P19-PINS": 0,
+      "ADS1299-N05-P26-CHART": 0,
+      "ADS1299-N06-P70-TIMING": 0,
+      "ADS1299-N07-P84-NOTICE": 0,
+      "ADC12DJ5200-N01-P01-FEATURES": 1,
+      "ADC12DJ5200-N02-P02-TOC": 2,
+      "ADC12DJ5200-N03-P03-PINS": 0,
+      "ADC12DJ5200-N04-P29-CHART": 0,
+      "ADC12DJ5200-N05-P102-BITFIELD": 0,
+      "ADC12DJ5200-N06-P180-NOTICE": 0,
+      "ADC12DJ5200-N07-P102-BITFIELD": 0
+    },
+    "false_positive_predictions": [
+      {
+        "negative_id": "ADC12DJ5200-N01-P01-FEATURES",
+        "negative_kind": "prose",
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "prediction_id": "p001-t01",
+        "table_type": "other",
+        "reconstruction_status": "reconstructed",
+        "overlap": 1.0
+      },
+      {
+        "negative_id": "ADC12DJ5200-N02-P02-TOC",
+        "negative_kind": "toc",
+        "pdf_id": "adc12dj5200",
+        "page": 2,
+        "prediction_id": "p002-t01",
+        "table_type": "recommended_operating",
+        "reconstruction_status": "reconstructed",
+        "overlap": 1.0
+      },
+      {
+        "negative_id": "ADC12DJ5200-N02-P02-TOC",
+        "negative_kind": "toc",
+        "pdf_id": "adc12dj5200",
+        "page": 2,
+        "prediction_id": "p002-t02",
+        "table_type": "electrical_characteristics",
+        "reconstruction_status": "reconstructed",
+        "overlap": 1.0
+      },
+      {
+        "negative_id": "LM358-N02-P02-TOC",
+        "negative_kind": "toc",
+        "pdf_id": "lm358",
+        "page": 2,
+        "prediction_id": "p002-t01",
+        "table_type": "recommended_operating",
+        "reconstruction_status": "reconstructed",
+        "overlap": 1.0
+      }
+    ]
+  },
+  "tables": [
+    {
+      "item_id": "ADC12DJ5200-P39-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 39,
+      "gold_rows": 8,
+      "gold_columns": 7,
+      "gold_data_rows": 7,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p039-t01",
+      "iou": 1.0,
+      "pred_rows": 8,
+      "pred_columns": 7,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 8,
+          "pred": 8,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 53,
+          "pred": 56,
+          "tp": 50,
+          "fp": 6,
+          "fn": 3
+        },
+        "headers": {
+          "column_hits": 7,
+          "columns": 7,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 7,
+          "all_exact": false,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "max",
+            "value",
+            "value",
+            "value",
+            "max",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P41-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 41,
+      "gold_rows": 6,
+      "gold_columns": 4,
+      "gold_data_rows": 5,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p041-t01",
+      "iou": 0.9999,
+      "pred_rows": 6,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 24,
+          "pred": 24,
+          "tp": 24,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P43-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 43,
+      "gold_rows": 3,
+      "gold_columns": 3,
+      "gold_data_rows": 2,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0
+    },
+    {
+      "item_id": "ADC12DJ5200-P46-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 46,
+      "gold_rows": 7,
+      "gold_columns": 4,
+      "gold_data_rows": 5,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p046-t01",
+      "iou": 0.9999,
+      "pred_rows": 7,
+      "pred_columns": 4,
+      "pred_table_type": "unknown",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 25,
+          "pred": 25,
+          "tp": 19,
+          "fp": 6,
+          "fn": 6
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 4,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "unknown",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P47-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 47,
+      "gold_rows": 2,
+      "gold_columns": 6,
+      "gold_data_rows": 1,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p047-t01",
+      "iou": 0.9979,
+      "pred_rows": 5,
+      "pred_columns": 6,
+      "pred_table_type": "unknown",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 2,
+          "pred": 5,
+          "exact": false,
+          "error": 3
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 12,
+          "pred": 17,
+          "tp": 7,
+          "fp": 10,
+          "fn": 5
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 6,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 6,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "unknown",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P54-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 54,
+      "gold_rows": 6,
+      "gold_columns": 2,
+      "gold_data_rows": 5,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p054-t01",
+      "iou": 0.9988,
+      "pred_rows": 6,
+      "pred_columns": 2,
+      "pred_table_type": "unknown",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 2,
+          "pred": 2,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 12,
+          "pred": 12,
+          "tp": 11,
+          "fp": 1,
+          "fn": 1
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 2,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 2,
+          "all_exact": false,
+          "gold": [
+            "condition",
+            "value"
+          ],
+          "pred": [
+            "unknown",
+            "unknown"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "unknown",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P61-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 61,
+      "gold_rows": 6,
+      "gold_columns": 5,
+      "gold_data_rows": 5,
+      "gold_table_type": "pin_functions",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p061-t01",
+      "iou": 0.9999,
+      "pred_rows": 6,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 25,
+          "pred": 25,
+          "tp": 25,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "pin_functions",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P61-T02",
+      "pdf_id": "adc12dj5200",
+      "page": 61,
+      "gold_rows": 14,
+      "gold_columns": 4,
+      "gold_data_rows": 13,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0
+    },
+    {
+      "item_id": "ADC12DJ5200-P72-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 72,
+      "gold_rows": 8,
+      "gold_columns": 4,
+      "gold_data_rows": 7,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p072-t01",
+      "iou": 0.9999,
+      "pred_rows": 8,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 8,
+          "pred": 8,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 31,
+          "pred": 32,
+          "tp": 30,
+          "fp": 2,
+          "fn": 1
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 3,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "condition",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P78-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 78,
+      "gold_rows": 7,
+      "gold_columns": 3,
+      "gold_data_rows": 6,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p078-t01",
+      "iou": 0.9999,
+      "pred_rows": 7,
+      "pred_columns": 3,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 21,
+          "pred": 21,
+          "tp": 21,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 3,
+          "columns": 3,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 1,
+          "columns": 3,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P78-T02",
+      "pdf_id": "adc12dj5200",
+      "page": 78,
+      "gold_rows": 10,
+      "gold_columns": 17,
+      "gold_data_rows": 8,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p078-t02",
+      "iou": 1.0,
+      "pred_rows": 10,
+      "pred_columns": 17,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 10,
+          "pred": 10,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 17,
+          "pred": 17,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 82,
+          "pred": 82,
+          "tp": 82,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 11,
+          "columns": 17,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 16,
+          "columns": 17,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P78-T03",
+      "pdf_id": "adc12dj5200",
+      "page": 78,
+      "gold_rows": 18,
+      "gold_columns": 17,
+      "gold_data_rows": 16,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0
+    },
+    {
+      "item_id": "ADC12DJ5200-P78-T04",
+      "pdf_id": "adc12dj5200",
+      "page": 78,
+      "gold_rows": 7,
+      "gold_columns": 17,
+      "gold_data_rows": 5,
+      "gold_table_type": "other",
+      "cross_page": {
+        "group": "adc-jmode-2-31",
+        "part": 1,
+        "relation": "continued"
+      },
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0
+    },
+    {
+      "item_id": "ADC12DJ5200-P79-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 79,
+      "gold_rows": 5,
+      "gold_columns": 17,
+      "gold_data_rows": 3,
+      "gold_table_type": "other",
+      "cross_page": {
+        "group": "adc-jmode-2-31",
+        "part": 2,
+        "relation": "continued"
+      },
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0
+    },
+    {
+      "item_id": "ADC12DJ5200-P98-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 98,
+      "gold_rows": 42,
+      "gold_columns": 4,
+      "gold_data_rows": 41,
+      "gold_table_type": "other",
+      "cross_page": {
+        "group": "adc-spi-register-map",
+        "part": 1,
+        "relation": "continued"
+      },
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p098-t01",
+      "iou": 1.0,
+      "pred_rows": 42,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 42,
+          "pred": 42,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 168,
+          "pred": 168,
+          "tp": 168,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 2,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "value",
+            "symbol",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "symbol",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P100-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 100,
+      "gold_rows": 38,
+      "gold_columns": 4,
+      "gold_data_rows": 37,
+      "gold_table_type": "other",
+      "cross_page": {
+        "group": "adc-spi-register-map",
+        "part": 2,
+        "relation": "continued"
+      },
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p100-t01",
+      "iou": 1.0,
+      "pred_rows": 38,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 38,
+          "pred": 38,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 152,
+          "pred": 152,
+          "tp": 152,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 2,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "value",
+            "symbol",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "symbol",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P102-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 102,
+      "gold_rows": 6,
+      "gold_columns": 5,
+      "gold_data_rows": 5,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p102-t01",
+      "iou": 0.9999,
+      "pred_rows": 6,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 28,
+          "pred": 28,
+          "tp": 28,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P102-T02",
+      "pdf_id": "adc12dj5200",
+      "page": 102,
+      "gold_rows": 3,
+      "gold_columns": 5,
+      "gold_data_rows": 2,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p102-t02",
+      "iou": 0.9999,
+      "pred_rows": 3,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 14,
+          "pred": 14,
+          "tp": 14,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADC12DJ5200-P102-T03",
+      "pdf_id": "adc12dj5200",
+      "page": 102,
+      "gold_rows": 3,
+      "gold_columns": 5,
+      "gold_data_rows": 2,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p102-t03",
+      "iou": 0.9998,
+      "pred_rows": 3,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 14,
+          "pred": 14,
+          "tp": 14,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADS1299-P17-T01",
+      "pdf_id": "ads1299",
+      "page": 17,
+      "gold_rows": 10,
+      "gold_columns": 13,
+      "gold_data_rows": 8,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p017-t01",
+      "iou": 1.0,
+      "pred_rows": 10,
+      "pred_columns": 13,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 10,
+          "pred": 10,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 13,
+          "pred": 13,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 109,
+          "pred": 109,
+          "tp": 105,
+          "fp": 4,
+          "fn": 4
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 13,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 12,
+          "columns": 13,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P17-T02",
+      "pdf_id": "ads1299",
+      "page": 17,
+      "gold_rows": 10,
+      "gold_columns": 13,
+      "gold_data_rows": 8,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p017-t02",
+      "iou": 1.0,
+      "pred_rows": 10,
+      "pred_columns": 13,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 10,
+          "pred": 10,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 13,
+          "pred": 13,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 109,
+          "pred": 109,
+          "tp": 105,
+          "fp": 4,
+          "fn": 4
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 13,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 12,
+          "columns": 13,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P17-T03",
+      "pdf_id": "ads1299",
+      "page": 17,
+      "gold_rows": 10,
+      "gold_columns": 8,
+      "gold_data_rows": 8,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p017-t03",
+      "iou": 1.0,
+      "pred_rows": 10,
+      "pred_columns": 8,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 10,
+          "pred": 10,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 8,
+          "pred": 8,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 68,
+          "pred": 68,
+          "tp": 66,
+          "fp": 2,
+          "fn": 2
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 8,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 7,
+          "columns": 8,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P23-T01",
+      "pdf_id": "ads1299",
+      "page": 23,
+      "gold_rows": 8,
+      "gold_columns": 2,
+      "gold_data_rows": 7,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p023-t01",
+      "iou": 1.0,
+      "pred_rows": 8,
+      "pred_columns": 2,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 8,
+          "pred": 8,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 2,
+          "pred": 2,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 16,
+          "pred": 16,
+          "tp": 16,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 2,
+          "columns": 2,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 2,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "typ"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P27-T01",
+      "pdf_id": "ads1299",
+      "page": 27,
+      "gold_rows": 4,
+      "gold_columns": 4,
+      "gold_data_rows": 3,
+      "gold_table_type": "pin_functions",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p027-t01",
+      "iou": 1.0,
+      "pred_rows": 4,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 16,
+          "pred": 16,
+          "tp": 16,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 1,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "condition",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "pin_functions",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P35-T01",
+      "pdf_id": "ads1299",
+      "page": 35,
+      "gold_rows": 8,
+      "gold_columns": 3,
+      "gold_data_rows": 7,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p035-t01",
+      "iou": 1.0,
+      "pred_rows": 8,
+      "pred_columns": 3,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 8,
+          "pred": 8,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 24,
+          "pred": 24,
+          "tp": 17,
+          "fp": 7,
+          "fn": 7
+        },
+        "headers": {
+          "column_hits": 3,
+          "columns": 3,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 2,
+          "columns": 3,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "unit"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P37-T01",
+      "pdf_id": "ads1299",
+      "page": 37,
+      "gold_rows": 3,
+      "gold_columns": 3,
+      "gold_data_rows": 2,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p037-t01",
+      "iou": 1.0,
+      "pred_rows": 3,
+      "pred_columns": 3,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 8,
+          "pred": 8,
+          "tp": 4,
+          "fp": 4,
+          "fn": 4
+        },
+        "headers": {
+          "column_hits": 2,
+          "columns": 3,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 2,
+          "columns": 3,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "min",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "min",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P40-T01",
+      "pdf_id": "ads1299",
+      "page": 40,
+      "gold_rows": 14,
+      "gold_columns": 4,
+      "gold_data_rows": 13,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p040-t01",
+      "iou": 1.0,
+      "pred_rows": 14,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 14,
+          "pred": 14,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 39,
+          "pred": 39,
+          "tp": 35,
+          "fp": 4,
+          "fn": 4
+        },
+        "headers": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 3,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADS1299-P44-T01",
+      "pdf_id": "ads1299",
+      "page": 44,
+      "gold_rows": 31,
+      "gold_columns": 11,
+      "gold_data_rows": 29,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p044-t01",
+      "iou": 1.0,
+      "pred_rows": 31,
+      "pred_columns": 11,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 31,
+          "pred": 31,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 11,
+          "pred": 11,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 229,
+          "pred": 233,
+          "tp": 227,
+          "fp": 6,
+          "fn": 2
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 11,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 11,
+          "columns": 11,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "ADS1299-P45-T01",
+      "pdf_id": "ads1299",
+      "page": 45,
+      "gold_rows": 5,
+      "gold_columns": 5,
+      "gold_data_rows": 4,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p045-t01",
+      "iou": 1.0,
+      "pred_rows": 5,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 25,
+          "pred": 25,
+          "tp": 25,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P52-T01",
+      "pdf_id": "ads1299",
+      "page": 52,
+      "gold_rows": 9,
+      "gold_columns": 5,
+      "gold_data_rows": 8,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p052-t01",
+      "iou": 1.0,
+      "pred_rows": 9,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 9,
+          "pred": 9,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 45,
+          "pred": 45,
+          "tp": 45,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 5,
+          "columns": 5,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P67-T01",
+      "pdf_id": "ads1299",
+      "page": 67,
+      "gold_rows": 5,
+      "gold_columns": 2,
+      "gold_data_rows": 4,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p067-t01",
+      "iou": 1.0,
+      "pred_rows": 5,
+      "pred_columns": 2,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 2,
+          "pred": 2,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 10,
+          "pred": 10,
+          "tp": 9,
+          "fp": 1,
+          "fn": 1
+        },
+        "headers": {
+          "column_hits": 2,
+          "columns": 2,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 2,
+          "columns": 2,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P70-T01",
+      "pdf_id": "ads1299",
+      "page": 70,
+      "gold_rows": 3,
+      "gold_columns": 5,
+      "gold_data_rows": 2,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p070-t01",
+      "iou": 1.0,
+      "pred_rows": 3,
+      "pred_columns": 4,
+      "pred_table_type": "electrical_characteristics",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 4,
+          "exact": false,
+          "error": -1
+        },
+        "cells": {
+          "gold": 11,
+          "pred": 9,
+          "tp": 4,
+          "fp": 5,
+          "fn": 7
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 5,
+          "all_exact": false,
+          "comparable": false
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 5,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "value",
+            "min",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "min",
+            "max",
+            "unit"
+          ],
+          "comparable": false
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "electrical_characteristics",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "ADS1299-P74-T01",
+      "pdf_id": "ads1299",
+      "page": 74,
+      "gold_rows": 4,
+      "gold_columns": 6,
+      "gold_data_rows": 3,
+      "gold_table_type": "other",
+      "cross_page": null,
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0
+    },
+    {
+      "item_id": "ADS1299-P76-T01",
+      "pdf_id": "ads1299",
+      "page": 76,
+      "gold_rows": 15,
+      "gold_columns": 10,
+      "gold_data_rows": 14,
+      "gold_table_type": "ordering_information",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p076-t01",
+      "iou": 1.0,
+      "pred_rows": 15,
+      "pred_columns": 8,
+      "pred_table_type": "ordering_information",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 15,
+          "pred": 15,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 10,
+          "pred": 8,
+          "exact": false,
+          "error": -2
+        },
+        "cells": {
+          "gold": 150,
+          "pred": 120,
+          "tp": 105,
+          "fp": 15,
+          "fn": 45
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 10,
+          "all_exact": false,
+          "comparable": false
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 10,
+          "all_exact": false,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": false
+        },
+        "table_type": {
+          "gold": "ordering_information",
+          "pred": "ordering_information",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
+    {
+      "item_id": "LM358-P04-T01",
+      "pdf_id": "lm358",
+      "page": 4,
+      "gold_rows": 17,
+      "gold_columns": 6,
+      "gold_data_rows": 16,
+      "gold_table_type": "absolute_maximum",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p004-t01",
+      "iou": 1.0,
+      "pred_rows": 17,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 17,
+          "pred": 17,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 5,
+          "exact": false,
+          "error": -1
+        },
+        "cells": {
+          "gold": 58,
+          "pred": 57,
+          "tp": 50,
+          "fp": 7,
+          "fn": 8
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 6,
+          "all_exact": false,
+          "comparable": false
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 6,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "condition",
+            "min",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "unknown",
+            "min",
+            "max",
+            "unit"
+          ],
+          "comparable": false
+        },
+        "table_type": {
+          "gold": "absolute_maximum",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P04-T02",
+      "pdf_id": "lm358",
+      "page": 4,
+      "gold_rows": 7,
+      "gold_columns": 4,
+      "gold_data_rows": 6,
+      "gold_table_type": "absolute_maximum",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p004-t02",
+      "iou": 0.9999,
+      "pred_rows": 7,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 16,
+          "pred": 18,
+          "tp": 14,
+          "fp": 4,
+          "fn": 2
+        },
+        "headers": {
+          "column_hits": 2,
+          "columns": 4,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 2,
+          "columns": 4,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "value",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "unknown",
+            "value",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "absolute_maximum",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P05-T01",
+      "pdf_id": "lm358",
+      "page": 5,
+      "gold_rows": 10,
+      "gold_columns": 5,
+      "gold_data_rows": 9,
+      "gold_table_type": "recommended_operating",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p005-t01",
+      "iou": 0.9999,
+      "pred_rows": 10,
+      "pred_columns": 5,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 10,
+          "pred": 10,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 35,
+          "pred": 35,
+          "tp": 32,
+          "fp": 3,
+          "fn": 3
+        },
+        "headers": {
+          "column_hits": 3,
+          "columns": 5,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 3,
+          "columns": 5,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "min",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "unknown",
+            "min",
+            "max",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "recommended_operating",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P05-T02",
+      "pdf_id": "lm358",
+      "page": 5,
+      "gold_rows": 9,
+      "gold_columns": 10,
+      "gold_data_rows": 6,
+      "gold_table_type": "thermal",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p005-t02",
+      "iou": 0.9999,
+      "pred_rows": 9,
+      "pred_columns": 10,
+      "pred_table_type": "thermal",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 9,
+          "pred": 9,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 10,
+          "pred": 10,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 74,
+          "pred": 74,
+          "tp": 70,
+          "fp": 4,
+          "fn": 4
+        },
+        "headers": {
+          "column_hits": 2,
+          "columns": 10,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 1,
+          "columns": 10,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "unit"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "thermal",
+          "pred": "thermal",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P06-T01",
+      "pdf_id": "lm358",
+      "page": 6,
+      "gold_rows": 51,
+      "gold_columns": 7,
+      "gold_data_rows": 50,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p006-t01",
+      "iou": 1.0,
+      "pred_rows": 51,
+      "pred_columns": 7,
+      "pred_table_type": "electrical_characteristics",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 51,
+          "pred": 51,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 187,
+          "pred": 201,
+          "tp": 144,
+          "fp": 57,
+          "fn": 43
+        },
+        "headers": {
+          "column_hits": 6,
+          "columns": 7,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 6,
+          "columns": 7,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "electrical_characteristics",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P08-T01",
+      "pdf_id": "lm358",
+      "page": 8,
+      "gold_rows": 52,
+      "gold_columns": 7,
+      "gold_data_rows": 51,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p008-t01",
+      "iou": 1.0,
+      "pred_rows": 52,
+      "pred_columns": 7,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 52,
+          "pred": 52,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 188,
+          "pred": 202,
+          "tp": 145,
+          "fp": 57,
+          "fn": 43
+        },
+        "headers": {
+          "column_hits": 6,
+          "columns": 7,
+          "all_exact": false,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 6,
+          "columns": 7,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "unknown",
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P10-T01",
+      "pdf_id": "lm358",
+      "page": 10,
+      "gold_rows": 50,
+      "gold_columns": 6,
+      "gold_data_rows": 49,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p010-t01",
+      "iou": 1.0,
+      "pred_rows": 50,
+      "pred_columns": 6,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 50,
+          "pred": 50,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 127,
+          "pred": 157,
+          "tp": 97,
+          "fp": 60,
+          "fn": 30
+        },
+        "headers": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P11-T01",
+      "pdf_id": "lm358",
+      "page": 11,
+      "gold_rows": 46,
+      "gold_columns": 6,
+      "gold_data_rows": 45,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p011-t01",
+      "iou": 1.0,
+      "pred_rows": 46,
+      "pred_columns": 7,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 46,
+          "pred": 46,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 7,
+          "exact": false,
+          "error": 1
+        },
+        "cells": {
+          "gold": 127,
+          "pred": 163,
+          "tp": 94,
+          "fp": 69,
+          "fn": 33
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 6,
+          "all_exact": false,
+          "comparable": false
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 6,
+          "all_exact": false,
+          "gold": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "symbol",
+            "condition",
+            "unknown",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "comparable": false
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P12-T01",
+      "pdf_id": "lm358",
+      "page": 12,
+      "gold_rows": 47,
+      "gold_columns": 6,
+      "gold_data_rows": 46,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p012-t01",
+      "iou": 1.0,
+      "pred_rows": 47,
+      "pred_columns": 6,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 47,
+          "pred": 47,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 124,
+          "pred": 146,
+          "tp": 91,
+          "fp": 55,
+          "fn": 33
+        },
+        "headers": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P14-T01",
+      "pdf_id": "lm358",
+      "page": 14,
+      "gold_rows": 50,
+      "gold_columns": 6,
+      "gold_data_rows": 49,
+      "gold_table_type": "electrical_characteristics",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p014-t01",
+      "iou": 1.0,
+      "pred_rows": 50,
+      "pred_columns": 6,
+      "pred_table_type": "other",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 50,
+          "pred": 50,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 134,
+          "pred": 157,
+          "tp": 98,
+          "fp": 59,
+          "fn": 36
+        },
+        "headers": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "comparable": true
+        },
+        "roles": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "pred": [
+            "symbol",
+            "condition",
+            "min",
+            "typ",
+            "max",
+            "unit"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "electrical_characteristics",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "partial"
+      }
+    },
+    {
+      "item_id": "LM358-P33-T01",
+      "pdf_id": "lm358",
+      "page": 33,
+      "gold_rows": 16,
+      "gold_columns": 10,
+      "gold_data_rows": 15,
+      "gold_table_type": "ordering_information",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p033-t01",
+      "iou": 1.0,
+      "pred_rows": 16,
+      "pred_columns": 6,
+      "pred_table_type": "ordering_information",
+      "reconstruction_status": "partial",
+      "structure": {
+        "rows": {
+          "gold": 16,
+          "pred": 16,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 10,
+          "pred": 6,
+          "exact": false,
+          "error": -4
+        },
+        "cells": {
+          "gold": 158,
+          "pred": 94,
+          "tp": 46,
+          "fp": 48,
+          "fn": 112
+        },
+        "headers": {
+          "column_hits": 0,
+          "columns": 10,
+          "all_exact": false,
+          "comparable": false
+        },
+        "roles": {
+          "column_hits": 0,
+          "columns": 10,
+          "all_exact": false,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": false
+        },
+        "table_type": {
+          "gold": "ordering_information",
+          "pred": "ordering_information",
+          "exact": true
+        },
+        "reconstruction_status": "partial"
+      }
+    }
+  ],
+  "run_status_on_gold_pages": {
+    "adc12dj5200": {
+      "reconstructed": 11,
+      "partial": 9
+    },
+    "ads1299": {
+      "reconstructed": 13,
+      "partial": 2
+    },
+    "lm358": {
+      "reconstructed": 4,
+      "partial": 11
+    }
+  },
+  "gold_counts": {
+    "tables": 45,
+    "negatives": 19,
+    "excluded": []
+  }
+}
