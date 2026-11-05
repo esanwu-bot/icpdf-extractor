@@ -1,0 +1,12 @@
+# Parser configuration (Phase 1 defaults; not yet consumed by Phase 0 code)
+pdf:
+  render_dpi: 150
+  # Coordinates are reported in PDF page space: origin top-left, unit = point (1/72 inch).
+  coordinate_system: pdf_page_top_left_points
+  text_min_chars: 1
+
+tables:
+  # A table may be reported as unresolved when row/column structure cannot be proven.
+  detector: pymupdf_lines_and_alignment
+  min_confidence: 0.60
+  allow_unresolved: true

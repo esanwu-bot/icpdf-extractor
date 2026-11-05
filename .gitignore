@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local / secrets
+.env
+*.local
+
+# Runtime artifacts (never commit runs)
+runs/
+datasets/goldset/private/
+datasets/challenge_set/private/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

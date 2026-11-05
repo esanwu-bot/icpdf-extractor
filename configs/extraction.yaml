@@ -1,0 +1,12 @@
+# Extraction configuration (Phase 2 placeholder; no LLM call in Phase 0/1)
+llm:
+  provider: dashscope
+  model_env: ICPDF_LLM_MODEL
+  timeout_env: ICPDF_LLM_TIMEOUT
+  # The model may only select existing candidate_id values. It must never invent values.
+  candidate_only: true
+  require_evidence: true
+
+output:
+  strict_json: true
+  unresolved_when_uncertain: true
