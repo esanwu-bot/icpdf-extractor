@@ -8,7 +8,7 @@
 # system, identical to the parser's PageGeometry.
 
 schema_version: "gold-schema/v1"
-annotation_version: "gold-2026-11-05.1"
+annotation_version: "gold-2026-11-06.1"
 reviewed_at: "2026-11-05"
 annotator: "icpdf rule-lattice annotator + overlay inspection"
 review_method: "every overlay checked for table/cell/header alignment; roles assigned from datasheet headings"
@@ -269,7 +269,16 @@ tables:
     column_roles: [part_number, status, material_type, package, package_qty, rohs, lead_finish, msl, op_temp, part_marking]
     notes: "Packaging Information, landscape page"
 
-  # ---------------- ADC12DJ5200 (15 tables) ----------------
+  # ---------------- ADC12DJ5200 (16 tables) ----------------
+  - id: ADC12DJ5200-P01-T01
+    pdf: adc12dj5200
+    page: 1
+    component: 0
+    header_rows: 1
+    table_type: ordering_information
+    column_roles: [part_number, package, value]
+    no_merge: [[1, 1]]
+    notes: "Package Information; independent review added after N01 bbox was found to overlap this table"
   - id: ADC12DJ5200-P39-T01
     pdf: adc12dj5200
     page: 39
@@ -482,7 +491,7 @@ negatives:
   - {id: ADS1299-N07-P84-NOTICE, pdf: ads1299, page: 84, negative_kind: legal_notice, bbox: [54, 70, 558, 330], notes: "Important Notice and Disclaimer prose"}
 
   # ---------------- ADC12DJ5200 (6) ----------------
-  - {id: ADC12DJ5200-N01-P01-FEATURES, pdf: adc12dj5200, page: 1, negative_kind: prose, bbox: [54, 115, 560, 650], notes: "Features / Applications bullets"}
+  - {id: ADC12DJ5200-N01-P01-FEATURES, pdf: adc12dj5200, page: 1, negative_kind: prose, bbox: [54, 115, 300, 660], notes: "Features / Applications bullets; narrowed to the prose column so it no longer covers the Package Information table"}
   - {id: ADC12DJ5200-N02-P02-TOC, pdf: adc12dj5200, page: 2, negative_kind: toc, bbox: [54, 96, 558, 330], notes: "Table of Contents with dot leaders"}
   - {id: ADC12DJ5200-N03-P03-PINS, pdf: adc12dj5200, page: 3, negative_kind: pin_diagram, bbox: [54, 70, 560, 710], notes: "144-ball pin configuration drawing"}
   - {id: ADC12DJ5200-N04-P29-CHART, pdf: adc12dj5200, page: 29, negative_kind: chart_annotations, bbox: [57, 115, 558, 670], notes: "Typical characteristics chart axes/legend"}

@@ -9,7 +9,7 @@ structured numeric data.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from icpdf.domain.candidate import ColumnRole
 from icpdf.domain.table import TableType
@@ -19,6 +19,7 @@ from icpdf.parser.structure import GridCell, TableGrid, TableRegion
 
 _NUMERIC = re.compile(r"^[<>±+\-–—]?\s*[\d.,]+\s*(?:[a-zA-Z%°Ω/]+)?$")
 _WORD = re.compile(r"[a-z0-9]+")
+_DOT_LEADER = re.compile(r"\.{4,}|…{2,}")
 
 _HEADER_WORDS = {
     "symbol", "parameter", "parameters", "min", "minimum", "typ", "typical",
@@ -49,6 +50,7 @@ class HeaderSemantics:
     column_roles: list[ColumnRole]
     title: str | None
     table_type: TableType
+    header_path: list[list[str]] = field(default_factory=list)
 
 
 def _norm(text: str) -> str:
@@ -57,6 +59,17 @@ def _norm(text: str) -> str:
 
 def _tokens(text: str) -> set[str]:
     return set(_WORD.findall(_norm(text)))
+
+
+_LEADING_NON_SYMBOL = {"orderable", "part", "number", "parts", "address", "bit",
+                       "sample", "samples", "code"}
+_UNIT_WORDS = {"v", "mv", "kv", "a", "ma", "ua", "w", "mw", "hz", "khz", "mhz",
+               "ghz", "ns", "us", "ms", "ps", "s", "ohm", "ohms", "kohm", "db",
+               "dbm", "c", "f", "pf", "nf", "uf"}
+# Device/package variant columns (e.g. "D (SOIC) | 8 PINS") are conditions of
+# the measurement; a bare "PACKAGE" column is an attribute and stays VALUE.
+_PACKAGE_WORDS = {"soic", "vssop", "pdip", "tssop", "sot", "lccc", "cdip",
+                  "qfn", "vqfn", "wqfn", "bga", "ssop", "msop", "dip", "sop", "so"}
 
 
 def role_for_header(header: str | None) -> ColumnRole:
@@ -68,19 +81,45 @@ def role_for_header(header: str | None) -> ColumnRole:
     tokens = _tokens(header or "")
     if not tokens:
         return ColumnRole.UNKNOWN
-    if tokens & {"min", "minimum"}:
+    # A metric name may contain a limit word ("MAXIMUM SAMPLING RATE",
+    # "NOMINAL BANDWIDTH ..."); only a short label names the column itself.
+    if len(tokens) <= 2 and tokens & {"min", "minimum"}:
         return ColumnRole.MIN
-    if tokens & {"typ", "typical", "nom", "nominal"}:
+    if len(tokens) <= 3 and tokens & {"typ", "typical", "nom", "nominal"}:
         return ColumnRole.TYP
-    if tokens & {"max", "maximum"}:
+    if len(tokens) <= 2 and tokens & {"max", "maximum"}:
         return ColumnRole.MAX
     if tokens & {"unit", "units"}:
         return ColumnRole.UNIT
     if tokens & {"condition", "conditions", "test", "tests"}:
         return ColumnRole.CONDITION
-    if tokens & {"symbol", "parameter", "parameters", "name", "signal", "signals"}:
+    # A bare MODE names a selector; "NORMAL MODE" is a value entry.
+    if tokens == {"mode"} or tokens & {"source", "clause", "configured", "derived"}:
+        return ColumnRole.CONDITION
+    if len(tokens) >= 4 and tokens & _PACKAGE_WORDS:
+        return ColumnRole.CONDITION
+    if tokens & {"symbol", "parameter", "parameters", "signal", "signals", "acronym"}:
         return ColumnRole.SYMBOL
     return ColumnRole.VALUE
+
+
+def _leading_role(header: str, role: ColumnRole) -> ColumnRole:
+    """The first column of a datasheet table names the parameter row.
+
+    Part-number, address, bit-index and sample-code columns are the
+    exceptions; everything else that is not an explicit min/typ/max/unit
+    column is a symbol column, including tables whose leading header cell is
+    empty.
+    """
+    if role not in (ColumnRole.VALUE, ColumnRole.UNKNOWN):
+        return role
+    if _tokens(header) & _LEADING_NON_SYMBOL:
+        return role
+    # "fCLK (MHz)" names a test stimulus, i.e. a condition column.
+    for inner in re.findall(r"\(([^)]*)\)", _norm(header)):
+        if _tokens(inner) & _UNIT_WORDS:
+            return ColumnRole.CONDITION
+    return ColumnRole.SYMBOL
 
 
 def _is_numeric(text: str) -> bool:
@@ -136,6 +175,51 @@ def _is_sparse_lead(row: list[GridCell], n_columns: int) -> bool:
             and all(len(cell.text.strip()) <= 40 for cell in nonempty))
 
 
+def _is_ordinal_header(row: list[GridCell]) -> bool:
+    """``OCTET | 0 | 1 | ...`` or ``NIBBLE | 0 | 1 | ...`` - the two-row
+    ordinal header used by register maps.  The label cell is text and the
+    rest is a complete 0-based run."""
+    ordered = sorted(_nonempty(row), key=lambda cell: cell.column)
+    if len(ordered) < 3:
+        return False
+    label = ordered[0].text.strip()
+    if not label or any(ch.isdigit() for ch in label):
+        return False
+    values = [cell.text.strip() for cell in ordered[1:]]
+    return values == [str(index) for index in range(len(values))]
+
+
+def _is_tabular_first_row(row: list[GridCell], n_columns: int) -> bool:
+    """A first row that labels most columns with short, non-numeric text.
+
+    This catches real headers whose vocabulary is outside ``_HEADER_WORDS``
+    (e.g. "MODE OF OPERATION", "LETTER IDENTIFIER", "PARTS").  Bit-field
+    rows ("OCTET", 0, 1, ...) stay out because they are mostly numeric, and
+    data rows rarely label half of the columns with alphabetic text.
+    """
+    nonempty = _nonempty(row)
+    if len(nonempty) < 2 or len(nonempty) * 2 <= n_columns:
+        return False
+    if _is_full_width(row, n_columns):
+        return False
+    if any(len(cell.text.strip()) > 40 for cell in nonempty):
+        return False
+    if _numeric_ratio(nonempty) >= 0.4:
+        return False
+    alpha = sum(1 for cell in nonempty if any(ch.isalpha() for ch in cell.text))
+    return alpha >= 2
+
+
+def _looks_like_toc(grid: TableGrid) -> bool:
+    """Tables of contents and index lists use dot leaders; they are not data
+    tables even when their leader dots form a stable column lattice."""
+    texts = [cell.text.strip() for cell in grid.cells if cell.text.strip()]
+    if not texts:
+        return False
+    hits = sum(1 for text in texts if _DOT_LEADER.search(text))
+    return hits >= max(2, int(len(texts) * 0.3))
+
+
 def _is_label_row(row: list[GridCell], n_columns: int) -> bool:
     """Header rows name columns; value rows contain part numbers, numbers,
     or short status words.  A body row may mention "reset" once, so a label
@@ -157,12 +241,21 @@ def _infer_header_rows(grid: TableGrid) -> int:
     canopy = any(cell.column_span > 1 for cell in first)
     second = _row_cells(grid, 1) if grid.n_rows > 1 else []
     sparse_lead = _is_sparse_lead(first, grid.n_columns)
-    if _header_hits(first) < 1 and not canopy and not (
-            sparse_lead and _is_label_row(second, grid.n_columns)):
+    ordinal_pair = _is_ordinal_header(first) and _is_ordinal_header(second)
+    # A label that spans two header bands (rows 0-1) is itself evidence of a
+    # two-row header, e.g. "OPTIMAL SYSREF_SEL SETTING" beside a group label.
+    first_span = max((cell.row_span for cell in first if cell.text.strip()), default=1)
+    if not (_header_hits(first) >= 1 or canopy
+            or _is_tabular_first_row(first, grid.n_columns)
+            or first_span > 1
+            or (sparse_lead and _is_label_row(second, grid.n_columns))
+            or ordinal_pair):
         return 0
-    header_rows = 1
+    header_rows = max(1, min(first_span, grid.n_rows - 1))
     if grid.n_rows < 2:
         return header_rows
+    if ordinal_pair:
+        return min(2, max(0, grid.n_rows - 1))
     if _is_full_width(second, grid.n_columns):
         return header_rows
     # A section row ("OFFSET VOLTAGE" under the header) often merges into one
@@ -170,28 +263,187 @@ def _infer_header_rows(grid: TableGrid) -> int:
     if len(_nonempty(second)) < 2:
         return header_rows
     if canopy or _is_label_row(second, grid.n_columns):
-        header_rows = 2
+        header_rows = max(header_rows, 2)
     if header_rows >= 2 and grid.n_rows >= 3:
         third = _row_cells(grid, 2)
         second_canopy = any(cell.column_span > 1 for cell in second)
-        if second_canopy and _is_label_row(third, grid.n_columns):
+        # Pin counts ("8 PINS") repeat across the data columns and belong to
+        # the header; a lone section banner ("Read Only ID Registers") does not.
+        third_labels = _nonempty(third)
+        if (second_canopy or _is_label_row(second, grid.n_columns)) \
+                and len(third_labels) >= max(2, grid.n_columns // 2) \
+                and _is_label_row(third, grid.n_columns):
             header_rows = 3
     return min(header_rows, max(0, grid.n_rows - 1))
 
 
-def _column_labels(grid: TableGrid, header_rows: int) -> list[str]:
-    labels: list[str] = []
+def _nearest_canopy(grid: TableGrid, row: int, column: int) -> str:
+    """Label for a header column left blank under a shared canopy.
+
+    Datasheets often draw "REGISTER BITS" over the middle of a bit range but
+    mean it for every bit column; the nearest multi-column label is the best
+    evidence we have.
+    """
+    centre = (grid.xs[column] + grid.xs[column + 1]) / 2.0
+    best: tuple[float, GridCell] | None = None
+    for cell in _row_cells(grid, row):
+        if cell.column_span <= 1:
+            continue
+        text = " ".join(cell.text.split())
+        if not text:
+            continue
+        distance = abs((cell.bbox[0] + cell.bbox[2]) / 2.0 - centre)
+        if best is None or distance < best[0]:
+            best = (distance, cell)
+    if best is None:
+        return ""
+    cell = best[1]
+    low, high = cell.column, cell.column + cell.column_span - 1
+    between = (range(column + 1, low) if column < low
+               else range(high + 1, column) if column > high else ())
+    # A labelled header cell between this column and the canopy starts a new
+    # header section: the canopy does not reach past it.
+    for middle in between:
+        if any(other.column <= middle < other.column + other.column_span
+               and other.text.strip() for other in _row_cells(grid, row)):
+            return ""
+    return " ".join(cell.text.split())
+
+
+def _row_labels(grid: TableGrid, row: int) -> dict[int, str]:
+    labels: dict[int, str] = {}
+    for cell in _row_cells(grid, row):
+        text = " ".join(cell.text.split())
+        if not text:
+            continue
+        for column in range(cell.column, cell.column + cell.column_span):
+            labels[column] = text
+    return labels
+
+
+def _centered_group_labels(grid: TableGrid, row: int) -> dict[int, str]:
+    """Spread a group label centred over its columns to the unlabelled ones.
+
+    ``PGA GAIN = 4`` is drawn in the middle column of a five-column block; the
+    block edges are the midpoints between neighbouring labels, mirrored at the
+    row ends.  A single label expands symmetrically while both flanks are free.
+    """
+    cells = [cell for cell in _row_cells(grid, row) if cell.text.strip()]
+    if not cells or any(cell.column_span > 1 for cell in cells):
+        return {}
+    labels = _row_labels(grid, row)
+    centres = [((cell.bbox[0] + cell.bbox[2]) / 2.0, cell) for cell in cells]
+    centres.sort(key=lambda item: item[0])
+    spans: list[tuple[float, float, str]] = []
+    for index, (centre, cell) in enumerate(centres):
+        if len(centres) == 1:
+            half = (cell.bbox[2] - cell.bbox[0]) / 2.0
+        elif index == 0:
+            half = (centres[1][0] - centre) / 2.0
+        elif index == len(centres) - 1:
+            half = (centre - centres[index - 1][0]) / 2.0
+        else:
+            half = 0.0
+        if len(centres) > 1 and 0 < index < len(centres) - 1:
+            spans.append(((centre + centres[index - 1][0]) / 2.0,
+                          (centre + centres[index + 1][0]) / 2.0,
+                          " ".join(cell.text.split())))
+        else:
+            spans.append((centre - half, centre + half, " ".join(cell.text.split())))
+    spread: dict[int, str] = {}
+    for column in range(grid.n_columns):
+        if column in labels:
+            continue
+        centre = (grid.xs[column] + grid.xs[column + 1]) / 2.0
+        for low, high, text in spans:
+            if low <= centre <= high:
+                spread[column] = text
+                break
+    if len(centres) == 1 and not spread:
+        # A lone label with no neighbours still covers a symmetric block.
+        first = centres[0][1]
+        low, high = first.column, first.column + first.column_span - 1
+        while low > 0 and high + 1 < grid.n_columns:
+            low -= 1
+            high += 1
+        for column in range(low, high + 1):
+            if column not in labels:
+                spread[column] = " ".join(first.text.split())
+    return spread
+
+
+def _ordinal_group_labels(grid: TableGrid, row: int,
+                          next_row: dict[int, str]) -> dict[int, str]:
+    """Spread ``OCTET | 0..7`` over an ``NIBBLE | 0..15`` row.
+
+    The group labels are centred over their column pairs, but the drawn rules
+    may or may not split the label cell.  When the labels form a complete
+    numeric run and divide the data columns evenly, that division is the
+    intended attribution.
+    """
+    cells = [cell for cell in _row_cells(grid, row)
+             if cell.column > 0 and cell.text.strip()]
+    if len(cells) < 2:
+        return {}
+    ordered = sorted(cells, key=lambda cell: cell.column)
+    values = [cell.text.strip() for cell in ordered]
+    if values != [str(index) for index in range(len(values))]:
+        return {}
+    below = [next_row.get(column, "") for column in range(1, grid.n_columns)]
+    if any(not text for text in below) or any(not text.isdigit() for text in below):
+        return {}
+    data_columns = grid.n_columns - 1
+    if data_columns % len(ordered):
+        return {}
+    width = data_columns // len(ordered)
+    return {1 + index * width + offset: label
+            for index, label in enumerate(values)
+            for offset in range(width)}
+
+
+def _column_label_parts(grid: TableGrid, header_rows: int) -> list[list[str]]:
+    raw = [_row_labels(grid, row) for row in range(header_rows)]
+    # The leading column is the row-header column; a canopy over the data
+    # columns (a device list, say) does not label it even when it is blank
+    # on the canopy row.
+    row_header = any(labels.get(0) for labels in raw[1:])
+    rows: list[dict[int, str]] = []
+    for row, labels in enumerate(raw):
+        labels = dict(labels)
+        ordinal = (_ordinal_group_labels(grid, row, raw[row + 1])
+                   if row + 1 < header_rows else {})
+        if ordinal:
+            labels.update(ordinal)
+        elif any(cell.column_span > 1 and cell.text.strip()
+                 for cell in _row_cells(grid, row)):
+            for column in range(grid.n_columns):
+                if column in labels:
+                    continue
+                if column == 0 and row_header:
+                    continue
+                text = _nearest_canopy(grid, row, column)
+                if text:
+                    labels[column] = text
+        else:
+            for column, text in _centered_group_labels(grid, row).items():
+                labels.setdefault(column, text)
+        rows.append(labels)
+    paths: list[list[str]] = []
     for column in range(grid.n_columns):
         parts: list[str] = []
-        for row in range(header_rows):
-            for cell in _row_cells(grid, row):
-                if cell.column <= column < cell.column + cell.column_span:
-                    text = " ".join(cell.text.split())
-                    if text and (not parts or parts[-1] != text):
-                        parts.append(text)
-                    break
-        labels.append(" | ".join(parts))
-    return labels
+        for labels in rows:
+            text = labels.get(column, "")
+            if text:
+                # Repeated labels are meaningful across levels (OCTET 0 is
+                # also NIBBLE 0), so levels are never collapsed.
+                parts.append(text)
+        paths.append(parts)
+    return paths
+
+
+def _column_labels(grid: TableGrid, header_rows: int) -> list[str]:
+    return [" | ".join(parts)
+            for parts in _column_label_parts(grid, header_rows)]
 
 
 def _caption(layout: PageLayout, region: TableRegion, params: TableParams) -> str | None:
@@ -228,14 +480,25 @@ def infer_semantics(layout: PageLayout, region: TableRegion, grid: TableGrid,
                     params: TableParams | None = None) -> HeaderSemantics:
     params = params or TableParams()
     header_rows = _infer_header_rows(grid)
-    headers = _column_labels(grid, header_rows)
+    header_path = _column_label_parts(grid, header_rows)
+    headers = [" | ".join(parts) for parts in header_path]
     roles = [role_for_header(label) for label in headers]
+    if roles:
+        roles[0] = _leading_role(headers[0], roles[0])
+    # An unlabeled column sitting left of the limit columns carries the test
+    # conditions (datasheets leave that header blank).
+    for column in range(1, len(roles)):
+        if roles[column] != ColumnRole.UNKNOWN:
+            continue
+        if any(role in (ColumnRole.MIN, ColumnRole.TYP, ColumnRole.MAX)
+               for role in roles[column + 1:]):
+            roles[column] = ColumnRole.CONDITION
     title = _caption(layout, region, params)
     if not title:
         joined = " / ".join(label for label in headers if label)
         title = joined or None
     return HeaderSemantics(header_rows, headers, roles, title,
-                           _infer_type(title, headers))
+                           _infer_type(title, headers), header_path)
 
 
 def assess_region(grid: TableGrid, semantics: HeaderSemantics,
@@ -252,12 +515,17 @@ def assess_region(grid: TableGrid, semantics: HeaderSemantics,
         return False, "header without data rows"
     if len(nonempty_rows) < max(2, semantics.header_rows + 1):
         return False, "fewer than two populated rows"
+    if _looks_like_toc(grid):
+        return False, "dot-leader contents list"
     first = _row_cells(grid, 0)
     if semantics.header_rows == 0:
         numeric = sum(1 for cell in grid.cells if _is_numeric(cell.text))
         if numeric < params.min_numeric_cells:
             return False, "no header and too few numeric cells"
-        if _numeric_ratio(first) >= 0.6:
+        # Only shallow all-numeric grids are bit-field diagrams; register maps
+        # ("OCTET / NIBBLE" grids) can also start with numbers but span many
+        # rows and are tables.
+        if grid.n_rows <= 4 and _numeric_ratio(first) >= 0.6:
             return False, "numeric first row resembles a bit-field diagram"
     texts = [cell.text.strip() for cell in grid.cells if cell.text.strip()]
     long_cells = sum(1 for text in texts if len(text) > params.max_cell_chars)

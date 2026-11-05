@@ -1,11 +1,11 @@
 {
   "label": "baseline-1d8c722",
-  "generated_at": "2026-11-05T13:36:58+00:00",
-  "annotation_version": "gold-2026-11-05.1",
+  "generated_at": "2026-11-05T18:17:17+00:00",
+  "annotation_version": "gold-2026-11-06.1",
   "baseline": {
     "tag": "phase1.1-baseline",
     "commit": "1d8c7220601db734b63437abd41c36739a42aa89",
-    "annotation_version": "gold-2026-11-05.1",
+    "annotation_version": "gold-2026-11-06.1",
     "pdf_sha256": {
       "lm358": "8277dff7b89138c63b3582d37f378065a1dea3cae5ed1e2926ddc2779eb7e3a2",
       "ads1299": "9ef667389897f02dae8d94e8c3daecbe8cbd2ab45f4d62e1db1c474544180075",
@@ -41,13 +41,13 @@
     "scope": "prediction must overlap an annotated table or negative region"
   },
   "overall": {
-    "tables": 45,
+    "tables": 46,
     "tp": 16,
     "fp": 309,
-    "fn": 29,
+    "fn": 30,
     "precision": 0.0492,
-    "recall": 0.3556,
-    "f1": 0.0865,
+    "recall": 0.3478,
+    "f1": 0.0863,
     "out_of_scope_predictions": 68,
     "predictions_on_gold_pages": 393,
     "negative_items": 19,
@@ -56,13 +56,13 @@
   },
   "per_pdf": {
     "adc12dj5200": {
-      "tables": 19,
+      "tables": 20,
       "tp": 10,
       "fp": 61,
-      "fn": 9,
+      "fn": 10,
       "precision": 0.1408,
-      "recall": 0.5263,
-      "f1": 0.2222,
+      "recall": 0.5,
+      "f1": 0.2198,
       "out_of_scope_predictions": 10,
       "predictions_on_gold_pages": 81,
       "negative_items": 7
@@ -96,14 +96,14 @@
     "table_types": {
       "absolute_maximum": 2,
       "electrical_characteristics": 15,
-      "ordering_information": 2,
+      "ordering_information": 3,
       "other": 22,
       "pin_functions": 2,
       "recommended_operating": 1,
       "thermal": 1
     },
     "tables_per_pdf": {
-      "adc12dj5200": 19,
+      "adc12dj5200": 20,
       "ads1299": 15,
       "lm358": 11
     },
@@ -114,14 +114,14 @@
     }
   },
   "fragmentation": {
-    "mean_overlapping_predictions": 5.911,
+    "mean_overlapping_predictions": 5.783,
     "max_overlapping_predictions": 25,
     "max_items": [
       "LM358-P10-T01",
       "LM358-P14-T01"
     ],
     "distribution": {
-      "0": 2,
+      "0": 3,
       "1": 17,
       "2": 1,
       "3": 8,
@@ -147,10 +147,104 @@
     "cell_text_fp": 74,
     "cell_text_fn": 152,
     "cell_text_f1": 0.8655,
-    "header_column_accuracy": 0.0413,
+    "header_column_accuracy": 1.0,
+    "header_column_accuracy_strict": 1.0,
     "header_tables_exact": 1,
-    "column_role_accuracy": 0.0331,
+    "header_comparable_tables": 1,
+    "header_comparable_columns": 5,
+    "header_cell_text_tp": 5,
+    "header_cell_text_fp": 0,
+    "header_cell_text_fn": 0,
+    "header_cell_text_f1": 1.0,
+    "header_multilayer_tables": 7,
+    "header_multilayer_exact": 0,
+    "header_row_depth_exact": 0,
+    "header_path_tables": 0,
+    "column_role_accuracy": 0.8,
+    "column_role_columns": 5,
     "column_role_tables_exact": 0,
+    "column_role_by_role": {
+      "min": {
+        "gold": 0,
+        "pred": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "typ": {
+        "gold": 0,
+        "pred": 1,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "max": {
+        "gold": 0,
+        "pred": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "unit": {
+        "gold": 1,
+        "pred": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "condition": {
+        "gold": 1,
+        "pred": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "symbol": {
+        "gold": 8,
+        "pred": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 8,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "value": {
+        "gold": 57,
+        "pred": 4,
+        "tp": 4,
+        "fp": 0,
+        "fn": 53,
+        "precision": 1.0,
+        "recall": 0.0702,
+        "f1": 0.1311
+      },
+      "unknown": {
+        "gold": 0,
+        "pred": 62,
+        "tp": 0,
+        "fp": 62,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
     "table_type_accuracy": 0.0,
     "reconstruction_status": {
       "partial": 6,
@@ -167,12 +261,3776 @@
       "-10": 3,
       "0": 12,
       "1": 1
+    },
+    "confusion": {
+      "table_type": {
+        "absolute_maximum": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        },
+        "recommended_operating": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        },
+        "electrical_characteristics": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 8
+        },
+        "thermal": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        },
+        "pin_functions": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        },
+        "ordering_information": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        },
+        "other": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 8
+        },
+        "unknown": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        }
+      },
+      "header_rows": {
+        "0": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "1": {
+          "0": 9,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "2": {
+          "0": 7,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "3": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "4": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        }
+      },
+      "column_role": {
+        "min": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "typ": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "max": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "unit": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 1
+        },
+        "condition": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 1
+        },
+        "symbol": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 8
+        },
+        "value": {
+          "min": 0,
+          "typ": 1,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 4,
+          "unknown": 52
+        },
+        "unknown": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "denominators": {
+      "detection_precision": "TP + in-scope FP (predictions on annotated pages)",
+      "detection_recall": "TP + FN (accepted gold tables)",
+      "row_count": "16 matched tables",
+      "column_count": "16 matched tables",
+      "cell_text": "matched tables; multiset F1 over non-empty cell texts",
+      "header_cell_text": "1 matched tables with equal column count; multiset F1 over non-empty header labels, whitespace-free",
+      "header_column_attribution": "5 labelled gold header columns (empty gold labels excluded) in 1 comparable matched tables; strict variant keeps intra-label spacing",
+      "header_multilayer": "7 matched gold tables with header_rows >= 2",
+      "header_row_detection": "header_rows exact over all matched tables",
+      "column_role": "5 gold columns in comparable matched tables"
     }
   },
+  "error_cases": {
+    "missed_tables": [
+      {
+        "item_id": "ADC12DJ5200-P01-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "gold_rows": 2,
+        "gold_columns": 3,
+        "gold_table_type": "ordering_information",
+        "best_iou": 0.0484
+      },
+      {
+        "item_id": "ADC12DJ5200-P39-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "gold_rows": 8,
+        "gold_columns": 7,
+        "gold_table_type": "other",
+        "best_iou": 0.3392
+      },
+      {
+        "item_id": "ADC12DJ5200-P61-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 61,
+        "gold_rows": 6,
+        "gold_columns": 5,
+        "gold_table_type": "pin_functions",
+        "best_iou": 0.0
+      },
+      {
+        "item_id": "ADC12DJ5200-P61-T02",
+        "pdf_id": "adc12dj5200",
+        "page": 61,
+        "gold_rows": 14,
+        "gold_columns": 4,
+        "gold_table_type": "other",
+        "best_iou": 0.1052
+      },
+      {
+        "item_id": "ADC12DJ5200-P72-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 72,
+        "gold_rows": 8,
+        "gold_columns": 4,
+        "gold_table_type": "other",
+        "best_iou": 0.0
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_rows": 7,
+        "gold_columns": 3,
+        "gold_table_type": "other",
+        "best_iou": 0.276
+      },
+      {
+        "item_id": "ADC12DJ5200-P79-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 79,
+        "gold_rows": 5,
+        "gold_columns": 17,
+        "gold_table_type": "other",
+        "best_iou": 0.4884
+      },
+      {
+        "item_id": "ADC12DJ5200-P100-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "gold_rows": 38,
+        "gold_columns": 4,
+        "gold_table_type": "other",
+        "best_iou": 0.2682
+      },
+      {
+        "item_id": "ADC12DJ5200-P102-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "gold_rows": 6,
+        "gold_columns": 5,
+        "gold_table_type": "other",
+        "best_iou": 0.1387
+      },
+      {
+        "item_id": "ADC12DJ5200-P102-T02",
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "gold_rows": 3,
+        "gold_columns": 5,
+        "gold_table_type": "other",
+        "best_iou": 0.2023
+      },
+      {
+        "item_id": "ADS1299-P27-T01",
+        "pdf_id": "ads1299",
+        "page": 27,
+        "gold_rows": 4,
+        "gold_columns": 4,
+        "gold_table_type": "pin_functions",
+        "best_iou": 0.3978
+      },
+      {
+        "item_id": "ADS1299-P40-T01",
+        "pdf_id": "ads1299",
+        "page": 40,
+        "gold_rows": 14,
+        "gold_columns": 4,
+        "gold_table_type": "other",
+        "best_iou": 0.2494
+      },
+      {
+        "item_id": "ADS1299-P44-T01",
+        "pdf_id": "ads1299",
+        "page": 44,
+        "gold_rows": 31,
+        "gold_columns": 11,
+        "gold_table_type": "other",
+        "best_iou": 0.2003
+      },
+      {
+        "item_id": "ADS1299-P45-T01",
+        "pdf_id": "ads1299",
+        "page": 45,
+        "gold_rows": 5,
+        "gold_columns": 5,
+        "gold_table_type": "other",
+        "best_iou": 0.0338
+      },
+      {
+        "item_id": "ADS1299-P52-T01",
+        "pdf_id": "ads1299",
+        "page": 52,
+        "gold_rows": 9,
+        "gold_columns": 5,
+        "gold_table_type": "other",
+        "best_iou": 0.0133
+      },
+      {
+        "item_id": "ADS1299-P67-T01",
+        "pdf_id": "ads1299",
+        "page": 67,
+        "gold_rows": 5,
+        "gold_columns": 2,
+        "gold_table_type": "other",
+        "best_iou": 0.4559
+      },
+      {
+        "item_id": "ADS1299-P70-T01",
+        "pdf_id": "ads1299",
+        "page": 70,
+        "gold_rows": 3,
+        "gold_columns": 5,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.3632
+      },
+      {
+        "item_id": "ADS1299-P74-T01",
+        "pdf_id": "ads1299",
+        "page": 74,
+        "gold_rows": 4,
+        "gold_columns": 6,
+        "gold_table_type": "other",
+        "best_iou": 0.4994
+      },
+      {
+        "item_id": "ADS1299-P76-T01",
+        "pdf_id": "ads1299",
+        "page": 76,
+        "gold_rows": 15,
+        "gold_columns": 10,
+        "gold_table_type": "ordering_information",
+        "best_iou": 0.1709
+      },
+      {
+        "item_id": "LM358-P04-T01",
+        "pdf_id": "lm358",
+        "page": 4,
+        "gold_rows": 17,
+        "gold_columns": 6,
+        "gold_table_type": "absolute_maximum",
+        "best_iou": 0.1437
+      },
+      {
+        "item_id": "LM358-P04-T02",
+        "pdf_id": "lm358",
+        "page": 4,
+        "gold_rows": 7,
+        "gold_columns": 4,
+        "gold_table_type": "absolute_maximum",
+        "best_iou": 0.2333
+      },
+      {
+        "item_id": "LM358-P05-T01",
+        "pdf_id": "lm358",
+        "page": 5,
+        "gold_rows": 10,
+        "gold_columns": 5,
+        "gold_table_type": "recommended_operating",
+        "best_iou": 0.2391
+      },
+      {
+        "item_id": "LM358-P05-T02",
+        "pdf_id": "lm358",
+        "page": 5,
+        "gold_rows": 9,
+        "gold_columns": 10,
+        "gold_table_type": "thermal",
+        "best_iou": 0.1383
+      },
+      {
+        "item_id": "LM358-P06-T01",
+        "pdf_id": "lm358",
+        "page": 6,
+        "gold_rows": 51,
+        "gold_columns": 7,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.0894
+      },
+      {
+        "item_id": "LM358-P08-T01",
+        "pdf_id": "lm358",
+        "page": 8,
+        "gold_rows": 52,
+        "gold_columns": 7,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.0877
+      },
+      {
+        "item_id": "LM358-P10-T01",
+        "pdf_id": "lm358",
+        "page": 10,
+        "gold_rows": 50,
+        "gold_columns": 6,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.0891
+      },
+      {
+        "item_id": "LM358-P11-T01",
+        "pdf_id": "lm358",
+        "page": 11,
+        "gold_rows": 46,
+        "gold_columns": 6,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.1329
+      },
+      {
+        "item_id": "LM358-P12-T01",
+        "pdf_id": "lm358",
+        "page": 12,
+        "gold_rows": 47,
+        "gold_columns": 6,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.0546
+      },
+      {
+        "item_id": "LM358-P14-T01",
+        "pdf_id": "lm358",
+        "page": 14,
+        "gold_rows": 50,
+        "gold_columns": 6,
+        "gold_table_type": "electrical_characteristics",
+        "best_iou": 0.0507
+      },
+      {
+        "item_id": "LM358-P33-T01",
+        "pdf_id": "lm358",
+        "page": 33,
+        "gold_rows": 16,
+        "gold_columns": 10,
+        "gold_table_type": "ordering_information",
+        "best_iou": 0.0886
+      }
+    ],
+    "in_scope_false_positives": [
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "prediction_id": "p001-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.488
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "prediction_id": "p001-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.485
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "prediction_id": "p001-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.049,
+        "overlap_negative": 0.401
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 2,
+        "prediction_id": "p002-t01",
+        "table_type": "recommended_operating",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 29,
+        "prediction_id": "p029-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 39,
+        "prediction_id": "p039-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 61,
+        "prediction_id": "p061-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 61,
+        "prediction_id": "p061-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 61,
+        "prediction_id": "p061-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "prediction_id": "p078-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 79,
+        "prediction_id": "p079-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 79,
+        "prediction_id": "p079-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 79,
+        "prediction_id": "p079-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 100,
+        "prediction_id": "p100-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.885,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "prediction_id": "p102-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 1,
+        "prediction_id": "p001-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.488
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 1,
+        "prediction_id": "p001-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.498
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 1,
+        "prediction_id": "p001-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.488
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 2,
+        "prediction_id": "p002-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 2,
+        "prediction_id": "p002-t02",
+        "table_type": "absolute_maximum",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 16,
+        "prediction_id": "p016-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.359
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 16,
+        "prediction_id": "p016-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 17,
+        "prediction_id": "p017-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 17,
+        "prediction_id": "p017-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 17,
+        "prediction_id": "p017-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 17,
+        "prediction_id": "p017-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 19,
+        "prediction_id": "p019-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 26,
+        "prediction_id": "p026-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 27,
+        "prediction_id": "p027-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.596,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 40,
+        "prediction_id": "p040-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 40,
+        "prediction_id": "p040-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 40,
+        "prediction_id": "p040-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.62,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 44,
+        "prediction_id": "p044-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 45,
+        "prediction_id": "p045-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 45,
+        "prediction_id": "p045-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 45,
+        "prediction_id": "p045-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 45,
+        "prediction_id": "p045-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 52,
+        "prediction_id": "p052-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 67,
+        "prediction_id": "p067-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.669,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 70,
+        "prediction_id": "p070-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.685
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 70,
+        "prediction_id": "p070-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.488,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 74,
+        "prediction_id": "p074-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "ads1299",
+        "page": 76,
+        "prediction_id": "p076-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 3,
+        "prediction_id": "p003-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 4,
+        "prediction_id": "p004-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t07",
+        "table_type": "thermal",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t10",
+        "table_type": "thermal",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 5,
+        "prediction_id": "p005-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t15",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t16",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t17",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t18",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 6,
+        "prediction_id": "p006-t19",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t15",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t16",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t17",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 8,
+        "prediction_id": "p008-t18",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t15",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t16",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t17",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t18",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t19",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t20",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t21",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t22",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t23",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t24",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 10,
+        "prediction_id": "p010-t25",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t15",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t16",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t17",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 11,
+        "prediction_id": "p011-t18",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t15",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t16",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t17",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t18",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t19",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t20",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t21",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t22",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t23",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 12,
+        "prediction_id": "p012-t24",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t14",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t15",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t16",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t17",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t18",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t19",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t20",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t21",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t22",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t23",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t24",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 14,
+        "prediction_id": "p014-t25",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 15,
+        "prediction_id": "p015-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 15,
+        "prediction_id": "p015-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 1.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 15,
+        "prediction_id": "p015-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 0.0,
+        "overlap_negative": 0.716
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t01",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t02",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t03",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t04",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t05",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t06",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t07",
+        "table_type": "unknown",
+        "reconstruction_status": "partial",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t08",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t09",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t10",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t11",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t12",
+        "table_type": "unknown",
+        "reconstruction_status": "unresolved",
+        "overlap_gold_table": 1.0,
+        "overlap_negative": 0.0
+      },
+      {
+        "pdf_id": "lm358",
+        "page": 33,
+        "prediction_id": "p033-t13",
+        "table_type": "unknown",
+        "reconstruction_status": "reconstructed",
+        "overlap_gold_table": 0.666,
+        "overlap_negative": 0.0
+      }
+    ],
+    "row_count_mismatch": [
+      {
+        "item_id": "ADC12DJ5200-P41-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 41,
+        "gold_rows": 6,
+        "pred_rows": 7
+      },
+      {
+        "item_id": "ADC12DJ5200-P47-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 47,
+        "gold_rows": 2,
+        "pred_rows": 4
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T02",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_rows": 10,
+        "pred_rows": 8
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T03",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_rows": 18,
+        "pred_rows": 16
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T04",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_rows": 7,
+        "pred_rows": 5
+      },
+      {
+        "item_id": "ADC12DJ5200-P102-T03",
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "gold_rows": 3,
+        "pred_rows": 2
+      },
+      {
+        "item_id": "ADS1299-P17-T01",
+        "pdf_id": "ads1299",
+        "page": 17,
+        "gold_rows": 10,
+        "pred_rows": 9
+      },
+      {
+        "item_id": "ADS1299-P17-T02",
+        "pdf_id": "ads1299",
+        "page": 17,
+        "gold_rows": 10,
+        "pred_rows": 9
+      },
+      {
+        "item_id": "ADS1299-P17-T03",
+        "pdf_id": "ads1299",
+        "page": 17,
+        "gold_rows": 10,
+        "pred_rows": 9
+      },
+      {
+        "item_id": "ADS1299-P35-T01",
+        "pdf_id": "ads1299",
+        "page": 35,
+        "gold_rows": 8,
+        "pred_rows": 9
+      },
+      {
+        "item_id": "ADS1299-P37-T01",
+        "pdf_id": "ads1299",
+        "page": 37,
+        "gold_rows": 3,
+        "pred_rows": 2
+      }
+    ],
+    "column_count_mismatch": [
+      {
+        "item_id": "ADC12DJ5200-P78-T02",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_columns": 17,
+        "pred_columns": 7,
+        "gold_header_rows": 2,
+        "pred_header_rows": 0
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T03",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_columns": 17,
+        "pred_columns": 7,
+        "gold_header_rows": 2,
+        "pred_header_rows": 0
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T04",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_columns": 17,
+        "pred_columns": 7,
+        "gold_header_rows": 2,
+        "pred_header_rows": 0
+      },
+      {
+        "item_id": "ADS1299-P37-T01",
+        "pdf_id": "ads1299",
+        "page": 37,
+        "gold_columns": 3,
+        "pred_columns": 4,
+        "gold_header_rows": 1,
+        "pred_header_rows": 0
+      }
+    ],
+    "header_text_mismatch": [],
+    "column_role_mismatch": [
+      {
+        "item_id": "ADC12DJ5200-P41-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 41,
+        "gold_roles": [
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P43-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 43,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P46-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 46,
+        "gold_roles": [
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P47-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 47,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P54-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 54,
+        "gold_roles": [
+          "condition",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T02",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T03",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P78-T04",
+        "pdf_id": "adc12dj5200",
+        "page": 78,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P98-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 98,
+        "gold_roles": [
+          "value",
+          "symbol",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADC12DJ5200-P102-T03",
+        "pdf_id": "adc12dj5200",
+        "page": 102,
+        "gold_roles": [
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "value",
+          "value",
+          "typ",
+          "value",
+          "value"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P17-T01",
+        "pdf_id": "ads1299",
+        "page": 17,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P17-T02",
+        "pdf_id": "ads1299",
+        "page": 17,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P17-T03",
+        "pdf_id": "ads1299",
+        "page": 17,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P23-T01",
+        "pdf_id": "ads1299",
+        "page": 23,
+        "gold_roles": [
+          "symbol",
+          "value"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P35-T01",
+        "pdf_id": "ads1299",
+        "page": 35,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "unit"
+        ],
+        "pred_roles": [
+          "unknown",
+          "unknown",
+          "unknown"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P37-T01",
+        "pdf_id": "ads1299",
+        "page": 37,
+        "gold_roles": [
+          "symbol",
+          "min",
+          "unit"
+        ],
+        "pred_roles": [
+          "min",
+          "unit",
+          "unknown",
+          "unknown"
+        ]
+      }
+    ]
+  },
   "single_row_tables": {
-    "count": 1,
+    "count": 2,
     "matched": 1,
     "items": [
+      {
+        "item_id": "ADC12DJ5200-P01-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "gold_rows": 2,
+        "gold_columns": 3,
+        "gold_data_rows": 1,
+        "gold_table_type": "ordering_information",
+        "cross_page": null,
+        "overlapping_predictions": 0,
+        "matched": false,
+        "prediction_id": null,
+        "iou": 0.0,
+        "best_iou": 0.0484
+      },
       {
         "item_id": "ADC12DJ5200-P47-T01",
         "pdf_id": "adc12dj5200",
@@ -212,9 +4070,34 @@
           },
           "headers": {
             "column_hits": 0,
+            "column_hits_strict": 0,
             "columns": 6,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
             "all_exact": false,
-            "comparable": true
+            "comparable": false,
+            "gold_rows": 1,
+            "pred_rows": 0,
+            "row_depth_exact": false,
+            "cell_text_tp": 0,
+            "cell_text_fp": 0,
+            "cell_text_fn": 6,
+            "header_path_present": false,
+            "gold_text": [
+              "PFIR Mode",
+              "Center Tap\nResolution",
+              "Center Tap LSB\nWeight",
+              "Non-Center Tap\nResolution",
+              "Non-Center Tap LSB\nWeight",
+              "Filter Coefficients"
+            ],
+            "pred_text": []
           },
           "roles": {
             "column_hits": 0,
@@ -295,9 +4178,56 @@
           },
           "headers": {
             "column_hits": 0,
+            "column_hits_strict": 0,
             "columns": 17,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
             "all_exact": false,
-            "comparable": false
+            "comparable": false,
+            "gold_rows": 2,
+            "pred_rows": 0,
+            "row_depth_exact": false,
+            "cell_text_tp": 0,
+            "cell_text_fp": 0,
+            "cell_text_fn": 17,
+            "header_path_present": false,
+            "gold_text": [
+              "OCTET | NIBBLE",
+              "0 | 0",
+              "0 | 1",
+              "1 | 2",
+              "1 | 3",
+              "2 | 4",
+              "2 | 5",
+              "3 | 6",
+              "3 | 7",
+              "4 | 8",
+              "4 | 9",
+              "5 | 10",
+              "5 | 11",
+              "6 | 12",
+              "6 | 13",
+              "7 | 14",
+              "7 | 15"
+            ],
+            "pred_text": []
           },
           "roles": {
             "column_hits": 0,
@@ -403,9 +4333,30 @@
           },
           "headers": {
             "column_hits": 0,
+            "column_hits_strict": 0,
             "columns": 4,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3
+            ],
             "all_exact": false,
-            "comparable": true
+            "comparable": false,
+            "gold_rows": 1,
+            "pred_rows": 0,
+            "row_depth_exact": false,
+            "cell_text_tp": 0,
+            "cell_text_fp": 0,
+            "cell_text_fn": 4,
+            "header_path_present": false,
+            "gold_text": [
+              "Address",
+              "Acronym",
+              "Register Name",
+              "Section"
+            ],
+            "pred_text": []
           },
           "roles": {
             "column_hits": 0,
@@ -527,7 +4478,7 @@
         "prediction_id": "p001-t01",
         "table_type": "unknown",
         "reconstruction_status": "partial",
-        "overlap": 1.0
+        "overlap": 0.488
       },
       {
         "negative_id": "ADC12DJ5200-N01-P01-FEATURES",
@@ -537,7 +4488,7 @@
         "prediction_id": "p001-t02",
         "table_type": "unknown",
         "reconstruction_status": "partial",
-        "overlap": 1.0
+        "overlap": 0.485
       },
       {
         "negative_id": "ADC12DJ5200-N01-P01-FEATURES",
@@ -547,7 +4498,7 @@
         "prediction_id": "p001-t03",
         "table_type": "unknown",
         "reconstruction_status": "partial",
-        "overlap": 0.75
+        "overlap": 0.401
       },
       {
         "negative_id": "ADC12DJ5200-N02-P02-TOC",
@@ -1113,6 +5064,21 @@
   },
   "tables": [
     {
+      "item_id": "ADC12DJ5200-P01-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 1,
+      "gold_rows": 2,
+      "gold_columns": 3,
+      "gold_data_rows": 1,
+      "gold_table_type": "ordering_information",
+      "cross_page": null,
+      "overlapping_predictions": 0,
+      "matched": false,
+      "prediction_id": null,
+      "iou": 0.0,
+      "best_iou": 0.0484
+    },
+    {
       "item_id": "ADC12DJ5200-P39-T01",
       "pdf_id": "adc12dj5200",
       "page": 39,
@@ -1166,9 +5132,30 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 4,
+          "header_path_present": false,
+          "gold_text": [
+            "ADC SAMPLE\n(Offset Binary)",
+            "ADC SAMPLE\n(2's Complement)",
+            "ABSOLUTE VALUE",
+            "UPPER 8 BITS USED FOR\nCOMPARISON"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1235,9 +5222,28 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 3,
+          "labeled_columns": [
+            0,
+            1,
+            2
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 3,
+          "header_path_present": false,
+          "gold_text": [
+            "MODE OF OPERATION",
+            "SAMPLING RATE VS fCLK",
+            "SAMPLING INSTANT"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1302,9 +5308,30 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 4,
+          "header_path_present": false,
+          "gold_text": [
+            "SYSREF_POS[23:0] | 0x02E[7:0]\n(Largest Delay)",
+            "SYSREF_POS[23:0] | 0x02D[7:0](1)",
+            "SYSREF_POS[23:0] | 0x02C[7:0](1)\n(Smallest Delay)",
+            "OPTIMAL SYSREF_SEL\nSETTING"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1371,9 +5398,34 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 6,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 6,
+          "header_path_present": false,
+          "gold_text": [
+            "PFIR Mode",
+            "Center Tap\nResolution",
+            "Center Tap LSB\nWeight",
+            "Non-Center Tap\nResolution",
+            "Non-Center Tap LSB\nWeight",
+            "Filter Coefficients"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1444,9 +5496,26 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 2,
+          "labeled_columns": [
+            0,
+            1
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 2,
+          "header_path_present": false,
+          "gold_text": [
+            "fCLK (MHz)",
+            "NCO_RDIV"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1569,9 +5638,56 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 17,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
           "all_exact": false,
-          "comparable": false
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 17,
+          "header_path_present": false,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1654,9 +5770,56 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 17,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
           "all_exact": false,
-          "comparable": false
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 17,
+          "header_path_present": false,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1743,9 +5906,56 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 17,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
           "all_exact": false,
-          "comparable": false
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 17,
+          "header_path_present": false,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1851,9 +6061,30 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 4,
+          "header_path_present": false,
+          "gold_text": [
+            "Address",
+            "Acronym",
+            "Register Name",
+            "Section"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -1969,9 +6200,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": false,
+          "gold_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ],
+          "pred_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ]
         },
         "roles": {
           "column_hits": 4,
@@ -2040,9 +6300,48 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 13,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 13,
+          "header_path_present": false,
+          "gold_text": [
+            "DR BITS OF\nCONFIG1\nREGISTER",
+            "OUTPUT\nDATA RATE\n(SPS)",
+            "–3-dB\nBANDWIDTH (Hz)",
+            "PGA\nGAIN = 4 | μVRMS",
+            "PGA\nGAIN = 4 | μVPP",
+            "PGA\nGAIN = 4 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 4 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 4 | ENOB",
+            "PGA\nGAIN = 6 | μVRMS",
+            "PGA\nGAIN = 6 | μVPP",
+            "PGA\nGAIN = 6 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 6 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 6 | ENOB"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -2127,9 +6426,48 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 13,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 13,
+          "header_path_present": false,
+          "gold_text": [
+            "DR BITS OF\nCONFIG1\nREGISTER",
+            "OUTPUT\nDATA RATE\n(SPS)",
+            "–3-dB\nBANDWIDTH (Hz)",
+            "PGA\nGAIN = 8 | μVRMS",
+            "PGA\nGAIN = 8 | μVPP",
+            "PGA\nGAIN = 8 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 8 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 8 | ENOB",
+            "PGA\nGAIN = 12 | μVRMS",
+            "PGA\nGAIN = 12 | μVPP",
+            "PGA\nGAIN = 12 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 12 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 12 | ENOB"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -2214,9 +6552,38 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 8,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 2,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 8,
+          "header_path_present": false,
+          "gold_text": [
+            "DR BITS OF CONFIG1\nREGISTER",
+            "OUTPUT DATA\nRATE (SPS)",
+            "–3-dB BANDWIDTH (Hz)",
+            "PGA\nGAIN = 24 | μVRMS",
+            "PGA\nGAIN = 24 | μVPP",
+            "PGA\nGAIN = 24 | DYNAMIC\nRANGE (dB)",
+            "PGA\nGAIN = 24 | NOISE-FREE\nBITS",
+            "PGA\nGAIN = 24 | ENOB"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -2291,9 +6658,26 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 2,
+          "labeled_columns": [
+            0,
+            1
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 2,
+          "header_path_present": false,
+          "gold_text": [
+            "GAIN",
+            "NOMINAL BANDWIDTH AT ROOM\nTEMPERATURE (kHz)"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -2371,9 +6755,28 @@
         },
         "headers": {
           "column_hits": 0,
+          "column_hits_strict": 0,
           "columns": 3,
+          "labeled_columns": [
+            0,
+            1,
+            2
+          ],
           "all_exact": false,
-          "comparable": true
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 3,
+          "header_path_present": false,
+          "gold_text": [
+            "DR[2:0]",
+            "NORMAL MODE",
+            "UNIT"
+          ],
+          "pred_text": []
         },
         "roles": {
           "column_hits": 0,
@@ -2438,9 +6841,30 @@
         },
         "headers": {
           "column_hits": 0,
-          "columns": 3,
+          "column_hits_strict": 0,
+          "columns": 2,
+          "labeled_columns": [
+            1,
+            2
+          ],
           "all_exact": false,
-          "comparable": false
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 0,
+          "row_depth_exact": false,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 2,
+          "header_path_present": false,
+          "gold_text": [
+            "",
+            "MIN",
+            "UNIT"
+          ],
+          "pred_text": [
+            "MIN",
+            "UNIT"
+          ]
         },
         "roles": {
           "column_hits": 0,
@@ -2771,7 +7195,7 @@
     }
   },
   "gold_counts": {
-    "tables": 45,
+    "tables": 46,
     "negatives": 19,
     "excluded": []
   }

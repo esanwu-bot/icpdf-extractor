@@ -53,6 +53,17 @@ def _norm(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip()
 
 
+def _compact(text: str) -> str:
+    """Whitespace-free form for header labels.
+
+    PDF text extraction splits subscripts and superscripts into separate
+    spans (``f CLK`` for ``fCLK``, ``V RMS`` spacing in ``VRMS``), so header
+    attribution ignores intra-label spacing.  Word boundaries are still
+    preserved by :func:`_norm` for body-cell scoring.
+    """
+    return _norm(text).replace(" ", "")
+
+
 def _area(box) -> float:
     return max(0.0, box[2] - box[0]) * max(0.0, box[3] - box[1])
 
@@ -164,12 +175,25 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
 
     gold_headers = [_norm(h) for h in gold_table["headers"]]
     pred_headers = [_norm(h) for h in pred.get("headers") or []]
-    if pred_columns == gold_columns and len(pred_headers) == gold_columns:
-        header_hits = sum(1 for g, p in zip(gold_headers, pred_headers) if g == p and g)
-        header_exact = header_hits == gold_columns
+    gold_keys = [_compact(h) for h in gold_headers]
+    pred_keys = [_compact(h) for h in pred_headers]
+    comparable = pred_columns == gold_columns and len(pred_headers) == gold_columns
+    # Column attribution is scored over gold columns that actually carry a
+    # label; an empty gold label is annotation debt, not a predicted miss.
+    labeled_columns = [index for index, key in enumerate(gold_keys) if key]
+    if comparable:
+        header_hits = sum(1 for index in labeled_columns
+                          if gold_keys[index] == pred_keys[index])
+        header_hits_strict = sum(1 for index in labeled_columns
+                                 if gold_headers[index] == pred_headers[index])
+        header_exact = header_hits == len(labeled_columns)
+        header_tp, header_fp, header_fn = _multiset_f1(
+            [key for key in gold_keys if key], [key for key in pred_keys if key])
     else:
-        header_hits = 0
+        header_hits = header_hits_strict = 0
         header_exact = False
+        header_tp = header_fp = 0
+        header_fn = len(labeled_columns)
 
     gold_roles = [COARSE_ROLE.get(role, "value") for role in gold_table["column_roles"]]
     pred_roles = [roles.get((pred["table_id"], column), "unknown")
@@ -177,6 +201,8 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
     role_length_ok = pred_columns == gold_columns
     role_hits = sum(1 for g, p in zip(gold_roles, pred_roles)
                     if role_length_ok and g == p)
+    gold_header_rows = int(gold_table.get("header_rows", 0))
+    pred_header_rows = int(pred.get("header_rows", 0) or 0)
 
     return {
         "rows": {"gold": gold_rows, "pred": pred_rows,
@@ -187,8 +213,16 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
                     "error": pred_columns - gold_columns},
         "cells": {"gold": len(gold_text), "pred": len(pred_text),
                   "tp": text_tp, "fp": text_fp, "fn": text_fn},
-        "headers": {"column_hits": header_hits, "columns": gold_columns,
-                    "all_exact": header_exact, "comparable": role_length_ok},
+        "headers": {"column_hits": header_hits, "column_hits_strict": header_hits_strict,
+                    "columns": len(labeled_columns), "labeled_columns": labeled_columns,
+                    "all_exact": header_exact, "comparable": comparable,
+                    "gold_rows": gold_header_rows, "pred_rows": pred_header_rows,
+                    "row_depth_exact": gold_header_rows == pred_header_rows,
+                    "cell_text_tp": header_tp, "cell_text_fp": header_fp,
+                    "cell_text_fn": header_fn,
+                    "header_path_present": bool(pred.get("header_path")),
+                    "gold_text": gold_table["headers"],
+                    "pred_text": pred.get("headers") or []},
         "roles": {"column_hits": role_hits, "columns": gold_columns,
                   "all_exact": role_length_ok and role_hits == gold_columns,
                   "gold": gold_roles, "pred": pred_roles,
@@ -220,6 +254,57 @@ def _match_page(gold_tables: list[dict], predictions: list[dict]) -> dict[str, t
     return matched_gold
 
 
+FOCUS_ROLES = ("min", "typ", "max", "unit", "condition", "symbol", "value", "unknown")
+
+
+def _confusion_matrix(pairs: list[tuple[str, str]], labels: list[str]) -> dict:
+    matrix = {row: {column: 0 for column in labels} for row in labels}
+    for gold, pred in pairs:
+        if gold not in matrix:
+            matrix[gold] = {column: 0 for column in labels}
+        if pred not in matrix[gold]:
+            matrix[gold][pred] = 0
+        matrix[gold][pred] += 1
+    return matrix
+
+
+def _role_metrics(matched_details: list[dict]) -> dict:
+    """Column-role precision/recall per role over comparable matched tables.
+
+    The unit of account is one gold column.  ``pred`` counts columns predicted
+    with the role; ``gold`` counts gold columns annotated with it.
+    """
+    stats = {role: {"gold": 0, "pred": 0, "tp": 0, "fp": 0, "fn": 0}
+             for role in FOCUS_ROLES}
+    pairs: list[tuple[str, str]] = []
+    for item in matched_details:
+        roles = item["structure"]["roles"]
+        if not roles["comparable"]:
+            continue
+        for gold, pred in zip(roles["gold"], roles["pred"]):
+            gold = gold if gold in stats else "value"
+            pred = pred if pred in stats else "unknown"
+            pairs.append((gold, pred))
+            stats[gold]["gold"] += 1
+            stats[pred]["pred"] += 1
+            if gold == pred:
+                stats[gold]["tp"] += 1
+            else:
+                stats[pred]["fp"] += 1
+                stats[gold]["fn"] += 1
+    for entry in stats.values():
+        precision = entry["tp"] / (entry["tp"] + entry["fp"]) if entry["tp"] + entry["fp"] else 0.0
+        recall = entry["tp"] / (entry["tp"] + entry["fn"]) if entry["tp"] + entry["fn"] else 0.0
+        f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+        entry["precision"] = round(precision, 4)
+        entry["recall"] = round(recall, 4)
+        entry["f1"] = round(f1, 4)
+    return {
+        "by_role": stats,
+        "confusion": _confusion_matrix(pairs, list(FOCUS_ROLES)),
+    }
+
+
 def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
              label: str, annotation_version: str, baseline: dict | None = None) -> dict:
     by_pdf: dict[str, list[dict]] = defaultdict(list)
@@ -244,6 +329,7 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
     total_out_of_scope = 0
     total_preds_on_gold_pages = 0
     negative_rows = []
+    fp_rows = []
     run_status = defaultdict(Counter)
 
     for pdf_id, gold_list in sorted(by_pdf.items()):
@@ -283,6 +369,19 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                     continue
                 if any(_over_pred(pred["bbox"], region) >= IOU_SCOPE for region in regions):
                     fp += 1
+                    fp_rows.append({
+                        "pdf_id": pdf_id,
+                        "page": page,
+                        "prediction_id": pred["table_id"],
+                        "table_type": pred["table_type"],
+                        "reconstruction_status": pred.get("reconstruction_status"),
+                        "overlap_gold_table": round(max(
+                            (_over_pred(pred["bbox"], region) for region in
+                             [table["table"]["bbox"] for table in page_gold]), default=0.0), 3),
+                        "overlap_negative": round(max(
+                            (_over_pred(pred["bbox"], negative["bbox"])
+                             for negative in page_negs), default=0.0), 3),
+                    })
                 else:
                     out_of_scope += 1
             for pred in predictions:
@@ -348,6 +447,42 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                 })
             details.append(record)
 
+    error_cases = {
+        "missed_tables": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "gold_rows": item["gold_rows"], "gold_columns": item["gold_columns"],
+            "gold_table_type": item["gold_table_type"], "best_iou": item["best_iou"],
+        } for item in details if not item["matched"]],
+        "in_scope_false_positives": fp_rows,
+        "row_count_mismatch": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "gold_rows": item["gold_rows"], "pred_rows": item["pred_rows"],
+        } for item in details if item["matched"]
+            and not item["structure"]["rows"]["exact"]],
+        "column_count_mismatch": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "gold_columns": item["gold_columns"], "pred_columns": item["pred_columns"],
+            "gold_header_rows": item["structure"]["headers"]["gold_rows"],
+            "pred_header_rows": item["structure"]["headers"]["pred_rows"],
+        } for item in details if item["matched"]
+            and not item["structure"]["columns"]["exact"]],
+        "header_text_mismatch": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "gold_headers": item["structure"]["headers"]["gold_text"],
+            "pred_headers": item["structure"]["headers"]["pred_text"],
+            "column_hits": item["structure"]["headers"]["column_hits"],
+            "columns": item["structure"]["headers"]["columns"],
+        } for item in details if item["matched"]
+            and item["structure"]["headers"]["comparable"]
+            and not item["structure"]["headers"]["all_exact"]],
+        "column_role_mismatch": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "gold_roles": item["structure"]["roles"]["gold"],
+            "pred_roles": item["structure"]["roles"]["pred"],
+        } for item in details if item["matched"]
+            and not item["structure"]["roles"]["all_exact"]],
+    }
+
     negative_kinds = {}
     for negative in negatives:
         rows = [row for row in negative_rows if row["negative_id"] == negative["item_id"]]
@@ -383,15 +518,42 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
         text_fn = sum(item["structure"]["cells"]["fn"] for item in matched_details)
         text_f1 = (2 * text_tp / (2 * text_tp + text_fp + text_fn)
                    if 2 * text_tp + text_fp + text_fn else 0.0)
-        header_hits = sum(item["structure"]["headers"]["column_hits"] for item in matched_details)
-        header_cols = sum(item["structure"]["headers"]["columns"] for item in matched_details)
-        headers_exact = sum(1 for item in matched_details if item["structure"]["headers"]["all_exact"])
-        role_hits = sum(item["structure"]["roles"]["column_hits"] for item in matched_details)
+        comparable = [item for item in matched_details
+                      if item["structure"]["headers"]["comparable"]]
+        header_hits = sum(item["structure"]["headers"]["column_hits"] for item in comparable)
+        header_hits_strict = sum(item["structure"]["headers"]["column_hits_strict"]
+                                 for item in comparable)
+        header_cols = sum(item["structure"]["headers"]["columns"] for item in comparable)
+        headers_exact = sum(1 for item in comparable
+                            if item["structure"]["headers"]["all_exact"])
+        header_tp = sum(item["structure"]["headers"]["cell_text_tp"] for item in comparable)
+        header_fp = sum(item["structure"]["headers"]["cell_text_fp"] for item in comparable)
+        header_fn = sum(item["structure"]["headers"]["cell_text_fn"] for item in comparable)
+        multi_gold = [item for item in matched_details
+                      if item["structure"]["headers"]["gold_rows"] >= 2]
+        multi_exact = sum(1 for item in multi_gold
+                          if item["structure"]["headers"]["row_depth_exact"])
+        header_depth_exact = sum(1 for item in matched_details
+                                 if item["structure"]["headers"]["row_depth_exact"])
+        header_path_present = sum(1 for item in matched_details
+                                  if item["structure"]["headers"]["header_path_present"])
+        role_hits = sum(item["structure"]["roles"]["column_hits"] for item in comparable)
+        role_cols = sum(item["structure"]["roles"]["columns"] for item in comparable)
         roles_exact = sum(1 for item in matched_details if item["structure"]["roles"]["all_exact"])
         type_hits = sum(1 for item in matched_details if item["structure"]["table_type"]["exact"])
         status_counts = Counter(item["reconstruction_status"] for item in matched_details)
         row_error = Counter(item["structure"]["rows"]["error"] for item in matched_details)
         column_error = Counter(item["structure"]["columns"]["error"] for item in matched_details)
+        role_metrics = _role_metrics(matched_details)
+        type_confusion = _confusion_matrix(
+            [(item["structure"]["table_type"]["gold"], item["structure"]["table_type"]["pred"])
+             for item in matched_details],
+            ["absolute_maximum", "recommended_operating", "electrical_characteristics",
+             "thermal", "pin_functions", "ordering_information", "other", "unknown"])
+        header_row_confusion = _confusion_matrix(
+            [(str(item["structure"]["headers"]["gold_rows"]),
+              str(item["structure"]["headers"]["pred_rows"])) for item in matched_details],
+            [str(index) for index in range(5)])
         structure = {
             "matched": len(matched_details),
             "row_count_exact": exact_rows,
@@ -400,14 +562,51 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
             "cell_text_tp": text_tp, "cell_text_fp": text_fp, "cell_text_fn": text_fn,
             "cell_text_f1": round(text_f1, 4),
             "header_column_accuracy": round(header_hits / header_cols, 4) if header_cols else 0.0,
+            "header_column_accuracy_strict": (round(header_hits_strict / header_cols, 4)
+                                              if header_cols else 0.0),
             "header_tables_exact": headers_exact,
-            "column_role_accuracy": round(role_hits / header_cols, 4) if header_cols else 0.0,
+            "header_comparable_tables": len(comparable),
+            "header_comparable_columns": header_cols,
+            "header_cell_text_tp": header_tp,
+            "header_cell_text_fp": header_fp,
+            "header_cell_text_fn": header_fn,
+            "header_cell_text_f1": round(
+                2 * header_tp / (2 * header_tp + header_fp + header_fn)
+                if 2 * header_tp + header_fp + header_fn else 0.0, 4),
+            "header_multilayer_tables": len(multi_gold),
+            "header_multilayer_exact": multi_exact,
+            "header_row_depth_exact": header_depth_exact,
+            "header_path_tables": header_path_present,
+            "column_role_accuracy": round(role_hits / role_cols, 4) if role_cols else 0.0,
+            "column_role_columns": role_cols,
             "column_role_tables_exact": roles_exact,
+            "column_role_by_role": role_metrics["by_role"],
             "table_type_accuracy": round(type_hits / len(matched_details), 4),
             "reconstruction_status": dict(status_counts),
             "row_error_distribution": {str(key): value for key, value in sorted(row_error.items())},
             "column_error_distribution": {str(key): value for key, value
                                           in sorted(column_error.items())},
+            "confusion": {
+                "table_type": type_confusion,
+                "header_rows": header_row_confusion,
+                "column_role": role_metrics["confusion"],
+            },
+            "denominators": {
+                "detection_precision": "TP + in-scope FP (predictions on annotated pages)",
+                "detection_recall": "TP + FN (accepted gold tables)",
+                "row_count": f"{len(matched_details)} matched tables",
+                "column_count": f"{len(matched_details)} matched tables",
+                "cell_text": "matched tables; multiset F1 over non-empty cell texts",
+                "header_cell_text": f"{len(comparable)} matched tables with equal column count; "
+                                    "multiset F1 over non-empty header labels, whitespace-free",
+                "header_column_attribution": f"{header_cols} labelled gold header columns "
+                                             f"(empty gold labels excluded) in "
+                                             f"{len(comparable)} comparable matched tables; "
+                                             "strict variant keeps intra-label spacing",
+                "header_multilayer": f"{len(multi_gold)} matched gold tables with header_rows >= 2",
+                "header_row_detection": "header_rows exact over all matched tables",
+                "column_role": f"{role_cols} gold columns in comparable matched tables",
+            },
         }
     else:
         structure = {"matched": 0}
@@ -447,6 +646,7 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                              for key, value in sorted(Counter(fragments).items())},
         },
         "structure": structure,
+        "error_cases": error_cases,
         "single_row_tables": {
             "count": len(single_row),
             "matched": sum(1 for item in single_row if item["matched"]),
@@ -560,13 +760,90 @@ def _write_markdown(path: Path, report: dict) -> None:
         f"| Row and column exact | {structure.get('row_and_column_exact', 0)} |",
         f"| Cell-text F1 | {structure.get('cell_text_f1', 0.0):.4f} |",
         f"| Header column accuracy | {structure.get('header_column_accuracy', 0.0):.4f} |",
-        f"| Header tables exact | {structure.get('header_tables_exact', 0)} |",
+        f"| Header column accuracy (strict spacing) | "
+        f"{structure.get('header_column_accuracy_strict', 0.0):.4f} |",
+        f"| Header row-depth exact | {structure.get('header_row_depth_exact', 0)} | "
+        f"(of {structure.get('matched', 0)} matched) |",
+        f"| Header tables exact | {structure.get('header_tables_exact', 0)} | "
+        f"(of {structure.get('header_comparable_tables', 0)} comparable) |",
+        f"| Header cell-text F1 | {structure.get('header_cell_text_f1', 0.0):.4f} |",
+        f"| Multi-layer header exact | {structure.get('header_multilayer_exact', 0)} | "
+        f"(of {structure.get('header_multilayer_tables', 0)}) |",
+        f"| Tables carrying header_path | {structure.get('header_path_tables', 0)} |",
         f"| Column-role accuracy | {structure.get('column_role_accuracy', 0.0):.4f} |",
         f"| Column-role tables exact | {structure.get('column_role_tables_exact', 0)} |",
         f"| Table-type accuracy | {structure.get('table_type_accuracy', 0.0):.4f} |",
         f"| Reconstruction status (matched) | {structure.get('reconstruction_status', {})} |",
         f"| Row error distribution | {structure.get('row_error_distribution', {})} |",
         f"| Column error distribution | {structure.get('column_error_distribution', {})} |",
+        "",
+        "## Metric denominators",
+        "",
+        "| Metric family | Denominator |",
+        "| --- | --- |",
+    ]
+    for family, denominator in structure.get("denominators", {}).items():
+        lines.append(f"| {family} | {denominator} |")
+    lines += [
+        "",
+        "## Column roles by role",
+        "",
+        "| Role | Gold columns | Predicted columns | TP | FP | FN | Precision | Recall | F1 |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for role, row in structure.get("column_role_by_role", {}).items():
+        lines.append(f"| {role} | {row['gold']} | {row['pred']} | {row['tp']} | {row['fp']} | "
+                     f"{row['fn']} | {row['precision']:.4f} | {row['recall']:.4f} | "
+                     f"{row['f1']:.4f} |")
+    lines += ["", "## Confusion matrices", ""]
+    for title, matrix in (structure.get("confusion") or {}).items():
+        if not matrix:
+            continue
+        columns = list(next(iter(matrix.values())).keys())
+        lines.append(f"### {title}")
+        lines.append("")
+        lines.append("| gold \\ pred | " + " | ".join(columns) + " |")
+        lines.append("| --- | " + " | ".join("---" for _ in columns) + " |")
+        for gold, row in matrix.items():
+            lines.append(f"| {gold} | " + " | ".join(str(row.get(column, 0))
+                                                     for column in columns) + " |")
+        lines.append("")
+    lines += [
+        "## Error cases",
+        "",
+        f"- Missed tables (FN): {len(report['error_cases']['missed_tables'])}",
+        f"- In-scope false positives: {len(report['error_cases']['in_scope_false_positives'])}",
+        f"- Row-count mismatches: {len(report['error_cases']['row_count_mismatch'])}",
+        f"- Column-count mismatches: {len(report['error_cases']['column_count_mismatch'])}",
+        f"- Header-text mismatches: {len(report['error_cases']['header_text_mismatch'])}",
+        f"- Column-role mismatches: {len(report['error_cases']['column_role_mismatch'])}",
+        "",
+        "| Case | Item | Page | Detail |",
+        "| --- | --- | --- | --- |",
+    ]
+    for item in report["error_cases"]["missed_tables"]:
+        lines.append(f"| FN | {item['item_id']} | {item['page']} | "
+                     f"gold {item['gold_rows']} x {item['gold_columns']}, "
+                     f"best IoU {item['best_iou']:.4f} |")
+    for item in report["error_cases"]["in_scope_false_positives"]:
+        lines.append(f"| FP | {item['prediction_id']} | {item['page']} | "
+                     f"table overlap {item['overlap_gold_table']:.3f}, "
+                     f"negative overlap {item['overlap_negative']:.3f} |")
+    for item in report["error_cases"]["row_count_mismatch"]:
+        lines.append(f"| rows | {item['item_id']} | {item['page']} | "
+                     f"gold {item['gold_rows']} -> pred {item['pred_rows']} |")
+    for item in report["error_cases"]["column_count_mismatch"]:
+        lines.append(f"| cols | {item['item_id']} | {item['page']} | "
+                     f"gold {item['gold_columns']} -> pred {item['pred_columns']} "
+                     f"(header rows {item['gold_header_rows']} -> "
+                     f"{item['pred_header_rows']}) |")
+    for item in report["error_cases"]["header_text_mismatch"]:
+        lines.append(f"| headers | {item['item_id']} | {item['page']} | "
+                     f"{item['column_hits']}/{item['columns']} column labels match |")
+    for item in report["error_cases"]["column_role_mismatch"]:
+        lines.append(f"| roles | {item['item_id']} | {item['page']} | "
+                     f"gold {item['gold_roles']} -> pred {item['pred_roles']} |")
+    lines += [
         "",
         "## Single-row gold tables (must not be dropped)",
         "",
@@ -655,7 +932,8 @@ def main() -> int:
             "annotation_version": manifest.get("annotation_version"),
             "pdf_sha256": {key: meta["sha256"] for key, meta in manifest.get("pdfs", {}).items()},
         }
-    report = evaluate(gold_tables, negatives, runs, args.label, "gold-2026-11-05.1", baseline)
+    report = evaluate(gold_tables, negatives, runs, args.label,
+                      baseline.get("annotation_version") or "unknown", baseline)
     report["gold_counts"] = {"tables": len(gold_tables), "negatives": len(negatives),
                              "excluded": gold_meta["excluded"]}
 

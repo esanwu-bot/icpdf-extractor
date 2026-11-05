@@ -1,11 +1,11 @@
 {
-  "label": "after-5layer-v4",
-  "generated_at": "2026-11-05T14:11:49+00:00",
-  "annotation_version": "gold-2026-11-05.1",
+  "label": "after-5layer-v5",
+  "generated_at": "2026-11-05T18:18:11+00:00",
+  "annotation_version": "gold-2026-11-06.1",
   "baseline": {
     "tag": "phase1.1-baseline",
     "commit": "1d8c7220601db734b63437abd41c36739a42aa89",
-    "annotation_version": "gold-2026-11-05.1",
+    "annotation_version": "gold-2026-11-06.1",
     "pdf_sha256": {
       "lm358": "8277dff7b89138c63b3582d37f378065a1dea3cae5ed1e2926ddc2779eb7e3a2",
       "ads1299": "9ef667389897f02dae8d94e8c3daecbe8cbd2ab45f4d62e1db1c474544180075",
@@ -15,22 +15,22 @@
   "runs": [
     {
       "pdf_id": "adc12dj5200",
-      "run_id": "20261105T141031Z-1d7e93",
-      "run_dir": "runs\\phase12_after5\\20261105T141031Z-1d7e93",
+      "run_id": "20261105T181640Z-359a61",
+      "run_dir": "runs\\phase12_round10\\20261105T181640Z-359a61",
       "parser_config_sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
       "parser_version": "0.1.0-phase1"
     },
     {
       "pdf_id": "ads1299",
-      "run_id": "20261105T141010Z-9985ab",
-      "run_dir": "runs\\phase12_after5\\20261105T141010Z-9985ab",
+      "run_id": "20261105T181637Z-932cfb",
+      "run_dir": "runs\\phase12_round10\\20261105T181637Z-932cfb",
       "parser_config_sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
       "parser_version": "0.1.0-phase1"
     },
     {
       "pdf_id": "lm358",
-      "run_id": "20261105T140950Z-9aefb4",
-      "run_dir": "runs\\phase12_after5\\20261105T140950Z-9aefb4",
+      "run_id": "20261105T181633Z-610c7a",
+      "run_dir": "runs\\phase12_round10\\20261105T181633Z-610c7a",
       "parser_config_sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
       "parser_version": "0.1.0-phase1"
     }
@@ -41,54 +41,54 @@
     "scope": "prediction must overlap an annotated table or negative region"
   },
   "overall": {
-    "tables": 45,
-    "tp": 39,
-    "fp": 4,
-    "fn": 6,
-    "precision": 0.907,
-    "recall": 0.8667,
-    "f1": 0.8864,
-    "out_of_scope_predictions": 7,
-    "predictions_on_gold_pages": 50,
+    "tables": 46,
+    "tp": 46,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "out_of_scope_predictions": 8,
+    "predictions_on_gold_pages": 54,
     "negative_items": 19,
-    "negative_items_with_fp": 3,
-    "negative_fp": 4
+    "negative_items_with_fp": 0,
+    "negative_fp": 0
   },
   "per_pdf": {
     "adc12dj5200": {
-      "tables": 19,
-      "tp": 14,
-      "fp": 3,
-      "fn": 5,
-      "precision": 0.8235,
-      "recall": 0.7368,
-      "f1": 0.7778,
+      "tables": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
       "out_of_scope_predictions": 3,
-      "predictions_on_gold_pages": 20,
+      "predictions_on_gold_pages": 23,
       "negative_items": 7
     },
     "ads1299": {
       "tables": 15,
-      "tp": 14,
+      "tp": 15,
       "fp": 0,
-      "fn": 1,
+      "fn": 0,
       "precision": 1.0,
-      "recall": 0.9333,
-      "f1": 0.9655,
-      "out_of_scope_predictions": 1,
-      "predictions_on_gold_pages": 15,
+      "recall": 1.0,
+      "f1": 1.0,
+      "out_of_scope_predictions": 2,
+      "predictions_on_gold_pages": 17,
       "negative_items": 7
     },
     "lm358": {
       "tables": 11,
       "tp": 11,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.9167,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.9565,
+      "f1": 1.0,
       "out_of_scope_predictions": 3,
-      "predictions_on_gold_pages": 15,
+      "predictions_on_gold_pages": 14,
       "negative_items": 5
     }
   },
@@ -96,14 +96,14 @@
     "table_types": {
       "absolute_maximum": 2,
       "electrical_characteristics": 15,
-      "ordering_information": 2,
+      "ordering_information": 3,
       "other": 22,
       "pin_functions": 2,
       "recommended_operating": 1,
       "thermal": 1
     },
     "tables_per_pdf": {
-      "adc12dj5200": 19,
+      "adc12dj5200": 20,
       "ads1299": 15,
       "lm358": 11
     },
@@ -114,59 +114,570 @@
     }
   },
   "fragmentation": {
-    "mean_overlapping_predictions": 0.867,
+    "mean_overlapping_predictions": 1.0,
     "max_overlapping_predictions": 1,
     "max_items": [
+      "ADC12DJ5200-P01-T01",
       "ADC12DJ5200-P39-T01",
       "ADC12DJ5200-P41-T01",
+      "ADC12DJ5200-P43-T01",
       "ADC12DJ5200-P46-T01",
       "ADC12DJ5200-P47-T01",
       "ADC12DJ5200-P54-T01",
       "ADC12DJ5200-P61-T01",
-      "ADC12DJ5200-P72-T01",
-      "ADC12DJ5200-P78-T01",
-      "ADC12DJ5200-P78-T02",
-      "ADC12DJ5200-P98-T01"
+      "ADC12DJ5200-P61-T02",
+      "ADC12DJ5200-P72-T01"
     ],
     "distribution": {
-      "0": 6,
-      "1": 39
+      "1": 46
     }
   },
   "structure": {
-    "matched": 39,
-    "row_count_exact": 38,
-    "column_count_exact": 34,
-    "row_and_column_exact": 33,
-    "cell_text_tp": 2305,
-    "cell_text_fp": 500,
-    "cell_text_fn": 443,
-    "cell_text_f1": 0.8302,
-    "header_column_accuracy": 0.5932,
-    "header_tables_exact": 20,
-    "column_role_accuracy": 0.6398,
-    "column_role_tables_exact": 12,
-    "table_type_accuracy": 0.5128,
+    "matched": 46,
+    "row_count_exact": 46,
+    "column_count_exact": 44,
+    "row_and_column_exact": 44,
+    "cell_text_tp": 2805,
+    "cell_text_fp": 417,
+    "cell_text_fn": 284,
+    "cell_text_f1": 0.8889,
+    "header_column_accuracy": 1.0,
+    "header_column_accuracy_strict": 0.9582,
+    "header_tables_exact": 44,
+    "header_comparable_tables": 44,
+    "header_comparable_columns": 287,
+    "header_cell_text_tp": 287,
+    "header_cell_text_fp": 0,
+    "header_cell_text_fn": 0,
+    "header_cell_text_f1": 1.0,
+    "header_multilayer_tables": 10,
+    "header_multilayer_exact": 10,
+    "header_row_depth_exact": 46,
+    "header_path_tables": 46,
+    "column_role_accuracy": 0.9897,
+    "column_role_columns": 292,
+    "column_role_tables_exact": 41,
+    "column_role_by_role": {
+      "min": {
+        "gold": 8,
+        "pred": 8,
+        "tp": 8,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "typ": {
+        "gold": 6,
+        "pred": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "max": {
+        "gold": 7,
+        "pred": 7,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "unit": {
+        "gold": 11,
+        "pred": 11,
+        "tp": 11,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "condition": {
+        "gold": 22,
+        "pred": 20,
+        "tp": 20,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.9091,
+        "f1": 0.9524
+      },
+      "symbol": {
+        "gold": 32,
+        "pred": 33,
+        "tp": 32,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.9697,
+        "recall": 1.0,
+        "f1": 0.9846
+      },
+      "value": {
+        "gold": 206,
+        "pred": 206,
+        "tp": 205,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.9951,
+        "recall": 0.9951,
+        "f1": 0.9951
+      },
+      "unknown": {
+        "gold": 0,
+        "pred": 1,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
+    "table_type_accuracy": 0.587,
     "reconstruction_status": {
-      "reconstructed": 19,
-      "partial": 20
+      "reconstructed": 30,
+      "partial": 16
     },
     "row_error_distribution": {
-      "0": 38,
-      "3": 1
+      "0": 46
     },
     "column_error_distribution": {
-      "-4": 1,
-      "-2": 1,
       "-1": 2,
-      "0": 34,
-      "1": 1
+      "0": 44
+    },
+    "confusion": {
+      "table_type": {
+        "absolute_maximum": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 2,
+          "unknown": 0
+        },
+        "recommended_operating": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 1,
+          "unknown": 0
+        },
+        "electrical_characteristics": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 2,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 13,
+          "unknown": 0
+        },
+        "thermal": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 1,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        },
+        "pin_functions": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 2,
+          "unknown": 0
+        },
+        "ordering_information": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 2,
+          "other": 1,
+          "unknown": 0
+        },
+        "other": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 22,
+          "unknown": 0
+        },
+        "unknown": {
+          "absolute_maximum": 0,
+          "recommended_operating": 0,
+          "electrical_characteristics": 0,
+          "thermal": 0,
+          "pin_functions": 0,
+          "ordering_information": 0,
+          "other": 0,
+          "unknown": 0
+        }
+      },
+      "header_rows": {
+        "0": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 36,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "2": {
+          "0": 0,
+          "1": 0,
+          "2": 9,
+          "3": 0,
+          "4": 0
+        },
+        "3": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1,
+          "4": 0
+        },
+        "4": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        }
+      },
+      "column_role": {
+        "min": {
+          "min": 8,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "typ": {
+          "min": 0,
+          "typ": 6,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "max": {
+          "min": 0,
+          "typ": 0,
+          "max": 7,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "unit": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 11,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        },
+        "condition": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 20,
+          "symbol": 0,
+          "value": 1,
+          "unknown": 1
+        },
+        "symbol": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 32,
+          "value": 0,
+          "unknown": 0
+        },
+        "value": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 1,
+          "value": 205,
+          "unknown": 0
+        },
+        "unknown": {
+          "min": 0,
+          "typ": 0,
+          "max": 0,
+          "unit": 0,
+          "condition": 0,
+          "symbol": 0,
+          "value": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "denominators": {
+      "detection_precision": "TP + in-scope FP (predictions on annotated pages)",
+      "detection_recall": "TP + FN (accepted gold tables)",
+      "row_count": "46 matched tables",
+      "column_count": "46 matched tables",
+      "cell_text": "matched tables; multiset F1 over non-empty cell texts",
+      "header_cell_text": "44 matched tables with equal column count; multiset F1 over non-empty header labels, whitespace-free",
+      "header_column_attribution": "287 labelled gold header columns (empty gold labels excluded) in 44 comparable matched tables; strict variant keeps intra-label spacing",
+      "header_multilayer": "10 matched gold tables with header_rows >= 2",
+      "header_row_detection": "header_rows exact over all matched tables",
+      "column_role": "292 gold columns in comparable matched tables"
     }
   },
+  "error_cases": {
+    "missed_tables": [],
+    "in_scope_false_positives": [],
+    "row_count_mismatch": [],
+    "column_count_mismatch": [
+      {
+        "item_id": "ADS1299-P70-T01",
+        "pdf_id": "ads1299",
+        "page": 70,
+        "gold_columns": 5,
+        "pred_columns": 4,
+        "gold_header_rows": 1,
+        "pred_header_rows": 1
+      },
+      {
+        "item_id": "LM358-P04-T01",
+        "pdf_id": "lm358",
+        "page": 4,
+        "gold_columns": 6,
+        "pred_columns": 5,
+        "gold_header_rows": 1,
+        "pred_header_rows": 1
+      }
+    ],
+    "header_text_mismatch": [],
+    "column_role_mismatch": [
+      {
+        "item_id": "ADC12DJ5200-P46-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 46,
+        "gold_roles": [
+          "value",
+          "value",
+          "value",
+          "value"
+        ],
+        "pred_roles": [
+          "symbol",
+          "value",
+          "value",
+          "value"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P27-T01",
+        "pdf_id": "ads1299",
+        "page": 27,
+        "gold_roles": [
+          "symbol",
+          "condition",
+          "condition",
+          "value"
+        ],
+        "pred_roles": [
+          "symbol",
+          "value",
+          "condition",
+          "value"
+        ]
+      },
+      {
+        "item_id": "ADS1299-P70-T01",
+        "pdf_id": "ads1299",
+        "page": 70,
+        "gold_roles": [
+          "symbol",
+          "value",
+          "min",
+          "max",
+          "unit"
+        ],
+        "pred_roles": [
+          "symbol",
+          "min",
+          "max",
+          "unit"
+        ]
+      },
+      {
+        "item_id": "LM358-P04-T01",
+        "pdf_id": "lm358",
+        "page": 4,
+        "gold_roles": [
+          "symbol",
+          "condition",
+          "condition",
+          "min",
+          "max",
+          "unit"
+        ],
+        "pred_roles": [
+          "symbol",
+          "condition",
+          "min",
+          "max",
+          "unit"
+        ]
+      },
+      {
+        "item_id": "LM358-P04-T02",
+        "pdf_id": "lm358",
+        "page": 4,
+        "gold_roles": [
+          "symbol",
+          "condition",
+          "value",
+          "unit"
+        ],
+        "pred_roles": [
+          "symbol",
+          "unknown",
+          "value",
+          "unit"
+        ]
+      }
+    ]
+  },
   "single_row_tables": {
-    "count": 1,
-    "matched": 1,
+    "count": 2,
+    "matched": 2,
     "items": [
+      {
+        "item_id": "ADC12DJ5200-P01-T01",
+        "pdf_id": "adc12dj5200",
+        "page": 1,
+        "gold_rows": 2,
+        "gold_columns": 3,
+        "gold_data_rows": 1,
+        "gold_table_type": "ordering_information",
+        "cross_page": null,
+        "overlapping_predictions": 1,
+        "matched": true,
+        "prediction_id": "p001-t01",
+        "iou": 0.9996,
+        "pred_rows": 2,
+        "pred_columns": 3,
+        "pred_table_type": "other",
+        "reconstruction_status": "reconstructed",
+        "structure": {
+          "rows": {
+            "gold": 2,
+            "pred": 2,
+            "exact": true,
+            "error": 0
+          },
+          "columns": {
+            "gold": 3,
+            "pred": 3,
+            "exact": true,
+            "error": 0
+          },
+          "cells": {
+            "gold": 6,
+            "pred": 6,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0
+          },
+          "headers": {
+            "column_hits": 3,
+            "column_hits_strict": 3,
+            "columns": 3,
+            "labeled_columns": [
+              0,
+              1,
+              2
+            ],
+            "all_exact": true,
+            "comparable": true,
+            "gold_rows": 1,
+            "pred_rows": 1,
+            "row_depth_exact": true,
+            "cell_text_tp": 3,
+            "cell_text_fp": 0,
+            "cell_text_fn": 0,
+            "header_path_present": true,
+            "gold_text": [
+              "PART NUMBER",
+              "PACKAGE(1)",
+              "PACKAGE SIZE(2)"
+            ],
+            "pred_text": [
+              "PART NUMBER",
+              "PACKAGE (1)",
+              "PACKAGE SIZE (2)"
+            ]
+          },
+          "roles": {
+            "column_hits": 3,
+            "columns": 3,
+            "all_exact": true,
+            "gold": [
+              "value",
+              "value",
+              "value"
+            ],
+            "pred": [
+              "value",
+              "value",
+              "value"
+            ],
+            "comparable": true
+          },
+          "table_type": {
+            "gold": "ordering_information",
+            "pred": "other",
+            "exact": false
+          },
+          "reconstruction_status": "reconstructed"
+        }
+      },
       {
         "item_id": "ADC12DJ5200-P47-T01",
         "pdf_id": "adc12dj5200",
@@ -180,16 +691,16 @@
         "matched": true,
         "prediction_id": "p047-t01",
         "iou": 0.9979,
-        "pred_rows": 5,
+        "pred_rows": 2,
         "pred_columns": 6,
-        "pred_table_type": "unknown",
-        "reconstruction_status": "partial",
+        "pred_table_type": "other",
+        "reconstruction_status": "reconstructed",
         "structure": {
           "rows": {
             "gold": 2,
-            "pred": 5,
-            "exact": false,
-            "error": 3
+            "pred": 2,
+            "exact": true,
+            "error": 0
           },
           "columns": {
             "gold": 6,
@@ -199,21 +710,53 @@
           },
           "cells": {
             "gold": 12,
-            "pred": 17,
-            "tp": 7,
-            "fp": 10,
-            "fn": 5
+            "pred": 12,
+            "tp": 12,
+            "fp": 0,
+            "fn": 0
           },
           "headers": {
-            "column_hits": 0,
+            "column_hits": 6,
+            "column_hits_strict": 6,
             "columns": 6,
-            "all_exact": false,
-            "comparable": true
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "all_exact": true,
+            "comparable": true,
+            "gold_rows": 1,
+            "pred_rows": 1,
+            "row_depth_exact": true,
+            "cell_text_tp": 6,
+            "cell_text_fp": 0,
+            "cell_text_fn": 0,
+            "header_path_present": true,
+            "gold_text": [
+              "PFIR Mode",
+              "Center Tap\nResolution",
+              "Center Tap LSB\nWeight",
+              "Non-Center Tap\nResolution",
+              "Non-Center Tap LSB\nWeight",
+              "Filter Coefficients"
+            ],
+            "pred_text": [
+              "PFIR Mode",
+              "Center Tap Resolution",
+              "Center Tap LSB Weight",
+              "Non-Center Tap Resolution",
+              "Non-Center Tap LSB Weight",
+              "Filter Coefficients"
+            ]
           },
           "roles": {
-            "column_hits": 0,
+            "column_hits": 6,
             "columns": 6,
-            "all_exact": false,
+            "all_exact": true,
             "gold": [
               "symbol",
               "value",
@@ -223,28 +766,28 @@
               "value"
             ],
             "pred": [
-              "unknown",
-              "unknown",
-              "unknown",
-              "unknown",
-              "unknown",
-              "unknown"
+              "symbol",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value"
             ],
             "comparable": true
           },
           "table_type": {
             "gold": "other",
-            "pred": "unknown",
-            "exact": false
+            "pred": "other",
+            "exact": true
           },
-          "reconstruction_status": "partial"
+          "reconstruction_status": "reconstructed"
         }
       }
     ]
   },
   "cross_page_tables": {
     "count": 4,
-    "matched": 2,
+    "matched": 4,
     "items": [
       {
         "item_id": "ADC12DJ5200-P78-T04",
@@ -259,11 +802,156 @@
           "part": 1,
           "relation": "continued"
         },
-        "overlapping_predictions": 0,
-        "matched": false,
-        "prediction_id": null,
-        "iou": 0.0,
-        "best_iou": 0.0
+        "overlapping_predictions": 1,
+        "matched": true,
+        "prediction_id": "p078-t04",
+        "iou": 1.0,
+        "pred_rows": 7,
+        "pred_columns": 17,
+        "pred_table_type": "other",
+        "reconstruction_status": "reconstructed",
+        "structure": {
+          "rows": {
+            "gold": 7,
+            "pred": 7,
+            "exact": true,
+            "error": 0
+          },
+          "columns": {
+            "gold": 17,
+            "pred": 17,
+            "exact": true,
+            "error": 0
+          },
+          "cells": {
+            "gold": 61,
+            "pred": 61,
+            "tp": 61,
+            "fp": 0,
+            "fn": 0
+          },
+          "headers": {
+            "column_hits": 17,
+            "column_hits_strict": 17,
+            "columns": 17,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "all_exact": true,
+            "comparable": true,
+            "gold_rows": 2,
+            "pred_rows": 2,
+            "row_depth_exact": true,
+            "cell_text_tp": 17,
+            "cell_text_fp": 0,
+            "cell_text_fn": 0,
+            "header_path_present": true,
+            "gold_text": [
+              "OCTET | NIBBLE",
+              "0 | 0",
+              "0 | 1",
+              "1 | 2",
+              "1 | 3",
+              "2 | 4",
+              "2 | 5",
+              "3 | 6",
+              "3 | 7",
+              "4 | 8",
+              "4 | 9",
+              "5 | 10",
+              "5 | 11",
+              "6 | 12",
+              "6 | 13",
+              "7 | 14",
+              "7 | 15"
+            ],
+            "pred_text": [
+              "OCTET | NIBBLE",
+              "0 | 0",
+              "0 | 1",
+              "1 | 2",
+              "1 | 3",
+              "2 | 4",
+              "2 | 5",
+              "3 | 6",
+              "3 | 7",
+              "4 | 8",
+              "4 | 9",
+              "5 | 10",
+              "5 | 11",
+              "6 | 12",
+              "6 | 13",
+              "7 | 14",
+              "7 | 15"
+            ]
+          },
+          "roles": {
+            "column_hits": 17,
+            "columns": 17,
+            "all_exact": true,
+            "gold": [
+              "symbol",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value"
+            ],
+            "pred": [
+              "symbol",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value"
+            ],
+            "comparable": true
+          },
+          "table_type": {
+            "gold": "other",
+            "pred": "other",
+            "exact": true
+          },
+          "reconstruction_status": "reconstructed"
+        }
       },
       {
         "item_id": "ADC12DJ5200-P79-T01",
@@ -278,11 +966,156 @@
           "part": 2,
           "relation": "continued"
         },
-        "overlapping_predictions": 0,
-        "matched": false,
-        "prediction_id": null,
-        "iou": 0.0,
-        "best_iou": 0.0
+        "overlapping_predictions": 1,
+        "matched": true,
+        "prediction_id": "p079-t01",
+        "iou": 0.9998,
+        "pred_rows": 5,
+        "pred_columns": 17,
+        "pred_table_type": "other",
+        "reconstruction_status": "reconstructed",
+        "structure": {
+          "rows": {
+            "gold": 5,
+            "pred": 5,
+            "exact": true,
+            "error": 0
+          },
+          "columns": {
+            "gold": 17,
+            "pred": 17,
+            "exact": true,
+            "error": 0
+          },
+          "cells": {
+            "gold": 47,
+            "pred": 47,
+            "tp": 47,
+            "fp": 0,
+            "fn": 0
+          },
+          "headers": {
+            "column_hits": 17,
+            "column_hits_strict": 17,
+            "columns": 17,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "all_exact": true,
+            "comparable": true,
+            "gold_rows": 2,
+            "pred_rows": 2,
+            "row_depth_exact": true,
+            "cell_text_tp": 17,
+            "cell_text_fp": 0,
+            "cell_text_fn": 0,
+            "header_path_present": true,
+            "gold_text": [
+              "OCTET | NIBBLE",
+              "0 | 0",
+              "0 | 1",
+              "1 | 2",
+              "1 | 3",
+              "2 | 4",
+              "2 | 5",
+              "3 | 6",
+              "3 | 7",
+              "4 | 8",
+              "4 | 9",
+              "5 | 10",
+              "5 | 11",
+              "6 | 12",
+              "6 | 13",
+              "7 | 14",
+              "7 | 15"
+            ],
+            "pred_text": [
+              "OCTET | NIBBLE",
+              "0 | 0",
+              "0 | 1",
+              "1 | 2",
+              "1 | 3",
+              "2 | 4",
+              "2 | 5",
+              "3 | 6",
+              "3 | 7",
+              "4 | 8",
+              "4 | 9",
+              "5 | 10",
+              "5 | 11",
+              "6 | 12",
+              "6 | 13",
+              "7 | 14",
+              "7 | 15"
+            ]
+          },
+          "roles": {
+            "column_hits": 17,
+            "columns": 17,
+            "all_exact": true,
+            "gold": [
+              "symbol",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value"
+            ],
+            "pred": [
+              "symbol",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value",
+              "value"
+            ],
+            "comparable": true
+          },
+          "table_type": {
+            "gold": "other",
+            "pred": "other",
+            "exact": true
+          },
+          "reconstruction_status": "reconstructed"
+        }
       },
       {
         "item_id": "ADC12DJ5200-P98-T01",
@@ -327,14 +1160,40 @@
           },
           "headers": {
             "column_hits": 4,
+            "column_hits_strict": 4,
             "columns": 4,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3
+            ],
             "all_exact": true,
-            "comparable": true
+            "comparable": true,
+            "gold_rows": 1,
+            "pred_rows": 1,
+            "row_depth_exact": true,
+            "cell_text_tp": 4,
+            "cell_text_fp": 0,
+            "cell_text_fn": 0,
+            "header_path_present": true,
+            "gold_text": [
+              "Address",
+              "Acronym",
+              "Register Name",
+              "Section"
+            ],
+            "pred_text": [
+              "Address",
+              "Acronym",
+              "Register Name",
+              "Section"
+            ]
           },
           "roles": {
-            "column_hits": 2,
+            "column_hits": 4,
             "columns": 4,
-            "all_exact": false,
+            "all_exact": true,
             "gold": [
               "value",
               "symbol",
@@ -343,8 +1202,8 @@
             ],
             "pred": [
               "value",
-              "value",
               "symbol",
+              "value",
               "value"
             ],
             "comparable": true
@@ -400,14 +1259,40 @@
           },
           "headers": {
             "column_hits": 4,
+            "column_hits_strict": 4,
             "columns": 4,
+            "labeled_columns": [
+              0,
+              1,
+              2,
+              3
+            ],
             "all_exact": true,
-            "comparable": true
+            "comparable": true,
+            "gold_rows": 1,
+            "pred_rows": 1,
+            "row_depth_exact": true,
+            "cell_text_tp": 4,
+            "cell_text_fp": 0,
+            "cell_text_fn": 0,
+            "header_path_present": true,
+            "gold_text": [
+              "Address",
+              "Acronym",
+              "Register Name",
+              "Section"
+            ],
+            "pred_text": [
+              "Address",
+              "Acronym",
+              "Register Name",
+              "Section"
+            ]
           },
           "roles": {
-            "column_hits": 2,
+            "column_hits": 4,
             "columns": 4,
-            "all_exact": false,
+            "all_exact": true,
             "gold": [
               "value",
               "symbol",
@@ -416,8 +1301,8 @@
             ],
             "pred": [
               "value",
-              "value",
               "symbol",
+              "value",
               "value"
             ],
             "comparable": true
@@ -436,13 +1321,13 @@
     "by_kind": {
       "prose": {
         "items": 4,
-        "items_with_fp": 1,
-        "fp": 1
+        "items_with_fp": 0,
+        "fp": 0
       },
       "toc": {
         "items": 3,
-        "items_with_fp": 2,
-        "fp": 3
+        "items_with_fp": 0,
+        "fp": 0
       },
       "pin_diagram": {
         "items": 3,
@@ -477,7 +1362,7 @@
     },
     "by_item": {
       "LM358-N01-P01-PROSE": 0,
-      "LM358-N02-P02-TOC": 1,
+      "LM358-N02-P02-TOC": 0,
       "LM358-N03-P03-PINS": 0,
       "LM358-N04-P15-CHART": 0,
       "LM358-N05-P31-REVHIST": 0,
@@ -488,58 +1373,107 @@
       "ADS1299-N05-P26-CHART": 0,
       "ADS1299-N06-P70-TIMING": 0,
       "ADS1299-N07-P84-NOTICE": 0,
-      "ADC12DJ5200-N01-P01-FEATURES": 1,
-      "ADC12DJ5200-N02-P02-TOC": 2,
+      "ADC12DJ5200-N01-P01-FEATURES": 0,
+      "ADC12DJ5200-N02-P02-TOC": 0,
       "ADC12DJ5200-N03-P03-PINS": 0,
       "ADC12DJ5200-N04-P29-CHART": 0,
       "ADC12DJ5200-N05-P102-BITFIELD": 0,
       "ADC12DJ5200-N06-P180-NOTICE": 0,
       "ADC12DJ5200-N07-P102-BITFIELD": 0
     },
-    "false_positive_predictions": [
-      {
-        "negative_id": "ADC12DJ5200-N01-P01-FEATURES",
-        "negative_kind": "prose",
-        "pdf_id": "adc12dj5200",
-        "page": 1,
-        "prediction_id": "p001-t01",
-        "table_type": "other",
-        "reconstruction_status": "reconstructed",
-        "overlap": 1.0
-      },
-      {
-        "negative_id": "ADC12DJ5200-N02-P02-TOC",
-        "negative_kind": "toc",
-        "pdf_id": "adc12dj5200",
-        "page": 2,
-        "prediction_id": "p002-t01",
-        "table_type": "recommended_operating",
-        "reconstruction_status": "reconstructed",
-        "overlap": 1.0
-      },
-      {
-        "negative_id": "ADC12DJ5200-N02-P02-TOC",
-        "negative_kind": "toc",
-        "pdf_id": "adc12dj5200",
-        "page": 2,
-        "prediction_id": "p002-t02",
-        "table_type": "electrical_characteristics",
-        "reconstruction_status": "reconstructed",
-        "overlap": 1.0
-      },
-      {
-        "negative_id": "LM358-N02-P02-TOC",
-        "negative_kind": "toc",
-        "pdf_id": "lm358",
-        "page": 2,
-        "prediction_id": "p002-t01",
-        "table_type": "recommended_operating",
-        "reconstruction_status": "reconstructed",
-        "overlap": 1.0
-      }
-    ]
+    "false_positive_predictions": []
   },
   "tables": [
+    {
+      "item_id": "ADC12DJ5200-P01-T01",
+      "pdf_id": "adc12dj5200",
+      "page": 1,
+      "gold_rows": 2,
+      "gold_columns": 3,
+      "gold_data_rows": 1,
+      "gold_table_type": "ordering_information",
+      "cross_page": null,
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p001-t01",
+      "iou": 0.9996,
+      "pred_rows": 2,
+      "pred_columns": 3,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 2,
+          "pred": 2,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 6,
+          "pred": 6,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 3,
+          "column_hits_strict": 3,
+          "columns": 3,
+          "labeled_columns": [
+            0,
+            1,
+            2
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 3,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PART NUMBER",
+            "PACKAGE(1)",
+            "PACKAGE SIZE(2)"
+          ],
+          "pred_text": [
+            "PART NUMBER",
+            "PACKAGE (1)",
+            "PACKAGE SIZE (2)"
+          ]
+        },
+        "roles": {
+          "column_hits": 3,
+          "columns": 3,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "ordering_information",
+          "pred": "other",
+          "exact": false
+        },
+        "reconstruction_status": "reconstructed"
+      }
+    },
     {
       "item_id": "ADC12DJ5200-P39-T01",
       "pdf_id": "adc12dj5200",
@@ -579,14 +1513,49 @@
         },
         "headers": {
           "column_hits": 7,
+          "column_hits_strict": 7,
           "columns": 7,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 7,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PART\nNUMBER",
+            "MAXIMUM\nSAMPLING\nRATE",
+            "RESOLUTION",
+            "DUAL CHANNEL\nDECIMATION",
+            "SINGLE CHANNEL\nDECIMATION",
+            "INTERFACE\n(MAX\nLINERATE)",
+            "Input"
+          ],
+          "pred_text": [
+            "PART NUMBER",
+            "MAXIMUM SAMPLING RATE",
+            "RESOLUTION",
+            "DUAL CHANNEL DECIMATION",
+            "SINGLE CHANNEL DECIMATION",
+            "INTERFACE (MAX LINERATE)",
+            "Input"
+          ]
         },
         "roles": {
-          "column_hits": 5,
+          "column_hits": 7,
           "columns": 7,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "value",
             "value",
@@ -598,11 +1567,11 @@
           ],
           "pred": [
             "value",
-            "max",
             "value",
             "value",
             "value",
-            "max",
+            "value",
+            "value",
             "value"
           ],
           "comparable": true
@@ -654,9 +1623,35 @@
         },
         "headers": {
           "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "ADC SAMPLE\n(Offset Binary)",
+            "ADC SAMPLE\n(2's Complement)",
+            "ABSOLUTE VALUE",
+            "UPPER 8 BITS USED FOR\nCOMPARISON"
+          ],
+          "pred_text": [
+            "ADC SAMPLE (Offset Binary)",
+            "ADC SAMPLE (2's Complement)",
+            "ABSOLUTE VALUE",
+            "UPPER 8 BITS USED FOR COMPARISON"
+          ]
         },
         "roles": {
           "column_hits": 4,
@@ -693,11 +1688,86 @@
       "gold_data_rows": 2,
       "gold_table_type": "other",
       "cross_page": null,
-      "overlapping_predictions": 0,
-      "matched": false,
-      "prediction_id": null,
-      "iou": 0.0,
-      "best_iou": 0.0
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p043-t01",
+      "iou": 0.9998,
+      "pred_rows": 3,
+      "pred_columns": 3,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 3,
+          "pred": 3,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 9,
+          "pred": 9,
+          "tp": 6,
+          "fp": 3,
+          "fn": 3
+        },
+        "headers": {
+          "column_hits": 3,
+          "column_hits_strict": 2,
+          "columns": 3,
+          "labeled_columns": [
+            0,
+            1,
+            2
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 3,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "MODE OF OPERATION",
+            "SAMPLING RATE VS fCLK",
+            "SAMPLING INSTANT"
+          ],
+          "pred_text": [
+            "MODE OF OPERATION",
+            "SAMPLING RATE VS f CLK",
+            "SAMPLING INSTANT"
+          ]
+        },
+        "roles": {
+          "column_hits": 3,
+          "columns": 3,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
     },
     {
       "item_id": "ADC12DJ5200-P46-T01",
@@ -714,8 +1784,8 @@
       "iou": 0.9999,
       "pred_rows": 7,
       "pred_columns": 4,
-      "pred_table_type": "unknown",
-      "reconstruction_status": "partial",
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
       "structure": {
         "rows": {
           "gold": 7,
@@ -737,13 +1807,39 @@
           "fn": 6
         },
         "headers": {
-          "column_hits": 0,
+          "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "SYSREF_POS[23:0] | 0x02E[7:0]\n(Largest Delay)",
+            "SYSREF_POS[23:0] | 0x02D[7:0](1)",
+            "SYSREF_POS[23:0] | 0x02C[7:0](1)\n(Smallest Delay)",
+            "OPTIMAL SYSREF_SEL\nSETTING"
+          ],
+          "pred_text": [
+            "SYSREF_POS[23:0] | 0x02E[7:0] (Largest Delay)",
+            "SYSREF_POS[23:0] | 0x02D[7:0] (1)",
+            "SYSREF_POS[23:0] | 0x02C[7:0] (1) (Smallest Delay)",
+            "OPTIMAL SYSREF_SEL SETTING"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 3,
           "columns": 4,
           "all_exact": false,
           "gold": [
@@ -753,19 +1849,19 @@
             "value"
           ],
           "pred": [
-            "unknown",
-            "unknown",
-            "unknown",
-            "unknown"
+            "symbol",
+            "value",
+            "value",
+            "value"
           ],
           "comparable": true
         },
         "table_type": {
           "gold": "electrical_characteristics",
-          "pred": "unknown",
+          "pred": "other",
           "exact": false
         },
-        "reconstruction_status": "partial"
+        "reconstruction_status": "reconstructed"
       }
     },
     {
@@ -781,16 +1877,16 @@
       "matched": true,
       "prediction_id": "p047-t01",
       "iou": 0.9979,
-      "pred_rows": 5,
+      "pred_rows": 2,
       "pred_columns": 6,
-      "pred_table_type": "unknown",
-      "reconstruction_status": "partial",
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
       "structure": {
         "rows": {
           "gold": 2,
-          "pred": 5,
-          "exact": false,
-          "error": 3
+          "pred": 2,
+          "exact": true,
+          "error": 0
         },
         "columns": {
           "gold": 6,
@@ -800,21 +1896,53 @@
         },
         "cells": {
           "gold": 12,
-          "pred": 17,
-          "tp": 7,
-          "fp": 10,
-          "fn": 5
+          "pred": 12,
+          "tp": 12,
+          "fp": 0,
+          "fn": 0
         },
         "headers": {
-          "column_hits": 0,
+          "column_hits": 6,
+          "column_hits_strict": 6,
           "columns": 6,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 6,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PFIR Mode",
+            "Center Tap\nResolution",
+            "Center Tap LSB\nWeight",
+            "Non-Center Tap\nResolution",
+            "Non-Center Tap LSB\nWeight",
+            "Filter Coefficients"
+          ],
+          "pred_text": [
+            "PFIR Mode",
+            "Center Tap Resolution",
+            "Center Tap LSB Weight",
+            "Non-Center Tap Resolution",
+            "Non-Center Tap LSB Weight",
+            "Filter Coefficients"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 6,
           "columns": 6,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -824,21 +1952,21 @@
             "value"
           ],
           "pred": [
-            "unknown",
-            "unknown",
-            "unknown",
-            "unknown",
-            "unknown",
-            "unknown"
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
           ],
           "comparable": true
         },
         "table_type": {
           "gold": "other",
-          "pred": "unknown",
-          "exact": false
+          "pred": "other",
+          "exact": true
         },
-        "reconstruction_status": "partial"
+        "reconstruction_status": "reconstructed"
       }
     },
     {
@@ -856,8 +1984,8 @@
       "iou": 0.9988,
       "pred_rows": 6,
       "pred_columns": 2,
-      "pred_table_type": "unknown",
-      "reconstruction_status": "partial",
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
       "structure": {
         "rows": {
           "gold": 6,
@@ -879,31 +2007,51 @@
           "fn": 1
         },
         "headers": {
-          "column_hits": 0,
+          "column_hits": 2,
+          "column_hits_strict": 1,
           "columns": 2,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 2,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "fCLK (MHz)",
+            "NCO_RDIV"
+          ],
+          "pred_text": [
+            "f CLK (MHz)",
+            "NCO_RDIV"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 2,
           "columns": 2,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "condition",
             "value"
           ],
           "pred": [
-            "unknown",
-            "unknown"
+            "condition",
+            "value"
           ],
           "comparable": true
         },
         "table_type": {
           "gold": "electrical_characteristics",
-          "pred": "unknown",
+          "pred": "other",
           "exact": false
         },
-        "reconstruction_status": "partial"
+        "reconstruction_status": "reconstructed"
       }
     },
     {
@@ -945,9 +2093,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "SIGNAL NAME",
+            "PIN NAMES",
+            "8B/10B",
+            "64B/66B",
+            "DESCRIPTION"
+          ],
+          "pred_text": [
+            "SIGNAL NAME",
+            "PIN NAMES",
+            "8B/10B",
+            "64B/66B",
+            "DESCRIPTION"
+          ]
         },
         "roles": {
           "column_hits": 5,
@@ -986,11 +2163,91 @@
       "gold_data_rows": 13,
       "gold_table_type": "other",
       "cross_page": null,
-      "overlapping_predictions": 0,
-      "matched": false,
-      "prediction_id": null,
-      "iou": 0.0,
-      "best_iou": 0.0
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p061-t02",
+      "iou": 1.0,
+      "pred_rows": 14,
+      "pred_columns": 4,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 14,
+          "pred": 14,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 56,
+          "pred": 56,
+          "tp": 56,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 4,
+          "column_hits_strict": 4,
+          "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "LETTER IDENTIFIER",
+            "REFERENCE\nCLAUSE",
+            "FEATURE",
+            "SUPPORT IN ADC12DJ5200SE"
+          ],
+          "pred_text": [
+            "LETTER IDENTIFIER",
+            "REFERENCE CLAUSE",
+            "FEATURE",
+            "SUPPORT IN ADC12DJ5200SE"
+          ]
+        },
+        "roles": {
+          "column_hits": 4,
+          "columns": 4,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "condition",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "condition",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
     },
     {
       "item_id": "ADC12DJ5200-P72-T01",
@@ -1031,14 +2288,40 @@
         },
         "headers": {
           "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "DESCRIPTION",
+            "USER CONFIGURED\nOR DERIVED",
+            "VALUE"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "DESCRIPTION",
+            "USER CONFIGURED OR DERIVED",
+            "VALUE"
+          ]
         },
         "roles": {
-          "column_hits": 3,
+          "column_hits": 4,
           "columns": 4,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -1048,7 +2331,7 @@
           "pred": [
             "symbol",
             "value",
-            "value",
+            "condition",
             "value"
           ],
           "comparable": true
@@ -1100,22 +2383,45 @@
         },
         "headers": {
           "column_hits": 3,
+          "column_hits_strict": 3,
           "columns": 3,
+          "labeled_columns": [
+            0,
+            1,
+            2
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 3,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "NOTATION",
+            "MODE",
+            "DESCRIPTION"
+          ],
+          "pred_text": [
+            "NOTATION",
+            "MODE",
+            "DESCRIPTION"
+          ]
         },
         "roles": {
-          "column_hits": 1,
+          "column_hits": 3,
           "columns": 3,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "condition",
             "value"
           ],
           "pred": [
-            "value",
-            "value",
+            "symbol",
+            "condition",
             "value"
           ],
           "comparable": true
@@ -1166,15 +2472,80 @@
           "fn": 0
         },
         "headers": {
-          "column_hits": 11,
+          "column_hits": 17,
+          "column_hits_strict": 17,
           "columns": 17,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 17,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ]
         },
         "roles": {
-          "column_hits": 16,
+          "column_hits": 17,
           "columns": 17,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -1195,7 +2566,7 @@
             "value"
           ],
           "pred": [
-            "value",
+            "symbol",
             "value",
             "value",
             "value",
@@ -1232,11 +2603,156 @@
       "gold_data_rows": 16,
       "gold_table_type": "other",
       "cross_page": null,
-      "overlapping_predictions": 0,
-      "matched": false,
-      "prediction_id": null,
-      "iou": 0.0,
-      "best_iou": 0.0
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p078-t03",
+      "iou": 0.9999,
+      "pred_rows": 18,
+      "pred_columns": 17,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 18,
+          "pred": 18,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 17,
+          "pred": 17,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 138,
+          "pred": 138,
+          "tp": 138,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 17,
+          "column_hits_strict": 17,
+          "columns": 17,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 17,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ]
+        },
+        "roles": {
+          "column_hits": 17,
+          "columns": 17,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
     },
     {
       "item_id": "ADC12DJ5200-P78-T04",
@@ -1251,11 +2767,156 @@
         "part": 1,
         "relation": "continued"
       },
-      "overlapping_predictions": 0,
-      "matched": false,
-      "prediction_id": null,
-      "iou": 0.0,
-      "best_iou": 0.0
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p078-t04",
+      "iou": 1.0,
+      "pred_rows": 7,
+      "pred_columns": 17,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 7,
+          "pred": 7,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 17,
+          "pred": 17,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 61,
+          "pred": 61,
+          "tp": 61,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 17,
+          "column_hits_strict": 17,
+          "columns": 17,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 17,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ]
+        },
+        "roles": {
+          "column_hits": 17,
+          "columns": 17,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
     },
     {
       "item_id": "ADC12DJ5200-P79-T01",
@@ -1270,11 +2931,156 @@
         "part": 2,
         "relation": "continued"
       },
-      "overlapping_predictions": 0,
-      "matched": false,
-      "prediction_id": null,
-      "iou": 0.0,
-      "best_iou": 0.0
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p079-t01",
+      "iou": 0.9998,
+      "pred_rows": 5,
+      "pred_columns": 17,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 5,
+          "pred": 5,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 17,
+          "pred": 17,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 47,
+          "pred": 47,
+          "tp": 47,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 17,
+          "column_hits_strict": 17,
+          "columns": 17,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 17,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ],
+          "pred_text": [
+            "OCTET | NIBBLE",
+            "0 | 0",
+            "0 | 1",
+            "1 | 2",
+            "1 | 3",
+            "2 | 4",
+            "2 | 5",
+            "3 | 6",
+            "3 | 7",
+            "4 | 8",
+            "4 | 9",
+            "5 | 10",
+            "5 | 11",
+            "6 | 12",
+            "6 | 13",
+            "7 | 14",
+            "7 | 15"
+          ]
+        },
+        "roles": {
+          "column_hits": 17,
+          "columns": 17,
+          "all_exact": true,
+          "gold": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "symbol",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
     },
     {
       "item_id": "ADC12DJ5200-P98-T01",
@@ -1319,14 +3125,40 @@
         },
         "headers": {
           "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Address",
+            "Acronym",
+            "Register Name",
+            "Section"
+          ],
+          "pred_text": [
+            "Address",
+            "Acronym",
+            "Register Name",
+            "Section"
+          ]
         },
         "roles": {
-          "column_hits": 2,
+          "column_hits": 4,
           "columns": 4,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "value",
             "symbol",
@@ -1335,8 +3167,8 @@
           ],
           "pred": [
             "value",
-            "value",
             "symbol",
+            "value",
             "value"
           ],
           "comparable": true
@@ -1392,14 +3224,40 @@
         },
         "headers": {
           "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Address",
+            "Acronym",
+            "Register Name",
+            "Section"
+          ],
+          "pred_text": [
+            "Address",
+            "Acronym",
+            "Register Name",
+            "Section"
+          ]
         },
         "roles": {
-          "column_hits": 2,
+          "column_hits": 4,
           "columns": 4,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "value",
             "symbol",
@@ -1408,8 +3266,8 @@
           ],
           "pred": [
             "value",
-            "value",
             "symbol",
+            "value",
             "value"
           ],
           "comparable": true
@@ -1461,9 +3319,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ],
+          "pred_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ]
         },
         "roles": {
           "column_hits": 5,
@@ -1532,9 +3419,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ],
+          "pred_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ]
         },
         "roles": {
           "column_hits": 5,
@@ -1603,9 +3519,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ],
+          "pred_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ]
         },
         "roles": {
           "column_hits": 5,
@@ -1673,15 +3618,68 @@
           "fn": 4
         },
         "headers": {
-          "column_hits": 5,
+          "column_hits": 13,
+          "column_hits_strict": 9,
           "columns": 13,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 13,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "DR BITS OF\nCONFIG1\nREGISTER",
+            "OUTPUT\nDATA RATE\n(SPS)",
+            "–3-dB\nBANDWIDTH (Hz)",
+            "PGA\nGAIN = 4 | μVRMS",
+            "PGA\nGAIN = 4 | μVPP",
+            "PGA\nGAIN = 4 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 4 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 4 | ENOB",
+            "PGA\nGAIN = 6 | μVRMS",
+            "PGA\nGAIN = 6 | μVPP",
+            "PGA\nGAIN = 6 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 6 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 6 | ENOB"
+          ],
+          "pred_text": [
+            "DR BITS OF CONFIG1 REGISTER",
+            "OUTPUT DATA RATE (SPS)",
+            "–3-dB BANDWIDTH (Hz)",
+            "PGA GAIN = 4 | μ V RMS",
+            "PGA GAIN = 4 | μ V PP",
+            "PGA GAIN = 4 | DYNAMIC RANGE (dB)",
+            "PGA GAIN = 4 | NOISE- FREE BITS",
+            "PGA GAIN = 4 | ENOB",
+            "PGA GAIN = 6 | μ V RMS",
+            "PGA GAIN = 6 | μ V PP",
+            "PGA GAIN = 6 | DYNAMIC RANGE (dB)",
+            "PGA GAIN = 6 | NOISE- FREE BITS",
+            "PGA GAIN = 6 | ENOB"
+          ]
         },
         "roles": {
-          "column_hits": 12,
+          "column_hits": 13,
           "columns": 13,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -1698,7 +3696,7 @@
             "value"
           ],
           "pred": [
-            "value",
+            "symbol",
             "value",
             "value",
             "value",
@@ -1760,15 +3758,68 @@
           "fn": 4
         },
         "headers": {
-          "column_hits": 5,
+          "column_hits": 13,
+          "column_hits_strict": 9,
           "columns": 13,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 13,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "DR BITS OF\nCONFIG1\nREGISTER",
+            "OUTPUT\nDATA RATE\n(SPS)",
+            "–3-dB\nBANDWIDTH (Hz)",
+            "PGA\nGAIN = 8 | μVRMS",
+            "PGA\nGAIN = 8 | μVPP",
+            "PGA\nGAIN = 8 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 8 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 8 | ENOB",
+            "PGA\nGAIN = 12 | μVRMS",
+            "PGA\nGAIN = 12 | μVPP",
+            "PGA\nGAIN = 12 | DYNAMIC\nRANGE\n(dB)",
+            "PGA\nGAIN = 12 | NOISE-\nFREE\nBITS",
+            "PGA\nGAIN = 12 | ENOB"
+          ],
+          "pred_text": [
+            "DR BITS OF CONFIG1 REGISTER",
+            "OUTPUT DATA RATE (SPS)",
+            "–3-dB BANDWIDTH (Hz)",
+            "PGA GAIN = 8 | μ V RMS",
+            "PGA GAIN = 8 | μ V PP",
+            "PGA GAIN = 8 | DYNAMIC RANGE (dB)",
+            "PGA GAIN = 8 | NOISE- FREE BITS",
+            "PGA GAIN = 8 | ENOB",
+            "PGA GAIN = 12 | μ V RMS",
+            "PGA GAIN = 12 | μ V PP",
+            "PGA GAIN = 12 | DYNAMIC RANGE (dB)",
+            "PGA GAIN = 12 | NOISE- FREE BITS",
+            "PGA GAIN = 12 | ENOB"
+          ]
         },
         "roles": {
-          "column_hits": 12,
+          "column_hits": 13,
           "columns": 13,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -1785,7 +3836,7 @@
             "value"
           ],
           "pred": [
-            "value",
+            "symbol",
             "value",
             "value",
             "value",
@@ -1847,15 +3898,53 @@
           "fn": 2
         },
         "headers": {
-          "column_hits": 4,
+          "column_hits": 8,
+          "column_hits_strict": 6,
           "columns": 8,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 8,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "DR BITS OF CONFIG1\nREGISTER",
+            "OUTPUT DATA\nRATE (SPS)",
+            "–3-dB BANDWIDTH (Hz)",
+            "PGA\nGAIN = 24 | μVRMS",
+            "PGA\nGAIN = 24 | μVPP",
+            "PGA\nGAIN = 24 | DYNAMIC\nRANGE (dB)",
+            "PGA\nGAIN = 24 | NOISE-FREE\nBITS",
+            "PGA\nGAIN = 24 | ENOB"
+          ],
+          "pred_text": [
+            "DR BITS OF CONFIG1 REGISTER",
+            "OUTPUT DATA RATE (SPS)",
+            "–3-dB BANDWIDTH (Hz)",
+            "PGA GAIN = 24 | μ V RMS",
+            "PGA GAIN = 24 | μ V PP",
+            "PGA GAIN = 24 | DYNAMIC RANGE (dB)",
+            "PGA GAIN = 24 | NOISE-FREE BITS",
+            "PGA GAIN = 24 | ENOB"
+          ]
         },
         "roles": {
-          "column_hits": 7,
+          "column_hits": 8,
           "columns": 8,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -1867,7 +3956,7 @@
             "value"
           ],
           "pred": [
-            "value",
+            "symbol",
             "value",
             "value",
             "value",
@@ -1925,21 +4014,41 @@
         },
         "headers": {
           "column_hits": 2,
+          "column_hits_strict": 2,
           "columns": 2,
+          "labeled_columns": [
+            0,
+            1
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 2,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "GAIN",
+            "NOMINAL BANDWIDTH AT ROOM\nTEMPERATURE (kHz)"
+          ],
+          "pred_text": [
+            "GAIN",
+            "NOMINAL BANDWIDTH AT ROOM TEMPERATURE (kHz)"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 2,
           "columns": 2,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value"
           ],
           "pred": [
-            "value",
-            "typ"
+            "symbol",
+            "value"
           ],
           "comparable": true
         },
@@ -1990,12 +4099,38 @@
         },
         "headers": {
           "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "CLKSEL PIN",
+            "CONFIG1.CLK_EN\nBIT",
+            "CLOCK SOURCE",
+            "CLK PIN STATUS"
+          ],
+          "pred_text": [
+            "CLKSEL PIN",
+            "CONFIG1.CLK_EN BIT",
+            "CLOCK SOURCE",
+            "CLK PIN STATUS"
+          ]
         },
         "roles": {
-          "column_hits": 1,
+          "column_hits": 3,
           "columns": 4,
           "all_exact": false,
           "gold": [
@@ -2005,9 +4140,9 @@
             "value"
           ],
           "pred": [
+            "symbol",
             "value",
-            "value",
-            "value",
+            "condition",
             "value"
           ],
           "comparable": true
@@ -2059,21 +4194,44 @@
         },
         "headers": {
           "column_hits": 3,
+          "column_hits_strict": 3,
           "columns": 3,
+          "labeled_columns": [
+            0,
+            1,
+            2
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 3,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "DR[2:0]",
+            "NORMAL MODE",
+            "UNIT"
+          ],
+          "pred_text": [
+            "DR[2:0]",
+            "NORMAL MODE",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 2,
+          "column_hits": 3,
           "columns": 3,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
             "unit"
           ],
           "pred": [
-            "value",
+            "symbol",
             "value",
             "unit"
           ],
@@ -2126,21 +4284,43 @@
         },
         "headers": {
           "column_hits": 2,
-          "columns": 3,
-          "all_exact": false,
-          "comparable": true
+          "column_hits_strict": 2,
+          "columns": 2,
+          "labeled_columns": [
+            1,
+            2
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 2,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "",
+            "MIN",
+            "UNIT"
+          ],
+          "pred_text": [
+            "",
+            "MIN",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 2,
+          "column_hits": 3,
           "columns": 3,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "min",
             "unit"
           ],
           "pred": [
-            "unknown",
+            "symbol",
             "min",
             "unit"
           ],
@@ -2193,14 +4373,40 @@
         },
         "headers": {
           "column_hits": 4,
+          "column_hits_strict": 4,
           "columns": 4,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 4,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "COMMAND",
+            "DESCRIPTION",
+            "FIRST BYTE",
+            "SECOND BYTE"
+          ],
+          "pred_text": [
+            "COMMAND",
+            "DESCRIPTION",
+            "FIRST BYTE",
+            "SECOND BYTE"
+          ]
         },
         "roles": {
-          "column_hits": 3,
+          "column_hits": 4,
           "columns": 4,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "value",
@@ -2208,7 +4414,7 @@
             "value"
           ],
           "pred": [
-            "value",
+            "symbol",
             "value",
             "value",
             "value"
@@ -2261,10 +4467,57 @@
           "fn": 2
         },
         "headers": {
-          "column_hits": 5,
+          "column_hits": 11,
+          "column_hits_strict": 11,
           "columns": 11,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 2,
+          "pred_rows": 2,
+          "row_depth_exact": true,
+          "cell_text_tp": 11,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "ADDRESS",
+            "REGISTER",
+            "DEFAULT\nSETTING",
+            "REGISTER BITS | 7",
+            "REGISTER BITS | 6",
+            "REGISTER BITS | 5",
+            "REGISTER BITS | 4",
+            "REGISTER BITS | 3",
+            "REGISTER BITS | 2",
+            "REGISTER BITS | 1",
+            "REGISTER BITS | 0"
+          ],
+          "pred_text": [
+            "ADDRESS",
+            "REGISTER",
+            "DEFAULT | SETTING",
+            "REGISTER BITS | 7",
+            "REGISTER BITS | 6",
+            "REGISTER BITS | 5",
+            "REGISTER BITS | 4",
+            "REGISTER BITS | 3",
+            "REGISTER BITS | 2",
+            "REGISTER BITS | 1",
+            "REGISTER BITS | 0"
+          ]
         },
         "roles": {
           "column_hits": 11,
@@ -2345,9 +4598,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ],
+          "pred_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ]
         },
         "roles": {
           "column_hits": 5,
@@ -2416,9 +4698,38 @@
         },
         "headers": {
           "column_hits": 5,
+          "column_hits_strict": 5,
           "columns": 5,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 5,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ],
+          "pred_text": [
+            "Bit",
+            "Field",
+            "Type",
+            "Reset",
+            "Description"
+          ]
         },
         "roles": {
           "column_hits": 5,
@@ -2487,9 +4798,29 @@
         },
         "headers": {
           "column_hits": 2,
+          "column_hits_strict": 2,
           "columns": 2,
+          "labeled_columns": [
+            0,
+            1
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 2,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "DESIGN PARAMETER",
+            "VALUE"
+          ],
+          "pred_text": [
+            "DESIGN PARAMETER",
+            "VALUE"
+          ]
         },
         "roles": {
           "column_hits": 2,
@@ -2552,9 +4883,35 @@
         },
         "headers": {
           "column_hits": 0,
-          "columns": 5,
+          "column_hits_strict": 0,
+          "columns": 3,
+          "labeled_columns": [
+            2,
+            3,
+            4
+          ],
           "all_exact": false,
-          "comparable": false
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 3,
+          "header_path_present": true,
+          "gold_text": [
+            "",
+            "",
+            "MIN",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "",
+            "MIN",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
           "column_hits": 0,
@@ -2568,7 +4925,7 @@
             "unit"
           ],
           "pred": [
-            "unknown",
+            "symbol",
             "min",
             "max",
             "unit"
@@ -2592,11 +4949,101 @@
       "gold_data_rows": 3,
       "gold_table_type": "other",
       "cross_page": null,
-      "overlapping_predictions": 0,
-      "matched": false,
-      "prediction_id": null,
-      "iou": 0.0,
-      "best_iou": 0.0
+      "overlapping_predictions": 1,
+      "matched": true,
+      "prediction_id": "p074-t01",
+      "iou": 1.0,
+      "pred_rows": 4,
+      "pred_columns": 6,
+      "pred_table_type": "other",
+      "reconstruction_status": "reconstructed",
+      "structure": {
+        "rows": {
+          "gold": 4,
+          "pred": 4,
+          "exact": true,
+          "error": 0
+        },
+        "columns": {
+          "gold": 6,
+          "pred": 6,
+          "exact": true,
+          "error": 0
+        },
+        "cells": {
+          "gold": 24,
+          "pred": 24,
+          "tp": 24,
+          "fp": 0,
+          "fn": 0
+        },
+        "headers": {
+          "column_hits": 6,
+          "column_hits_strict": 6,
+          "columns": 6,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 6,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARTS",
+            "PRODUCT FOLDER",
+            "ORDER NOW",
+            "TECHNICAL\nDOCUMENTS",
+            "TOOLS &\nSOFTWARE",
+            "SUPPORT &\nCOMMUNITY"
+          ],
+          "pred_text": [
+            "PARTS",
+            "PRODUCT FOLDER",
+            "ORDER NOW",
+            "TECHNICAL DOCUMENTS",
+            "TOOLS & SOFTWARE",
+            "SUPPORT & COMMUNITY"
+          ]
+        },
+        "roles": {
+          "column_hits": 6,
+          "columns": 6,
+          "all_exact": true,
+          "gold": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "pred": [
+            "value",
+            "value",
+            "value",
+            "value",
+            "value",
+            "value"
+          ],
+          "comparable": true
+        },
+        "table_type": {
+          "gold": "other",
+          "pred": "other",
+          "exact": true
+        },
+        "reconstruction_status": "reconstructed"
+      }
     },
     {
       "item_id": "ADS1299-P76-T01",
@@ -2612,7 +5059,7 @@
       "prediction_id": "p076-t01",
       "iou": 1.0,
       "pred_rows": 15,
-      "pred_columns": 8,
+      "pred_columns": 10,
       "pred_table_type": "ordering_information",
       "reconstruction_status": "reconstructed",
       "structure": {
@@ -2624,27 +5071,71 @@
         },
         "columns": {
           "gold": 10,
-          "pred": 8,
-          "exact": false,
-          "error": -2
+          "pred": 10,
+          "exact": true,
+          "error": 0
         },
         "cells": {
           "gold": 150,
-          "pred": 120,
-          "tp": 105,
-          "fp": 15,
-          "fn": 45
+          "pred": 150,
+          "tp": 150,
+          "fp": 0,
+          "fn": 0
         },
         "headers": {
-          "column_hits": 0,
+          "column_hits": 10,
+          "column_hits_strict": 10,
           "columns": 10,
-          "all_exact": false,
-          "comparable": false
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 10,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Orderable part number",
+            "Status\n(1)",
+            "Material type\n(2)",
+            "Package | Pins",
+            "Package qty | Carrier",
+            "RoHS\n(3)",
+            "Lead finish/\nBall material\n(4)",
+            "MSL rating/\nPeak reflow\n(5)",
+            "Op temp (°C)",
+            "Part marking\n(6)"
+          ],
+          "pred_text": [
+            "Orderable part number",
+            "Status (1)",
+            "Material type (2)",
+            "Package | Pins",
+            "Package qty | Carrier",
+            "RoHS (3)",
+            "Lead finish/ Ball material (4)",
+            "MSL rating/ Peak reflow (5)",
+            "Op temp (°C)",
+            "Part marking (6)"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 10,
           "columns": 10,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "value",
             "value",
@@ -2665,9 +5156,11 @@
             "value",
             "value",
             "value",
+            "value",
+            "value",
             "value"
           ],
-          "comparable": false
+          "comparable": true
         },
         "table_type": {
           "gold": "ordering_information",
@@ -2716,9 +5209,37 @@
         },
         "headers": {
           "column_hits": 0,
-          "columns": 6,
+          "column_hits_strict": 0,
+          "columns": 3,
+          "labeled_columns": [
+            3,
+            4,
+            5
+          ],
           "all_exact": false,
-          "comparable": false
+          "comparable": false,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 0,
+          "cell_text_fp": 0,
+          "cell_text_fn": 3,
+          "header_path_present": true,
+          "gold_text": [
+            "",
+            "",
+            "",
+            "MIN",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "",
+            "",
+            "MIN",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
           "column_hits": 0,
@@ -2733,8 +5254,8 @@
             "unit"
           ],
           "pred": [
-            "unknown",
-            "unknown",
+            "symbol",
+            "condition",
             "min",
             "max",
             "unit"
@@ -2788,12 +5309,36 @@
         },
         "headers": {
           "column_hits": 2,
-          "columns": 4,
-          "all_exact": false,
-          "comparable": true
+          "column_hits_strict": 2,
+          "columns": 2,
+          "labeled_columns": [
+            2,
+            3
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 2,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "",
+            "",
+            "VALUE",
+            "UNIT"
+          ],
+          "pred_text": [
+            "",
+            "",
+            "VALUE",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 2,
+          "column_hits": 3,
           "columns": 4,
           "all_exact": false,
           "gold": [
@@ -2803,7 +5348,7 @@
             "unit"
           ],
           "pred": [
-            "unknown",
+            "symbol",
             "unknown",
             "value",
             "unit"
@@ -2857,14 +5402,41 @@
         },
         "headers": {
           "column_hits": 3,
-          "columns": 5,
-          "all_exact": false,
-          "comparable": true
+          "column_hits_strict": 3,
+          "columns": 3,
+          "labeled_columns": [
+            2,
+            3,
+            4
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 3,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "",
+            "",
+            "MIN",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "",
+            "",
+            "MIN",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 3,
+          "column_hits": 5,
           "columns": 5,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "condition",
@@ -2873,8 +5445,8 @@
             "unit"
           ],
           "pred": [
-            "unknown",
-            "unknown",
+            "symbol",
+            "condition",
             "min",
             "max",
             "unit"
@@ -2905,7 +5477,7 @@
       "pred_rows": 9,
       "pred_columns": 10,
       "pred_table_type": "thermal",
-      "reconstruction_status": "partial",
+      "reconstruction_status": "reconstructed",
       "structure": {
         "rows": {
           "gold": 9,
@@ -2927,15 +5499,59 @@
           "fn": 4
         },
         "headers": {
-          "column_hits": 2,
+          "column_hits": 10,
+          "column_hits_strict": 10,
           "columns": 10,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 3,
+          "pred_rows": 3,
+          "row_depth_exact": true,
+          "cell_text_tp": 10,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "THERMAL METRIC(1)",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B,\nLM2904BA, LM2904V(2) | D\n(SOIC) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B,\nLM2904BA, LM2904V(2) | DGK\n(VSSOP) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B,\nLM2904BA, LM2904V(2) | P\n(PDIP) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B,\nLM2904BA, LM2904V(2) | PS\n(SO) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B,\nLM2904BA, LM2904V(2) | PW\n(TSSOP) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B,\nLM2904BA, LM2904V(2) | DDF\n(SOT-23) | 8PINS",
+            "LM158, LM158A | FK\n(LCCC) | 20 PINS",
+            "LM158, LM158A | JG\n(CDIP) | 8 PINS",
+            "UNIT"
+          ],
+          "pred_text": [
+            "THERMAL METRIC (1)",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B, LM2904BA, LM2904V (2) | D (SOIC) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B, LM2904BA, LM2904V (2) | DGK (VSSOP) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B, LM2904BA, LM2904V (2) | P (PDIP) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B, LM2904BA, LM2904V (2) | PS (SO) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B, LM2904BA, LM2904V (2) | PW (TSSOP) | 8 PINS",
+            "LM258, LM258A, LM358, LM358A, LM358B, LM358BA, LM2904, LM2904B, LM2904BA, LM2904V (2) | DDF (SOT-23) | 8PINS",
+            "LM158, LM158A | FK (LCCC) | 20 PINS",
+            "LM158, LM158A | JG (CDIP) | 8 PINS",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 1,
+          "column_hits": 10,
           "columns": 10,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "condition",
@@ -2949,15 +5565,15 @@
             "unit"
           ],
           "pred": [
-            "value",
-            "value",
-            "value",
-            "value",
-            "value",
-            "value",
-            "value",
-            "value",
-            "value",
+            "symbol",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
+            "condition",
             "unit"
           ],
           "comparable": true
@@ -2967,7 +5583,7 @@
           "pred": "thermal",
           "exact": true
         },
-        "reconstruction_status": "partial"
+        "reconstruction_status": "reconstructed"
       }
     },
     {
@@ -3008,15 +5624,50 @@
           "fn": 43
         },
         "headers": {
-          "column_hits": 6,
+          "column_hits": 7,
+          "column_hits_strict": 7,
           "columns": 7,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 7,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "PARAMETER",
+            "TEST CONDITIONS",
+            "MIN",
+            "TYP",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "PARAMETER",
+            "TEST CONDITIONS",
+            "MIN",
+            "TYP",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 6,
+          "column_hits": 7,
           "columns": 7,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "symbol",
@@ -3027,7 +5678,7 @@
             "unit"
           ],
           "pred": [
-            "unknown",
+            "symbol",
             "symbol",
             "condition",
             "min",
@@ -3083,15 +5734,50 @@
           "fn": 43
         },
         "headers": {
-          "column_hits": 6,
+          "column_hits": 7,
+          "column_hits_strict": 7,
           "columns": 7,
-          "all_exact": false,
-          "comparable": true
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 7,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "PARAMETER",
+            "TEST CONDITIONS",
+            "MIN",
+            "TYP",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "PARAMETER",
+            "TEST CONDITIONS",
+            "MIN",
+            "TYP",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 6,
+          "column_hits": 7,
           "columns": 7,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "symbol",
@@ -3102,7 +5788,7 @@
             "unit"
           ],
           "pred": [
-            "unknown",
+            "symbol",
             "symbol",
             "condition",
             "min",
@@ -3159,9 +5845,41 @@
         },
         "headers": {
           "column_hits": 6,
+          "column_hits_strict": 6,
           "columns": 6,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 6,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "TEST CONDITIONS(1)",
+            "MIN",
+            "TYP(2)",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "TEST CONDITIONS (1)",
+            "MIN",
+            "TYP (2)",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
           "column_hits": 6,
@@ -3207,7 +5925,7 @@
       "prediction_id": "p011-t01",
       "iou": 1.0,
       "pred_rows": 46,
-      "pred_columns": 7,
+      "pred_columns": 6,
       "pred_table_type": "other",
       "reconstruction_status": "partial",
       "structure": {
@@ -3219,27 +5937,59 @@
         },
         "columns": {
           "gold": 6,
-          "pred": 7,
-          "exact": false,
-          "error": 1
+          "pred": 6,
+          "exact": true,
+          "error": 0
         },
         "cells": {
           "gold": 127,
-          "pred": 163,
+          "pred": 150,
           "tp": 94,
-          "fp": 69,
+          "fp": 56,
           "fn": 33
         },
         "headers": {
-          "column_hits": 0,
+          "column_hits": 6,
+          "column_hits_strict": 6,
           "columns": 6,
-          "all_exact": false,
-          "comparable": false
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 6,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "TEST CONDITIONS(1)",
+            "MIN",
+            "TYP (2)",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "TEST CONDITIONS (1)",
+            "MIN",
+            "TYP (2)",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 6,
           "columns": 6,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "symbol",
             "condition",
@@ -3251,13 +6001,12 @@
           "pred": [
             "symbol",
             "condition",
-            "unknown",
             "min",
             "typ",
             "max",
             "unit"
           ],
-          "comparable": false
+          "comparable": true
         },
         "table_type": {
           "gold": "electrical_characteristics",
@@ -3306,9 +6055,41 @@
         },
         "headers": {
           "column_hits": 6,
+          "column_hits_strict": 6,
           "columns": 6,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 6,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "TEST CONDITIONS(1)",
+            "MIN",
+            "TYP(2)",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "TEST CONDITIONS (1)",
+            "MIN",
+            "TYP (2)",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
           "column_hits": 6,
@@ -3379,9 +6160,41 @@
         },
         "headers": {
           "column_hits": 6,
+          "column_hits_strict": 6,
           "columns": 6,
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "all_exact": true,
-          "comparable": true
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 6,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "PARAMETER",
+            "TEST CONDITIONS(1)",
+            "MIN",
+            "TYP(2)",
+            "MAX",
+            "UNIT"
+          ],
+          "pred_text": [
+            "PARAMETER",
+            "TEST CONDITIONS (1)",
+            "MIN",
+            "TYP (2)",
+            "MAX",
+            "UNIT"
+          ]
         },
         "roles": {
           "column_hits": 6,
@@ -3427,7 +6240,7 @@
       "prediction_id": "p033-t01",
       "iou": 1.0,
       "pred_rows": 16,
-      "pred_columns": 6,
+      "pred_columns": 10,
       "pred_table_type": "ordering_information",
       "reconstruction_status": "partial",
       "structure": {
@@ -3439,27 +6252,71 @@
         },
         "columns": {
           "gold": 10,
-          "pred": 6,
-          "exact": false,
-          "error": -4
+          "pred": 10,
+          "exact": true,
+          "error": 0
         },
         "cells": {
           "gold": 158,
-          "pred": 94,
-          "tp": 46,
-          "fp": 48,
-          "fn": 112
+          "pred": 158,
+          "tp": 158,
+          "fp": 0,
+          "fn": 0
         },
         "headers": {
-          "column_hits": 0,
+          "column_hits": 10,
+          "column_hits_strict": 10,
           "columns": 10,
-          "all_exact": false,
-          "comparable": false
+          "labeled_columns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "all_exact": true,
+          "comparable": true,
+          "gold_rows": 1,
+          "pred_rows": 1,
+          "row_depth_exact": true,
+          "cell_text_tp": 10,
+          "cell_text_fp": 0,
+          "cell_text_fn": 0,
+          "header_path_present": true,
+          "gold_text": [
+            "Orderable part number",
+            "Status\n(1)",
+            "Material type\n(2)",
+            "Package | Pins",
+            "Package qty | Carrier",
+            "RoHS\n(3)",
+            "Lead finish/\nBall material\n(4)",
+            "MSL rating/\nPeak reflow\n(5)",
+            "Op temp (°C)",
+            "Part marking\n(6)"
+          ],
+          "pred_text": [
+            "Orderable part number",
+            "Status (1)",
+            "Material type (2)",
+            "Package | Pins",
+            "Package qty | Carrier",
+            "RoHS (3)",
+            "Lead finish/ Ball material (4)",
+            "MSL rating/ Peak reflow (5)",
+            "Op temp (°C)",
+            "Part marking (6)"
+          ]
         },
         "roles": {
-          "column_hits": 0,
+          "column_hits": 10,
           "columns": 10,
-          "all_exact": false,
+          "all_exact": true,
           "gold": [
             "value",
             "value",
@@ -3478,9 +6335,13 @@
             "value",
             "value",
             "value",
+            "value",
+            "value",
+            "value",
+            "value",
             "value"
           ],
-          "comparable": false
+          "comparable": true
         },
         "table_type": {
           "gold": "ordering_information",
@@ -3493,20 +6354,20 @@
   ],
   "run_status_on_gold_pages": {
     "adc12dj5200": {
-      "reconstructed": 11,
-      "partial": 9
+      "reconstructed": 19,
+      "partial": 4
     },
     "ads1299": {
-      "reconstructed": 13,
+      "reconstructed": 15,
       "partial": 2
     },
     "lm358": {
       "reconstructed": 4,
-      "partial": 11
+      "partial": 10
     }
   },
   "gold_counts": {
-    "tables": 45,
+    "tables": 46,
     "negatives": 19,
     "excluded": []
   }

@@ -184,3 +184,41 @@ validation of candidate ownership + evidence alignment.
   mismatches, including the intentionally dropped partial sub-rule in
   `LM358-P04-T01`).
 - No LLM, no DashScope, no automatic parameter generation in this round.
+
+---
+
+## Round 5 — Phase 1.2 round 2: gold review + header/role semantics (2026-11-06)
+
+**Status:** second refactor round complete; reviewer approval requested. Phase 2 frozen.
+
+- Gold annotation `gold-2026-11-06.1`: 46 tables + 19 negatives. Independent
+  review complete for 65/65 items (`gold/independent_review.json`,
+  `gold/review_record.md`, `manifest.json` `items_pending: 0`). Corrections:
+  `ADC12DJ5200-P01-T01` added (missing p.1 package table);
+  `ADC12DJ5200-N01-P01-FEATURES` bbox narrowed so it no longer covers that table.
+  Open gold ambiguities are documented and deliberately frozen.
+- Header semantics (`parser/header_semantics.py`): header depth from vertical
+  merges, ordinal headers, sparse lead rows and third-row pin counts; canopy
+  propagation no longer overwrites the leading row-header column; ordinal groups
+  spread evenly; whitespace-free header comparison in the evaluator with an
+  exact-spacing strict variant.
+- Column roles: limit words only count in short labels (`MAXIMUM SAMPLING RATE`
+  is VALUE); selectors (`MODE`, `CLOCK SOURCE`, `REFERENCE CLAUSE`, package
+  options) are CONDITION; `acronym` is SYMBOL and `Register Name` is VALUE;
+  leading column defaults to SYMBOL except part/address/bit/sample-code or a
+  stimulus with a unit; unlabeled columns left of MIN/TYP/MAX are CONDITION.
+- Metrics: same 46-table set on both sides (baseline re-evaluated through the
+  evaluator). Detection TP/FP/FN 16/309/30 -> 46/0/0; negative FP 59 -> 0;
+  out-of-scope 68 -> 8. Structure: row exact 5/16 -> 46/46; column exact
+  12/16 -> 44/46; header column accuracy (compact) 1.0000 on 287 columns (44
+  tables), strict 0.9582; header depth 46/46; multi-layer 10/10; header
+  cell-text F1 1.0000; role accuracy 0.9897 (292 columns), role exact 41 tables;
+  table-type 0.5870; cell-text F1 0.8889.
+- Residual mismatches: 2 column splits (gold ambiguity), 3 role columns
+  (`ADS1299-P27-T01`, `ADC12DJ5200-P46-T01`, `LM358-P04-T02`), 12 strict-spacing
+  header columns (`fCLK`, `µV`). Header/role denominators are printed in
+  `gold/comparison.md`; confusion matrices and error cases in
+  `gold/after_report.md`.
+- Tests: `python -m pytest -q` -> 48 passed.
+- Candidate Registry unchanged; no LLM, no DashScope, no automatic parameter
+  generation. Not pushed to Codeup this round.

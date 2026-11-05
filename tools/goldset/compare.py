@@ -31,11 +31,34 @@ STRUCTURE = [
     ("Column count exact", "column_count_exact", "int"),
     ("Row and column exact", "row_and_column_exact", "int"),
     ("Cell-text F1", "cell_text_f1", "f4"),
+    ("Header comparable tables", "header_comparable_tables", "int"),
+    ("Header comparable columns", "header_comparable_columns", "int"),
     ("Header column accuracy", "header_column_accuracy", "f4"),
+    ("Header column accuracy (strict spacing)", "header_column_accuracy_strict", "f4"),
+    ("Header row-depth exact", "header_row_depth_exact", "int"),
     ("Header tables exact", "header_tables_exact", "int"),
+    ("Header multi-layer exact", "header_multilayer_exact", "int"),
+    ("Header cell-text F1", "header_cell_text_f1", "f4"),
     ("Column-role accuracy", "column_role_accuracy", "f4"),
+    ("Column-role columns", "column_role_columns", "int"),
     ("Column-role tables exact", "column_role_tables_exact", "int"),
     ("Table-type accuracy", "table_type_accuracy", "f4"),
+]
+
+DENOMINATORS = [
+    ("Detection precision", "TP / (TP + in-scope FP)"),
+    ("Detection recall", "TP / (TP + FN); every accepted gold table counts"),
+    ("Row count exact", "matched tables whose predicted row count equals gold"),
+    ("Column count exact", "matched tables whose predicted column count equals gold"),
+    ("Cell-text F1", "cell multiset over the cells of matched tables"),
+    ("Header column accuracy", "columns with equal compact label / labeled gold columns of comparable tables"),
+    ("Header column accuracy (strict)", "same denominator, exact spacing"),
+    ("Header row depth", "matched tables with equal header_rows"),
+    ("Header tables exact", "comparable tables with every labeled column exact"),
+    ("Header multi-layer", "matched tables whose gold header_rows >= 2"),
+    ("Header cell-text F1", "labeled header cells of comparable tables"),
+    ("Column role", "columns with equal coarse role / comparable columns"),
+    ("Table type", "matched tables with equal table_type"),
 ]
 
 
@@ -119,14 +142,26 @@ def main() -> None:
                      f"{after_neg.get(kind, {}).get('fp', 0)} |")
     lines += [""]
 
+    bs = before.get("structure", {})
+    as_ = after.get("structure", {})
+    lines += ["## Metric denominators", "",
+              "| Metric family | Denominator |", "| --- | --- |"]
+    lines += [f"| {label} | {text} |" for label, text in DENOMINATORS]
+    lines += [""]
+
     notes = [
         "## Notes",
         "",
-        "- Cell-text F1 is computed only over matched tables, so the baseline value",
-        "  (16 matched) and the after value (39 matched) are not directly comparable;",
-        "  all other structure metrics share the same denominator.",
-        "- Header/role metrics count a table only when the predicted column count",
-        "  equals the gold column count, matching `gold/README.md`.",
+        f"- Cell-text F1 is computed over matched tables ({bs.get('matched')} baseline, "
+        f"{as_.get('matched')} after), so those values are not directly comparable.",
+        f"- Header column attribution and column-role accuracy are scored only on tables "
+        f"whose predicted column count equals gold: {bs.get('header_comparable_tables')} "
+        f"table(s) / {bs.get('header_comparable_columns')} column(s) baseline versus "
+        f"{as_.get('header_comparable_tables')} tables / {as_.get('header_comparable_columns')} "
+        "columns after. The baseline had no header model, so its accuracy values rest on "
+        "a much smaller denominator and must be read with those counts.",
+        "- Table-type accuracy uses matched tables as the denominator; the per-class "
+        "confusion matrix is in `gold/after_report.md`.",
         "",
     ]
     lines += notes

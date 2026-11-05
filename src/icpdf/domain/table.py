@@ -57,6 +57,7 @@ class TableRow(BaseModel):
 
     row_id: NonEmptyStr
     cells: list[Cell] = Field(min_length=1)
+    bbox: BBox | None = None
 
     @model_validator(mode="after")
     def _check_row(self) -> "TableRow":
@@ -91,6 +92,9 @@ class Table(BaseModel):
     title: str | None = None
     table_type: TableType = TableType.UNKNOWN
     headers: list[str] = Field(default_factory=list)
+    header_rows: int = Field(default=0, ge=0)
+    # Per column, the top-to-bottom header labels that produced ``headers``.
+    header_path: list[list[str]] = Field(default_factory=list)
     rows: list[TableRow] = Field(default_factory=list)
     detection_method: NonEmptyStr
     confidence: float = Field(ge=0.0, le=1.0)

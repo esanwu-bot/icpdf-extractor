@@ -1,0 +1,399 @@
+{
+  "schema_version": "gold-independent-review/v1",
+  "status": "complete",
+  "reviewer": "independent second pass (fresh context, PDF-first; parser output not used to justify an annotation)",
+  "reviewed_at": "2026-11-06",
+  "method": "Every item was re-opened as a standalone crop of the source PDF before comparing against the annotation. Bbox, header depth, header text, column and row count, merges and roles were checked against the printed datasheet; parser output was consulted last, only to classify residual mismatches as gold ambiguity or parser gap.",
+  "record": "gold/review_record.md",
+  "scope": {
+    "tables": 46,
+    "negatives": 19,
+    "baseline_false_negatives_reviewed": 30,
+    "baseline_true_positive_spot_checks": 16,
+    "baseline_in_scope_fp_reviewed": 309,
+    "baseline_negative_fp_reviewed": 59,
+    "column_count_mismatches": 2,
+    "role_mismatch_tables": 5,
+    "review_crops": "gold/review_crops/",
+    "overlays": "gold/overlays/"
+  },
+  "corrections": [
+    {
+      "item_id": "ADC12DJ5200-P01-T01",
+      "change": "added_table",
+      "from": "absent",
+      "to": "3 columns, 1 data row (Table 6-2 Package Information, p.1)",
+      "reason": "Missed in round-1 annotation; found while checking the p.1 false-positive regions."
+    },
+    {
+      "item_id": "ADC12DJ5200-N01-P01-FEATURES",
+      "change": "bbox_narrowed",
+      "from": [
+        54,
+        115,
+        560,
+        650
+      ],
+      "to": [
+        54,
+        115,
+        300,
+        660
+      ],
+      "reason": "The old box covered the p.1 ordering table that is now ADC12DJ5200-P01-T01."
+    }
+  ],
+  "baseline_fp_review": {
+    "verdict": "parser over-segmentation, not gold errors",
+    "in_scope_fp": 309,
+    "negative_fp": 59,
+    "evidence": "Baseline emits 5.783 predictions per gold table on average (max 25) and fragments every page's ruled boxes; the same gold annotations yield 0 in-scope FP and 0 negative FP after the five-layer rewrite, without any gold bbox or label being relaxed."
+  },
+  "open_ambiguities": [
+    {
+      "id": "partial-condition-column",
+      "items": [
+        "LM358-P04-T01",
+        "ADS1299-P70-T01",
+        "ADS1299-P37-T01"
+      ],
+      "text": "P04-T01 and P70 split the partial Either-input band into two condition columns; P37 merges the same band. Gold is internally inconsistent. Both conventions were kept frozen this round to preserve before/after comparability; a future annotation revision should pick one."
+    },
+    {
+      "id": "unlabeled-condition-column",
+      "items": [
+        "LM358-P04-T02"
+      ],
+      "text": "The table prints no header over its test-condition column; the parser reports UNKNOWN. Inferring a role from an empty cell would be a guess."
+    },
+    {
+      "id": "leading-sysref-column",
+      "items": [
+        "ADC12DJ5200-P46-T01"
+      ],
+      "text": "Gold calls the leading SYSREF_POS bit-field column VALUE; it behaves like a symbol column. Parser reports SYMBOL."
+    },
+    {
+      "id": "bitfield-negative-scope",
+      "items": [
+        "ADC12DJ5200-N05-P102-BITFIELD",
+        "ADC12DJ5200-N07-P102-BITFIELD"
+      ],
+      "text": "Single-row register bit-field diagrams look table-like but are excluded from the data-table scope by design; the parser agrees."
+    },
+    {
+      "id": "dense-register-maps",
+      "items": [
+        "ADS1299-P44-T01",
+        "ADC12DJ5200-P98-T01",
+        "ADC12DJ5200-P100-T01"
+      ],
+      "text": "Structure verified; cell text was spot-checked, not verified cell by cell."
+    }
+  ],
+  "items": {
+    "LM358-P04-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/LM358-P04-T01.png",
+      "note": "Absolute Maximum Ratings. Gold encodes the partial Either-input band as two condition columns (6 columns); the parser reports 5. Annotation matches the printed rule; kept frozen (open ambiguity 1)."
+    },
+    "LM358-P04-T02": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/LM358-P04-T02.png",
+      "note": "ESD Ratings. Column 1 carries test conditions with an empty header cell; the parser emits UNKNOWN because the printed header is blank (annotation debt, not a gold error)."
+    },
+    "LM358-P05-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P05-T01.png"
+    },
+    "LM358-P05-T02": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/LM358-P05-T02.png",
+      "note": "Three-row header: device-list canopy plus package subheaders. Package-option columns are annotated CONDITION; the parser recovers them with the package-token rule."
+    },
+    "LM358-P06-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P06-T01.png"
+    },
+    "LM358-P08-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P08-T01.png"
+    },
+    "LM358-P10-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P10-T01.png"
+    },
+    "LM358-P11-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P11-T01.png"
+    },
+    "LM358-P12-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P12-T01.png"
+    },
+    "LM358-P14-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/LM358-P14-T01.png"
+    },
+    "LM358-P33-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/LM358-P33-T01.png",
+      "note": "Rule-less ordering table recovered by header/gutter projection; bbox and 10 logical columns confirmed."
+    },
+    "ADS1299-P17-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P17-T01.png",
+      "note": "Two-level header: PGA GAIN = 4 canopy over 13 measurement columns; header depth 2 confirmed."
+    },
+    "ADS1299-P17-T02": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P17-T02.png",
+      "note": "Two-level header with PGA GAIN = 6 canopy; 13 columns confirmed."
+    },
+    "ADS1299-P17-T03": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P17-T03.png"
+    },
+    "ADS1299-P23-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P23-T01.png"
+    },
+    "ADS1299-P27-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P27-T01.png",
+      "note": "CLOCK SOURCE is a condition column and CLKSEL PIN is the symbol lead. Gold roles confirmed; the parser still labels CONFIG1.CLK_EN BIT as VALUE (open gap)."
+    },
+    "ADS1299-P35-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P35-T01.png"
+    },
+    "ADS1299-P37-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P37-T01.png",
+      "note": "Gold merges the partial Either-input band here while LM358-P04-T01 and ADS1299-P70-T01 split it; a cross-item convention inconsistency recorded in review_record.md (open ambiguity 1). Gold left unchanged this round."
+    },
+    "ADS1299-P40-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P40-T01.png"
+    },
+    "ADS1299-P44-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P44-T01.png",
+      "note": "Dense ID-register map; bbox, row count and two-row header confirmed. Cell text spot-checked on the first and last register rows."
+    },
+    "ADS1299-P45-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P45-T01.png"
+    },
+    "ADS1299-P52-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P52-T01.png"
+    },
+    "ADS1299-P67-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P67-T01.png"
+    },
+    "ADS1299-P70-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P70-T01.png",
+      "note": "Timing table. Gold keeps the partial band as a fifth column (split near x=112); the parser reports 4 columns. Annotation matches the round-1 convention; frozen for before/after comparability (open ambiguity 1)."
+    },
+    "ADS1299-P74-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADS1299-P74-T01.png"
+    },
+    "ADS1299-P76-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADS1299-P76-T01.png",
+      "note": "Rule-less ordering table; wrapped header labels span visual columns but each is one logical column. 10 columns confirmed."
+    },
+    "ADC12DJ5200-P01-T01": {
+      "status": "corrected",
+      "evidence": "gold/overlays/ADC12DJ5200-P01-T01.png",
+      "note": "Table 6-2 Package Information was missing from round-1 gold; found during independent review of the p.1 false positives and added. One data row: ADC12DJ5200SE | FCBGA (144) | 10mm x 10mm."
+    },
+    "ADC12DJ5200-P39-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P39-T01.png",
+      "note": "Gold roles are all VALUE. MAXIMUM SAMPLING RATE and INTERFACE (MAX LINERATE) are metric names, not MAX limit columns; the parser applies the same limit-word guard."
+    },
+    "ADC12DJ5200-P41-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P41-T01.png",
+      "note": "Both leading columns are ADC sample-code lists (VALUE), not symbol columns; gold role confirmed."
+    },
+    "ADC12DJ5200-P43-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P43-T01.png"
+    },
+    "ADC12DJ5200-P46-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P46-T01.png",
+      "note": "Two-row header with a vertically merged OPTIMAL SYSREF_SEL SETTING cell; header depth 2 confirmed. Gold calls the leading SYSREF bit-field column VALUE while the parser's leading-column heuristic calls it SYMBOL (documented role gap)."
+    },
+    "ADC12DJ5200-P47-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P47-T01.png",
+      "note": "Two-row header; single-row gold table kept in recall. Header depth 2 and 6 columns confirmed."
+    },
+    "ADC12DJ5200-P54-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P54-T01.png",
+      "note": "The leading fCLK (MHz) column is a test condition; gold role confirmed."
+    },
+    "ADC12DJ5200-P61-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P61-T01.png",
+      "note": "JESD204C signal table; SIGNAL NAME is a symbol column. Confirmed."
+    },
+    "ADC12DJ5200-P61-T02": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P61-T02.png"
+    },
+    "ADC12DJ5200-P72-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P72-T01.png"
+    },
+    "ADC12DJ5200-P78-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P78-T01.png"
+    },
+    "ADC12DJ5200-P78-T02": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P78-T02.png",
+      "note": "Ordinal two-row header OCTET | NIBBLE + 0..15, 17 columns; confirmed."
+    },
+    "ADC12DJ5200-P78-T03": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P78-T03.png",
+      "note": "Ordinal two-row header, 17 columns; confirmed."
+    },
+    "ADC12DJ5200-P78-T04": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P78-T04.png",
+      "note": "Cross-page continuation (group adc-jmode-2-31, part 1/continued) whose fragment starts without a top border. Bbox and two-row ordinal header confirmed."
+    },
+    "ADC12DJ5200-P79-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P79-T01.png",
+      "note": "Ordinal two-row header, 17 columns; confirmed."
+    },
+    "ADC12DJ5200-P98-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P98-T01.png",
+      "note": "Dense register map. Acronym is SYMBOL and Register Name is VALUE; the parser now agrees. Cell text spot-checked."
+    },
+    "ADC12DJ5200-P100-T01": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/overlays/ADC12DJ5200-P100-T01.png",
+      "note": "Same register-map layout as P98-T01; annotation and roles confirmed."
+    },
+    "ADC12DJ5200-P102-T01": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P102-T01.png"
+    },
+    "ADC12DJ5200-P102-T02": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P102-T02.png"
+    },
+    "ADC12DJ5200-P102-T03": {
+      "status": "confirmed",
+      "evidence": "gold/overlays/ADC12DJ5200-P102-T03.png"
+    },
+    "LM358-N01-P01-PROSE": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_LM358-N01-P01-PROSE.png",
+      "note": "prose: confirmed to contain no data table."
+    },
+    "LM358-N02-P02-TOC": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_LM358-N02-P02-TOC.png",
+      "note": "toc: confirmed to contain no data table."
+    },
+    "LM358-N03-P03-PINS": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_LM358-N03-P03-PINS.png",
+      "note": "pin_diagram: confirmed to contain no data table."
+    },
+    "LM358-N04-P15-CHART": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_LM358-N04-P15-CHART.png",
+      "note": "chart_annotations: confirmed to contain no data table."
+    },
+    "LM358-N05-P31-REVHIST": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_LM358-N05-P31-REVHIST.png",
+      "note": "revision_history: confirmed to contain no data table."
+    },
+    "ADS1299-N01-P01-PROSE": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N01-P01-PROSE.png",
+      "note": "prose: confirmed to contain no data table."
+    },
+    "ADS1299-N02-P02-TOC": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N02-P02-TOC.png",
+      "note": "toc: confirmed to contain no data table."
+    },
+    "ADS1299-N03-P16-PROSE": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N03-P16-PROSE.png",
+      "note": "prose: confirmed to contain no data table."
+    },
+    "ADS1299-N04-P19-PINS": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N04-P19-PINS.png",
+      "note": "pin_diagram: confirmed to contain no data table."
+    },
+    "ADS1299-N05-P26-CHART": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N05-P26-CHART.png",
+      "note": "chart_annotations: confirmed to contain no data table."
+    },
+    "ADS1299-N06-P70-TIMING": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N06-P70-TIMING.png",
+      "note": "timing_diagram: confirmed to contain no data table."
+    },
+    "ADS1299-N07-P84-NOTICE": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADS1299-N07-P84-NOTICE.png",
+      "note": "legal_notice: confirmed to contain no data table."
+    },
+    "ADC12DJ5200-N01-P01-FEATURES": {
+      "status": "corrected",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N01-P01-FEATURES.png",
+      "note": "Bbox narrowed from [54, 115, 560, 650] to [54, 115, 300, 660] so it no longer covers the Package Information table added as ADC12DJ5200-P01-T01."
+    },
+    "ADC12DJ5200-N02-P02-TOC": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N02-P02-TOC.png",
+      "note": "toc: confirmed to contain no data table."
+    },
+    "ADC12DJ5200-N03-P03-PINS": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N03-P03-PINS.png",
+      "note": "pin_diagram: confirmed to contain no data table."
+    },
+    "ADC12DJ5200-N04-P29-CHART": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N04-P29-CHART.png",
+      "note": "chart_annotations: confirmed to contain no data table."
+    },
+    "ADC12DJ5200-N05-P102-BITFIELD": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N05-P102-BITFIELD.png",
+      "note": "Figure 6-70 single-row bit-field diagram (RESERVED / MODE). Gold scope excludes bit-field diagrams; the parser emits no table."
+    },
+    "ADC12DJ5200-N06-P180-NOTICE": {
+      "status": "confirmed",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N06-P180-NOTICE.png",
+      "note": "legal_notice: confirmed to contain no data table."
+    },
+    "ADC12DJ5200-N07-P102-BITFIELD": {
+      "status": "confirmed_with_note",
+      "evidence": "gold/review_crops/indep_ADC12DJ5200-N07-P102-BITFIELD.png",
+      "note": "Figure 6-31 single-row CHIP_TYPE_REG bit-field diagram; out of gold scope by design, parser emits no table."
+    }
+  }
+}

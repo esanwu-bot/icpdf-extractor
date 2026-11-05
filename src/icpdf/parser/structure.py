@@ -219,7 +219,7 @@ def _band_runs(layout: PageLayout, ys: list[float],
 
 
 def _header_words_between(layout: PageLayout, ys: list[float],
-                          lo: float, hi: float, bands: int = 2) -> bool:
+                          lo: float, hi: float, bands: int = 1) -> bool:
     for band in range(min(bands, max(0, len(ys) - 1))):
         for word in layout.words:
             center_y = (word.bbox[1] + word.bbox[3]) / 2.0
@@ -228,6 +228,36 @@ def _header_words_between(layout: PageLayout, ys: list[float],
                 if lo < center_x < hi:
                     return True
     return False
+
+
+def _band_coverage(segments, x: float, ys: list[float],
+                   layout: PageLayout | None = None, tol: float = TOL) -> float:
+    """Fraction of row bands where a vertical rule spans the band.
+
+    Summed rule length accepts nested sub-boxes (conditions, MIN/MAX boxes)
+    that are drawn only on part of the table; a logical column rule runs
+    through nearly every row band.  Bands where text crosses ``x`` are counted
+    as support too: a merged cell is evidence the boundary is real but
+    suppressed, not evidence against the column.
+    """
+    hits = total = 0
+    for y0, y1 in zip(ys, ys[1:]):
+        if y1 - y0 < 2.0:
+            continue
+        total += 1
+        covered = sum(max(0.0, min(segment.b, y1) - max(segment.a, y0))
+                      for segment in segments if abs(segment.c - x) <= tol)
+        if covered >= (y1 - y0) * 0.6:
+            hits += 1
+        elif layout is not None and _text_crosses(layout, x, y0, y1):
+            hits += 1
+    return hits / total if total else 0.0
+
+
+def _text_crosses(layout: PageLayout, x: float, y0: float, y1: float) -> bool:
+    return any(word.bbox[0] < x - 2.0 and word.bbox[2] > x + 2.0
+               for word in layout.words
+               if y0 - 1.0 <= (word.bbox[1] + word.bbox[3]) / 2.0 <= y1 + 1.0)
 
 
 def _crossing_ratio(bands: list[list[list[float]]], x: float) -> tuple[float, float]:
@@ -312,7 +342,10 @@ def _rule_grid(layout: PageLayout, region: TableRegion, params: TableParams) -> 
                     and bbox[1] - TOL <= s.c <= bbox[3] + TOL])
     rule_ys = set(ys)
 
-    if len(ys) < 4:
+    if len(ys) < 3:
+        # No internal horizontal rule: fall back to text-line centres.  When a
+        # real rule exists, splitting every physical line would double the row
+        # count of tables whose header wraps onto two lines.
         centers = sorted((w.bbox[1] + w.bbox[3]) / 2.0 for w in layout.words
                          if bbox[1] <= (w.bbox[1] + w.bbox[3]) / 2.0 <= bbox[3])
         centers = _unique(centers, 4.0)
@@ -322,15 +355,18 @@ def _rule_grid(layout: PageLayout, region: TableRegion, params: TableParams) -> 
     body_runs = _band_runs(layout, ys, params.cell_gap_pt)
 
     def _is_column_rule(x: float) -> bool:
-        # Sub-rules that span only a few rows (nested TEST CONDITIONS boxes) are
-        # not logical column delimiters; neither are lines that text crosses.
-        if _coverage(component.vertical, x, bbox[1], bbox[3]) < 0.55:
+        # Nested TEST CONDITIONS boxes have enough total length but run through
+        # only part of the table; logical columns run through most row bands
+        # (bands where text crosses the boundary count as merged-cell support).
+        coverage = _band_coverage(component.vertical, x, ys, layout)
+        if coverage < 0.7:
             return False
-        return _crossing_ratio(body_runs, x)[0] < 0.4
+        # A rule drawn through every row band is structural; tight header words
+        # (superscript notes) may touch it without making it a text gutter.
+        return coverage >= 0.999 or _crossing_ratio(body_runs, x)[0] < 0.4
 
     hard_xs = [x for x in hard_xs
                if x <= bbox[0] + TOL or x >= bbox[2] - TOL or _is_column_rule(x)]
-    body_bands = _band_gaps(layout, ys, params.cell_gap_pt)
     header_candidates: list[float] = []
     for left, right, mid in _header_boundaries(layout, bbox, ys):
         if any(left < x < right for x in hard_xs):
@@ -340,15 +376,17 @@ def _rule_grid(layout: PageLayout, region: TableRegion, params: TableParams) -> 
             # up with it, so header placement is the only evidence needed.
             header_candidates.append(mid)
             continue
-        support = sum(1 for gaps in body_bands
-                      if any(abs(mid - gap[2]) <= 5.0 for gap in gaps))
-        if support >= max(1, int(len(body_bands) * 0.15)):
+        # Body gutters need not align with a header gap (body text widths
+        # differ), so accept the gap when no body text crosses it.
+        if _crossing_ratio(body_runs, mid)[0] < 0.4:
             header_candidates.append(mid)
 
     boundaries = sorted(set(hard_xs) | set(header_candidates))
     soft_xs: list[float] = []
-    for left, right, candidate in _projection_boundaries(
-            layout, bbox, ys, gap=params.cell_gap_pt):
+    internal_hard = [x for x in hard_xs if bbox[0] + TOL < x < bbox[2] - TOL]
+    for left, right, candidate in ([] if len(internal_hard) >= 2 else
+                                   _projection_boundaries(
+                                       layout, bbox, ys, gap=params.cell_gap_pt)):
         if any(left < x < right for x in hard_xs):
             continue                                   # the real rule is the edge
         below = [x for x in boundaries if x < candidate]

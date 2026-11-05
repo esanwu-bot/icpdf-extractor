@@ -46,6 +46,8 @@ class DetectedTable(BaseModel):
     title: str | None = None
     table_type: TableType = TableType.UNKNOWN
     headers: list[str] = Field(default_factory=list)
+    header_rows: int = Field(default=0, ge=0)
+    header_path: list[list[str]] = Field(default_factory=list)
     column_roles: list[str] = Field(default_factory=list)
     rows: list[DetectedRow] = Field(default_factory=list)
     detection_method: str = "text_alignment"
@@ -134,6 +136,8 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
             title=semantics.title,
             table_type=semantics.table_type,
             headers=semantics.headers,
+            header_rows=semantics.header_rows,
+            header_path=semantics.header_path,
             column_roles=[role.value for role in semantics.column_roles],
             rows=rows,
             detection_method=region.source,

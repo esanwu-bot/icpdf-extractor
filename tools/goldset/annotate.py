@@ -30,6 +30,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC_PATH = ROOT / "gold" / "spec.yaml"
 GOLD_DIR = ROOT / "gold"
 OVERLAY_DIR = GOLD_DIR / "overlays"
+INDEPENDENT_REVIEW_PATH = GOLD_DIR / "independent_review.json"
 BASELINE_TAG = "phase1.1-baseline"
 
 
@@ -61,15 +62,29 @@ def _header_labels(grid, header_rows: int) -> list[str]:
     return labels
 
 
-def _review_fields(item: dict, defaults: dict) -> tuple[str, dict]:
+def _load_independent_review() -> dict:
+    if not INDEPENDENT_REVIEW_PATH.exists():
+        return {"status": "pending", "items": {}}
+    return json.loads(INDEPENDENT_REVIEW_PATH.read_text(encoding="utf-8"))
+
+
+def _review_fields(item: dict, defaults: dict,
+                   independent: dict | None = None) -> tuple[str, dict]:
     review = {"annotator": defaults["annotator"], "reviewed_at": defaults["reviewed_at"],
               "method": defaults["review_method"],
               "status": "annotator_accepted", "independent_review": "pending"}
     review.update(item.get("review") or {})
+    entry = ((independent or {}).get("items") or {}).get(item["id"]) or {}
+    review["independent_review"] = entry.get("status", "pending")
+    if entry.get("note"):
+        review["independent_review_note"] = entry["note"]
+    if entry.get("evidence"):
+        review["independent_review_evidence"] = entry["evidence"]
     return item.get("verdict", defaults["default_verdict"]), review
 
 
-def _table_record(item: dict, pdf_meta: dict, defaults: dict) -> dict:
+def _table_record(item: dict, pdf_meta: dict, defaults: dict,
+                  independent: dict | None = None) -> dict:
     path = Path(pdf_meta["path"])
     with pymupdf.open(path) as doc:
         page = doc[item["page"] - 1]
@@ -91,7 +106,7 @@ def _table_record(item: dict, pdf_meta: dict, defaults: dict) -> dict:
         )
     n_columns = len(grid.xs) - 1
     n_rows = len(grid.ys) - 1
-    verdict, review = _review_fields(item, defaults)
+    verdict, review = _review_fields(item, defaults, independent)
     roles = list(item["column_roles"])
     if len(roles) != n_columns:
         raise ValueError(f"{item['id']}: {len(roles)} column_roles for {n_columns} columns")
@@ -144,8 +159,9 @@ def _table_record(item: dict, pdf_meta: dict, defaults: dict) -> dict:
     }
 
 
-def _negative_record(item: dict, pdf_meta: dict, defaults: dict) -> dict:
-    verdict, review = _review_fields(item, defaults)
+def _negative_record(item: dict, pdf_meta: dict, defaults: dict,
+                     independent: dict | None = None) -> dict:
+    verdict, review = _review_fields(item, defaults, independent)
     return {
         "schema_version": "gold-schema/v1",
         "annotation_version": item["_annotation_version"],
@@ -250,13 +266,14 @@ def main() -> int:
     GOLD_DIR.mkdir(parents=True, exist_ok=True)
     OVERLAY_DIR.mkdir(parents=True, exist_ok=True)
 
+    independent = _load_independent_review()
     records: list[dict] = []
     for item in spec["tables"]:
         item["_annotation_version"] = annotation_version
-        records.append(_table_record(item, pdfs[item["pdf"]], defaults))
+        records.append(_table_record(item, pdfs[item["pdf"]], defaults, independent))
     for item in spec["negatives"]:
         item["_annotation_version"] = annotation_version
-        records.append(_negative_record(item, pdfs[item["pdf"]], defaults))
+        records.append(_negative_record(item, pdfs[item["pdf"]], defaults, independent))
 
     with (GOLD_DIR / "gold_table_set.jsonl").open("w", encoding="utf-8", newline="\n") as handle:
         for record in records:
@@ -271,6 +288,22 @@ def main() -> int:
         ["git", "rev-list", "-n", "1", BASELINE_TAG], cwd=ROOT,
         capture_output=True, text=True, check=False,
     ).stdout.strip()
+    reviewed = [r["item_id"] for r in records
+                if r["review"].get("independent_review") not in (None, "pending")]
+    pending = [r["item_id"] for r in records
+               if r["review"].get("independent_review") in (None, "pending")]
+    independent_summary = {
+        "status": independent.get("status", "pending"),
+        "reviewer": independent.get("reviewer"),
+        "reviewed_at": independent.get("reviewed_at"),
+        "method": independent.get("method"),
+        "record": "gold/review_record.md",
+        "items_reviewed": len(reviewed),
+        "items_pending": len(pending),
+        "pending_items": pending,
+        "scope": independent.get("scope", {}),
+        "corrections": independent.get("corrections", []),
+    }
     manifest = {
         "schema_version": "gold-schema/v1",
         "annotation_version": annotation_version,
@@ -278,7 +311,7 @@ def main() -> int:
         "annotator": spec["annotator"],
         "reviewed_at": spec["reviewed_at"],
         "review_method": spec["review_method"],
-        "independent_review": "pending",
+        "independent_review": independent_summary,
         "baseline_tag": BASELINE_TAG,
         "baseline_commit": baseline_commit,
         "pdfs": {key: {"label": meta["label"], "path": meta["path"],

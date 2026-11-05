@@ -34,7 +34,7 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
                 extraction_method=ExtractionMethod.TABLE_DETECTOR,
                 raw_tokens=cell.text.split(),
             ))
-        rows.append(TableRow(row_id=row_id, cells=cells))
+        rows.append(TableRow(row_id=row_id, cells=cells, bbox=detected_row.bbox))
     return Table(
         table_id=table_id,
         document_id=document_id,
@@ -43,6 +43,8 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
         title=detected.title,
         table_type=detected.table_type,          # parser hypothesis only
         headers=detected.headers,
+        header_rows=detected.header_rows,
+        header_path=detected.header_path,
         rows=rows,
         detection_method=detected.detection_method,
         confidence=detected.confidence,

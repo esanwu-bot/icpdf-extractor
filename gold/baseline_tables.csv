@@ -1,4 +1,5 @@
 item_id,pdf_id,page,matched,prediction_id,iou,best_iou,gold_rows,pred_rows,gold_columns,pred_columns,gold_data_rows,overlapping_predictions,gold_table_type,pred_table_type,reconstruction_status
+ADC12DJ5200-P01-T01,adc12dj5200,1,False,,0.0,0.0484,2,,3,,1,0,ordering_information,,
 ADC12DJ5200-P39-T01,adc12dj5200,39,False,,0.0,0.3392,8,,7,,7,8,other,,
 ADC12DJ5200-P41-T01,adc12dj5200,41,True,p041-t01,0.8933,,6,7,4,4,5,1,other,unknown,partial
 ADC12DJ5200-P43-T01,adc12dj5200,43,True,p043-t01,0.7579,,3,3,3,3,2,1,other,unknown,reconstructed

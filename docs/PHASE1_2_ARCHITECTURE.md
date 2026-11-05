@@ -1,13 +1,15 @@
 # Phase 1.2 — Gold Set and five-layer detector
 
-Status: first refactor round complete; awaiting reviewer approval. Phase 2 (LLM)
-remains frozen.
+Status: second refactor round complete (gold review + header/role semantics);
+awaiting reviewer approval. Phase 2 (LLM) remains frozen.
 
 Baseline for every number in this document: commit
 `1d8c7220601db734b63437abd41c36739a42aa89` (tag `phase1.1-baseline`),
-evaluated on `gold/gold_table_set.jsonl` (annotation `gold-2026-11-05.1`).
-After numbers: `gold/after_report.json` (`after-5layer-v4`), same Gold Set.
-Delta: `gold/comparison.md`.
+evaluated on `gold/gold_table_set.jsonl` (annotation `gold-2026-11-06.1`,
+46 tables + 19 negatives, all independently reviewed).
+After numbers: `gold/after_report.json` (`after-5layer-v5`), same Gold Set.
+Delta and metric denominators: `gold/comparison.md`.
+Independent review: `gold/review_record.md` and `gold/independent_review.json`.
 
 ## Why
 
@@ -62,13 +64,27 @@ Merging:
 
 Layer 4 rules:
 
+- Header depth is inferred from evidence, not position: header vocabulary,
+  column canopies, ordinal rows (`OCTET | 0 | 1 | ...`), sparse lead rows above a
+  label row, tabular first rows, vertically merged cells (a label spanning rows
+  0-1), and a third row only when it is a real label row across at least half the
+  columns (pin counts), never a lone section banner.
 - A leading header row may be sparse (a canopy label above a wider label row);
   a second header row is accepted only when it is a label row — no cell longer
   than 40 characters and at least two header-vocabulary hits, or a merged cell.
   This separates "MIN/TYP/MAX" rows from data rows that merely contain a value.
+- Canopy labels propagate down a column only when the column has no lower label;
+  the leading row-header column is never overwritten by a device-list canopy.
+- Ordinal group headers (`0 1 2 3...` over register nibbles) are spread evenly
+  across the data columns instead of trusting inconsistent drawn spans.
 - Section rows ("OFFSET VOLTAGE") under the header are body rows.
 - Header roles are token-matched (`min`, `typ`, `max`, `unit`, `condition`,
-  `symbol`), so `administrator` no longer matches `min`.
+  `symbol`), so `administrator` no longer matches `min`. Limit words only name a
+  limit column in short labels (`MAX`, not `MAXIMUM SAMPLING RATE`); selector
+  labels (`MODE`, `CLOCK SOURCE`, `REFERENCE CLAUSE`, package options such as
+  `D (SOIC)`) are conditions; a leading column is a symbol unless it is a
+  part-number/address/bit/sample-code column or names a stimulus with a unit.
+  An unlabeled column left of the limit columns is a condition column.
 - `assess_region` keeps single-row tables and rejects a region only for
   structural evidence: no multi-column grid, no data row under the header,
   too few populated rows, numeric first row resembling a bit-field diagram,
@@ -76,7 +92,7 @@ Layer 4 rules:
 
 ## Gold Set
 
-- 45 tables and 19 negatives over LM358 (68 p), ADS1299 (84 p), ADC12DJ5200
+- 46 tables and 19 negatives over LM358 (68 p), ADS1299 (84 p), ADC12DJ5200
   (180 p); PDF SHA256 values are in `gold/manifest.json`.
 - Negatives cover prose, TOC, pin lists, chart annotations, revision history,
   timing diagrams, legal notices and bit-field diagrams.
@@ -84,6 +100,11 @@ Layer 4 rules:
   `tools/goldset/rules.py`; every accept/reject, merge, header depth, column role
   and cross-page relation is a human decision in `gold/spec.yaml`.
 - Visual proof for every item: `gold/overlays/*.png`, gallery `gold/review.html`.
+- **Independent review is complete**: all 46 tables and 19 negatives were
+  re-opened on the PDF (65/65 items reviewed, 0 pending). Two corrections were
+  applied (`ADC12DJ5200-P01-T01` added, `ADC12DJ5200-N01-P01-FEATURES` narrowed);
+  both sides of the comparison were re-run on the corrected set. Open gold
+  ambiguities are frozen and listed in `gold/review_record.md`.
 - Single-row tables are explicitly counted and kept in recall (`ADC12DJ5200-P47-T01`).
 
 ## Results on the same Gold Set
@@ -92,58 +113,63 @@ Table detection:
 
 | Metric | Baseline | After |
 | --- | --- | --- |
-| TP / FP / FN | 16 / 309 / 29 | 39 / 4 / 6 |
-| Precision / Recall / F1 | 0.0492 / 0.3556 / 0.0865 | 0.9070 / 0.8667 / 0.8864 |
-| Negative FP | 59 | 4 |
-| Out-of-scope predictions | 68 | 7 |
-| Mean predictions per gold table | 5.911 | 0.867 |
+| TP / FP / FN | 16 / 309 / 30 | 46 / 0 / 0 |
+| Precision / Recall / F1 | 0.0492 / 0.3478 / 0.0863 | 1.0000 / 1.0000 / 1.0000 |
+| Negative FP | 59 | 0 |
+| Out-of-scope predictions | 68 | 8 |
+| Mean predictions per gold table | 5.783 | 1.000 |
 
-Structure on the 39 matched tables:
+Structure on the 46 matched tables:
 
 | Metric | Baseline | After |
 | --- | --- | --- |
-| Row count exact | 5 / 16 | 38 / 39 |
-| Column count exact | 12 / 16 | 34 / 39 |
-| Row and column exact | 5 / 16 | 33 / 39 |
-| Header column accuracy | 0.0413 | 0.5932 |
-| Header tables exact | 1 | 20 |
-| Column-role accuracy | 0.0331 | 0.6398 |
-| Column-role tables exact | 0 | 12 |
-| Table-type accuracy | 0.0000 | 0.5128 |
+| Row count exact | 5 / 16 | 46 / 46 |
+| Column count exact | 12 / 16 | 44 / 46 |
+| Row and column exact | 5 / 16 | 44 / 46 |
+| Header row depth exact | 0 / 16 | 46 / 46 |
+| Header column accuracy (compact) | 1.0000 (1 table, 5 cols) | 1.0000 (44 tables, 287 cols) |
+| Header column accuracy (strict spacing) | 1.0000 (1 table, 5 cols) | 0.9582 (44 tables, 287 cols) |
+| Header tables exact | 1 / 1 comparable | 44 / 44 comparable |
+| Multi-layer header exact | 0 / 7 | 10 / 10 |
+| Header cell-text F1 | 1.0000 (5 cells) | 1.0000 (287 cells) |
+| Column-role accuracy | 0.8000 (5 cols) | 0.9897 (292 cols) |
+| Column-role tables exact | 0 | 41 |
+| Table-type accuracy | 0.0000 | 0.5870 |
 
-Cell-text F1 (0.8655 -> 0.8302) is computed over matched tables only; the two
-values cover 16 and 39 tables respectively and are not directly comparable.
-All other structure metrics use the same 45-table denominator.
+Cell-text F1 0.8655 -> 0.8889 is computed over matched tables only (16 vs 46),
+so it is not directly comparable. The baseline header/role accuracies rest on the
+single table that had a comparable header, so they must be read with their
+denominators; `gold/comparison.md` prints them explicitly.
 
 Physical chain unchanged: 60/60 sampled non-empty candidates across the three
 PDFs still contain rendered ink at 150 dpi.
 
 ## Remaining failures (documented, not hidden)
 
-- 6 false negatives: `ADC12DJ5200-P43-T01`, `ADC12DJ5200-P61-T02`,
-  `ADC12DJ5200-P78-T03`, `ADC12DJ5200-P78-T04`, `ADC12DJ5200-P79-T01`,
-  `ADS1299-P74-T01`. Five are continuation fragments without a closed rule
-  lattice; one is a table whose ruling stops before its last row band.
-- 4 negative false positives: three table-of-contents layouts (page 2 of LM358
-  and ADC12DJ5200, two regions) and one "features" prose page in ADC12DJ5200.
-  They are rule-backed layouts, so the region gate accepts them; distinguishing
-  a TOC from a table needs a semantic layer that this round deliberately does
-  not build.
-- Column count mismatches: `ADS1299-P70-T01` (-1, missing symbol column),
-  `ADS1299-P76-T01` (-2, ordering table whose wrapped header labels span two
-  visual columns), `LM358-P04-T01` (-1, partial sub-rule intentionally dropped),
-  `LM358-P11-T01` (+1, physical sub-rule inside TEST CONDITIONS that gold
-  annotates as one column), `LM358-P33-T01` (-4, rule-less ordering table).
-- Row count mismatch: `ADC12DJ5200-P47-T01` (+3, one annotated row is rendered
-  as several ruled bands).
+- Detection: 0 FP, 0 FN, 0 negative FP. Eight predictions remain out of scope
+  (page areas outside annotated regions); gold is page-sampled, so they are
+  reported but not scored.
+- Column count (2): `ADS1299-P70-T01` and `LM358-P04-T01` each miss one column
+  because gold splits the partial "Either input" band while the parser merges it.
+  The gold set is itself inconsistent here (`ADS1299-P37-T01` merges the band);
+  fixing it needs an annotation revision, not a parser change.
+- Column roles (3 of 292 columns wrong): `ADS1299-P27-T01` misses the
+  `CONFIG1.CLK_EN BIT` condition; `ADC12DJ5200-P46-T01` calls the leading SYSREF
+  bit-field column `symbol` where gold says `value`; `LM358-P04-T02` leaves its
+  blank condition column `unknown`. `ADS1299-P70-T01` / `LM358-P04-T01` role
+  differences are consequences of the column split.
+- Header labels: no compact mismatches. The strict-spacing variant differs on 12
+  columns of `ADC12DJ5200-P43-T01`, `ADC12DJ5200-P54-T01` and
+  `ADS1299-P17-T01/T02/T03` because extraction spaces `fCLK` as `f CLK` and
+  `µV` as `µ V`.
 
-`reconstructed` remains a status, not evidence: matched tables split 19
-`reconstructed` / 20 `partial`, and status does not affect the metrics above.
+`reconstructed` remains a status, not evidence: matched tables split 30
+`reconstructed` / 16 `partial`, and status does not affect the metrics above.
 
 ## Verification
 
 ```text
-python -m pytest -q            -> 48 passed
+python -m pytest -q                    -> 48 passed
 python -m tools.goldset.evaluate ...   -> gold/after_report.*
 python -m tools.goldset.compare ...    -> gold/comparison.md
 ```
