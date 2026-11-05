@@ -222,3 +222,38 @@ validation of candidate ownership + evidence alignment.
 - Tests: `python -m pytest -q` -> 48 passed.
 - Candidate Registry unchanged; no LLM, no DashScope, no automatic parameter
   generation. Not pushed to Codeup this round.
+
+---
+
+## Round 6 — Phase 1.3 evidence-chain slice (2026-11-06)
+
+**Status:** first Phase 1.3 slice complete; Phase 2 still frozen.
+
+- Evidence model: `Table.header_cells` records the printed header cell behind
+  every column/level label (id, level, column, bbox, page, source cell);
+  `Candidate.role_source` (`header_text` / `heuristic` / `fail_closed`) and
+  `Candidate.role_header_cell_id` record where a role came from.  All fields are
+  optional and did not change parser decisions.
+- New validator `tools/validate_evidence.py` resolves every candidate to
+  table/row/cell, checks box containment, page bounds, header path/refs, role
+  provenance, and manifest counts.  `--strict` fails on warnings.  Negative
+  tests cover missing/cross-table references, bbox mismatches and out-of-page
+  boxes, broken header paths, missing header cells and role conflicts.
+- Re-parsed the three reference PDFs into `runs/phase13_evidence` (ignored):
+  LM358 39 tables / 5,631 candidates / 272 header cells; ADS1299 56 / 2,651 /
+  354; ADC12DJ5200 301 / 9,328 / 1,609.  Validator: 0 errors, 0 warnings on all
+  three runs.
+- Regression: same gold evaluation gives TP/FP/FN 46/0/0, row exact 46/46,
+  column exact 44/46, header compact 1.0000, strict 0.9582, depth 46/46, role
+  0.9897.  No metric changed.
+- Gold version policy: `docs/GOLD_SPEC.md` defines `visual_boundary` vs
+  `logical_column`, partial condition bands, merged cells, unlabeled columns
+  and bit-field negatives.  `tools/goldset/freeze_version.py` snapshots
+  `spec.yaml` + derived files into `gold/versions/<annotation_version>/` and
+  refuses to overwrite.  `gold-2026-11-06.1` is frozen at source commit
+  `b8c2d3b`.
+- Tests: `python -m pytest -q` -> 63 passed.
+- Known gaps: cross-page continuation metadata is not yet in the run contract;
+  gold v2 is documented but not migrated; no untuned vendor PDF has been
+  annotated yet.  See `docs/PHASE1_3_EVIDENCE.md`.
+- Not pushed to Codeup; no LLM, DashScope or automatic parameter generation.

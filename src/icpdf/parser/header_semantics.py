@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass, field
 
 from icpdf.domain.candidate import ColumnRole
+from icpdf.domain.common import BBox
 from icpdf.domain.table import TableType
 from icpdf.parser.config import TableParams
 from icpdf.parser.layout import PageLayout
@@ -44,6 +45,18 @@ _TYPE_KEYWORDS: tuple[tuple[TableType, tuple[str, ...]], ...] = (
 
 
 @dataclass(frozen=True)
+class HeaderCellRef:
+    """One printed header cell behind one column label."""
+
+    level: int
+    column: int
+    text: str
+    bbox: BBox
+    source_row: int
+    source_column: int
+
+
+@dataclass(frozen=True)
 class HeaderSemantics:
     header_rows: int
     headers: list[str]
@@ -51,6 +64,7 @@ class HeaderSemantics:
     title: str | None
     table_type: TableType
     header_path: list[list[str]] = field(default_factory=list)
+    header_cells: list[HeaderCellRef] = field(default_factory=list)
 
 
 def _norm(text: str) -> str:
@@ -401,7 +415,7 @@ def _ordinal_group_labels(grid: TableGrid, row: int,
             for offset in range(width)}
 
 
-def _column_label_parts(grid: TableGrid, header_rows: int) -> list[list[str]]:
+def _header_label_rows(grid: TableGrid, header_rows: int) -> list[dict[int, str]]:
     raw = [_row_labels(grid, row) for row in range(header_rows)]
     # The leading column is the row-header column; a canopy over the data
     # columns (a device list, say) does not label it even when it is blank
@@ -428,6 +442,11 @@ def _column_label_parts(grid: TableGrid, header_rows: int) -> list[list[str]]:
             for column, text in _centered_group_labels(grid, row).items():
                 labels.setdefault(column, text)
         rows.append(labels)
+    return rows
+
+
+def _column_label_parts(grid: TableGrid, header_rows: int) -> list[list[str]]:
+    rows = _header_label_rows(grid, header_rows)
     paths: list[list[str]] = []
     for column in range(grid.n_columns):
         parts: list[str] = []
@@ -439,6 +458,47 @@ def _column_label_parts(grid: TableGrid, header_rows: int) -> list[list[str]]:
                 parts.append(text)
         paths.append(parts)
     return paths
+
+
+def _source_header_cell(grid: TableGrid, level: int, column: int,
+                        text: str) -> GridCell | None:
+    """Printed cell that carries ``text`` for ``column`` at ``level``.
+
+    Canopies and centred group labels can be spread beyond their drawn cell,
+    so a direct hit is preferred, then the nearest cell with the same text.
+    """
+    normalized = " ".join(text.split())
+    direct = [cell for cell in grid.cells
+              if cell.row <= level < cell.row + cell.row_span
+              and cell.column <= column < cell.column + cell.column_span
+              and " ".join(cell.text.split()) == normalized]
+    if direct:
+        return direct[0]
+    centre = (grid.xs[column] + grid.xs[column + 1]) / 2.0
+    best: tuple[float, GridCell] | None = None
+    for cell in grid.cells:
+        if cell.row != level or not cell.text.strip():
+            continue
+        if " ".join(cell.text.split()) != normalized:
+            continue
+        distance = abs((cell.bbox[0] + cell.bbox[2]) / 2.0 - centre)
+        if best is None or distance < best[0]:
+            best = (distance, cell)
+    return best[1] if best else None
+
+
+def _header_cell_refs(grid: TableGrid, rows: list[dict[int, str]]
+                      ) -> list[HeaderCellRef]:
+    refs: list[HeaderCellRef] = []
+    for level, labels in enumerate(rows):
+        for column, text in sorted(labels.items()):
+            cell = _source_header_cell(grid, level, column, text)
+            if cell is None:
+                continue
+            refs.append(HeaderCellRef(level=level, column=column, text=text,
+                                      bbox=cell.bbox, source_row=cell.row,
+                                      source_column=cell.column))
+    return refs
 
 
 def _column_labels(grid: TableGrid, header_rows: int) -> list[str]:
@@ -480,7 +540,9 @@ def infer_semantics(layout: PageLayout, region: TableRegion, grid: TableGrid,
                     params: TableParams | None = None) -> HeaderSemantics:
     params = params or TableParams()
     header_rows = _infer_header_rows(grid)
+    label_rows = _header_label_rows(grid, header_rows)
     header_path = _column_label_parts(grid, header_rows)
+    header_cells = _header_cell_refs(grid, label_rows)
     headers = [" | ".join(parts) for parts in header_path]
     roles = [role_for_header(label) for label in headers]
     if roles:
@@ -498,7 +560,8 @@ def infer_semantics(layout: PageLayout, region: TableRegion, grid: TableGrid,
         joined = " / ".join(label for label in headers if label)
         title = joined or None
     return HeaderSemantics(header_rows, headers, roles, title,
-                           _infer_type(title, headers), header_path)
+                           _infer_type(title, headers), header_path,
+                           header_cells)
 
 
 def assess_region(grid: TableGrid, semantics: HeaderSemantics,

@@ -1,0 +1,11 @@
+{
+  "annotation_version": "gold-2026-11-06.1",
+  "frozen_at": "2026-11-05T18:41:35+00:00",
+  "source_commit": "b8c2d3bdf7b1b0900c6ad2204400b80a32dfdead",
+  "files": {
+    "spec.yaml": "79a7fca23f0a727cd29c7769930893032ecd08be9d6790d8f487bbde420fa5c3",
+    "gold_table_set.jsonl": "d02224c41c3f346d3c1203c94ddab940d46338f637e9544c86f85a8d9c59418c",
+    "manifest.json": "67e64376410c7c3dbf1dabff20abe3fabe9e3aad4228637e528a27f9dc9449d2"
+  },
+  "note": "Immutable snapshot; corrections require a new annotation_version."
+}

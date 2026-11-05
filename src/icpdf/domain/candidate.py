@@ -60,6 +60,11 @@ class Candidate(BaseModel):
     normalized_value: str | None = None
     unit: str | None = None
     column_role: ColumnRole = ColumnRole.UNKNOWN
+    #: Where the role came from: printed header text, a documented heuristic,
+    #: or no evidence at all (fail-closed ``unknown``).
+    role_source: str = "unknown"
+    #: Header cell backing the role; None for unlabeled columns.
+    role_header_cell_id: str | None = None
     candidate_type: CandidateType = CandidateType.VALUE
     #: How this cell was obtained. `source_text_type` must never be upgraded
     #: silently: OCR text stays OCR text.

@@ -71,6 +71,24 @@ class TableRow(BaseModel):
         return self
 
 
+class HeaderCell(BaseModel):
+    """Printed cell that supplied one level of one column's header label.
+
+    Header labels are spread across merged canopies, so the same printed cell
+    can back several columns; the per-column reference keeps that visible.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    header_cell_id: NonEmptyStr
+    column_id: int = Field(ge=0)
+    level: int = Field(ge=0)
+    text: str
+    bbox: BBox
+    page_number: int = Field(ge=1)
+    source_cell_id: NonEmptyStr | None = None
+
+
 class Table(BaseModel):
     """A reconstructed table region.
 
@@ -95,6 +113,8 @@ class Table(BaseModel):
     header_rows: int = Field(default=0, ge=0)
     # Per column, the top-to-bottom header labels that produced ``headers``.
     header_path: list[list[str]] = Field(default_factory=list)
+    # Cell-level backing for ``header_path``; empty for headerless tables.
+    header_cells: list[HeaderCell] = Field(default_factory=list)
     rows: list[TableRow] = Field(default_factory=list)
     detection_method: NonEmptyStr
     confidence: float = Field(ge=0.0, le=1.0)
@@ -118,6 +138,17 @@ class Table(BaseModel):
                 cell_ids.add(cell.cell_id)
                 if not (self.page_number <= cell.page_number <= last_page):
                     raise ValueError("cell.page_number outside table page range")
+        header_ids: set[str] = set()
+        for header in self.header_cells:
+            if header.header_cell_id in header_ids:
+                raise ValueError("duplicate header_cell_id in table")
+            header_ids.add(header.header_cell_id)
+            if header.level >= self.header_rows:
+                raise ValueError("header cell level outside header_rows")
+            if self.headers and header.column_id >= len(self.headers):
+                raise ValueError("header cell column outside headers")
+            if not (self.page_number <= header.page_number <= last_page):
+                raise ValueError("header cell page outside table page range")
         if self.reconstruction_status is ReconstructionStatus.UNRESOLVED:
             if not self.uncertainty_reason:
                 raise ValueError("unresolved table must carry uncertainty_reason")

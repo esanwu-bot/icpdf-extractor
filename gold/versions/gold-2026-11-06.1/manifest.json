@@ -1,0 +1,97 @@
+{
+  "schema_version": "gold-schema/v1",
+  "annotation_version": "gold-2026-11-06.1",
+  "generated_at": "2026-11-05T18:22:01+00:00",
+  "annotator": "icpdf rule-lattice annotator + overlay inspection",
+  "reviewed_at": "2026-11-05",
+  "review_method": "every overlay checked for table/cell/header alignment; roles assigned from datasheet headings",
+  "independent_review": {
+    "status": "complete",
+    "reviewer": "independent second pass (fresh context, PDF-first; parser output not used to justify an annotation)",
+    "reviewed_at": "2026-11-06",
+    "method": "Every item was re-opened as a standalone crop of the source PDF before comparing against the annotation. Bbox, header depth, header text, column and row count, merges and roles were checked against the printed datasheet; parser output was consulted last, only to classify residual mismatches as gold ambiguity or parser gap.",
+    "record": "gold/review_record.md",
+    "items_reviewed": 65,
+    "items_pending": 0,
+    "pending_items": [],
+    "scope": {
+      "tables": 46,
+      "negatives": 19,
+      "baseline_false_negatives_reviewed": 30,
+      "baseline_true_positive_spot_checks": 16,
+      "baseline_in_scope_fp_reviewed": 309,
+      "baseline_negative_fp_reviewed": 59,
+      "column_count_mismatches": 2,
+      "role_mismatch_tables": 5,
+      "review_crops": "gold/review_crops/",
+      "overlays": "gold/overlays/"
+    },
+    "corrections": [
+      {
+        "item_id": "ADC12DJ5200-P01-T01",
+        "change": "added_table",
+        "from": "absent",
+        "to": "3 columns, 1 data row (Table 6-2 Package Information, p.1)",
+        "reason": "Missed in round-1 annotation; found while checking the p.1 false-positive regions."
+      },
+      {
+        "item_id": "ADC12DJ5200-N01-P01-FEATURES",
+        "change": "bbox_narrowed",
+        "from": [
+          54,
+          115,
+          560,
+          650
+        ],
+        "to": [
+          54,
+          115,
+          300,
+          660
+        ],
+        "reason": "The old box covered the p.1 ordering table that is now ADC12DJ5200-P01-T01."
+      }
+    ]
+  },
+  "baseline_tag": "phase1.1-baseline",
+  "baseline_commit": "1d8c7220601db734b63437abd41c36739a42aa89",
+  "pdfs": {
+    "lm358": {
+      "label": "LM358",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/LM358__lm358.pdf",
+      "sha256": "8277dff7b89138c63b3582d37f378065a1dea3cae5ed1e2926ddc2779eb7e3a2"
+    },
+    "ads1299": {
+      "label": "ADS1299",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/ADS1299IPAGR__ads1299.pdf",
+      "sha256": "9ef667389897f02dae8d94e8c3daecbe8cbd2ab45f4d62e1db1c474544180075"
+    },
+    "adc12dj5200": {
+      "label": "ADC12DJ5200",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/ADC12DJ5200SEAAV__adc12dj5200se.pdf",
+      "sha256": "398fd1f1adc1957236ec95b65b8a2ea0cebbedeb95327ba37261e1f9f5857a74"
+    }
+  },
+  "counts": {
+    "tables": 46,
+    "negatives": 19,
+    "negative_kinds": [
+      "bit_field_diagram",
+      "chart_annotations",
+      "legal_notice",
+      "pin_diagram",
+      "prose",
+      "revision_history",
+      "timing_diagram",
+      "toc"
+    ],
+    "tables_per_pdf": {
+      "lm358": 11,
+      "ads1299": 15,
+      "adc12dj5200": 20
+    }
+  },
+  "human_verdicts": {
+    "accepted": 65
+  }
+}

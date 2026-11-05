@@ -14,6 +14,7 @@ from .product import IdentityEvidence, IdentityScope, Product, ProductType
 from .table import (
     Cell,
     ExtractionMethod,
+    HeaderCell,
     ReconstructionStatus,
     Table,
     TableRow,
@@ -33,6 +34,7 @@ __all__ = [
     "ExtractionMethod",
     "FORMAL_STATUSES",
     "FormalParameterSet",
+    "HeaderCell",
     "IdentityEvidence",
     "IdentityScope",
     "Parameter",

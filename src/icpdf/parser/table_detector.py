@@ -37,6 +37,17 @@ class DetectedRow(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     bbox: BBox
     cells: list[DetectedCell]
+    grid_row: int = Field(default=0, ge=0)
+
+
+class DetectedHeaderCell(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    level: int = Field(ge=0)
+    column: int = Field(ge=0)
+    text: str
+    bbox: BBox
+    source_row: int = Field(ge=0)
+    source_column: int = Field(ge=0)
 
 
 class DetectedTable(BaseModel):
@@ -48,6 +59,7 @@ class DetectedTable(BaseModel):
     headers: list[str] = Field(default_factory=list)
     header_rows: int = Field(default=0, ge=0)
     header_path: list[list[str]] = Field(default_factory=list)
+    header_cells: list[DetectedHeaderCell] = Field(default_factory=list)
     column_roles: list[str] = Field(default_factory=list)
     rows: list[DetectedRow] = Field(default_factory=list)
     detection_method: str = "text_alignment"
@@ -124,7 +136,7 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
                 continue
             bbox = (min(cell.bbox[0] for cell in cells), min(cell.bbox[1] for cell in cells),
                     max(cell.bbox[2] for cell in cells), max(cell.bbox[3] for cell in cells))
-            rows.append(DetectedRow(bbox=bbox, cells=cells))
+            rows.append(DetectedRow(bbox=bbox, cells=cells, grid_row=row_index))
         if not rows:
             continue
 
@@ -138,6 +150,11 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
             headers=semantics.headers,
             header_rows=semantics.header_rows,
             header_path=semantics.header_path,
+            header_cells=[DetectedHeaderCell(
+                level=ref.level, column=ref.column, text=ref.text,
+                bbox=ref.bbox, source_row=ref.source_row,
+                source_column=ref.source_column)
+                for ref in semantics.header_cells],
             column_roles=[role.value for role in semantics.column_roles],
             rows=rows,
             detection_method=region.source,

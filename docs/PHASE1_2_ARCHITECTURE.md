@@ -1,7 +1,7 @@
 # Phase 1.2 — Gold Set and five-layer detector
 
-Status: second refactor round complete (gold review + header/role semantics);
-awaiting reviewer approval. Phase 2 (LLM) remains frozen.
+Status: Phase 1.2 round 2 approved by the reviewer.  Phase 1.3 evidence-chain
+work is in progress (`docs/PHASE1_3_EVIDENCE.md`); Phase 2 (LLM) remains frozen.
 
 Baseline for every number in this document: commit
 `1d8c7220601db734b63437abd41c36739a42aa89` (tag `phase1.1-baseline`),

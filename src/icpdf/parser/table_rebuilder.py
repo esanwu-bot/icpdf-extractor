@@ -5,6 +5,7 @@ from __future__ import annotations
 from icpdf.domain.table import (
     Cell,
     ExtractionMethod,
+    HeaderCell,
     ReconstructionStatus,
     Table,
     TableRow,
@@ -15,8 +16,10 @@ from icpdf.parser.table_detector import DetectedTable
 def build_table(detected: DetectedTable, document_id: str, table_index: int) -> Table:
     table_id = f"p{detected.page_number:03d}-t{table_index:02d}"
     rows: list[TableRow] = []
+    row_ids_by_grid_row: dict[int, str] = {}
     for row_index, detected_row in enumerate(detected.rows, 1):
         row_id = f"{table_id}-r{row_index:02d}"
+        row_ids_by_grid_row[detected_row.grid_row] = row_id
         cells: list[Cell] = []
         seen_columns: set[int] = set()
         for cell in detected_row.cells:
@@ -35,6 +38,19 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
                 raw_tokens=cell.text.split(),
             ))
         rows.append(TableRow(row_id=row_id, cells=cells, bbox=detected_row.bbox))
+    header_cells: list[HeaderCell] = []
+    for ref in detected.header_cells:
+        source_row_id = row_ids_by_grid_row.get(ref.source_row)
+        header_cells.append(HeaderCell(
+            header_cell_id=f"{table_id}-h{ref.level:02d}-c{ref.column:02d}",
+            column_id=ref.column,
+            level=ref.level,
+            text=ref.text,
+            bbox=ref.bbox,
+            page_number=detected.page_number,
+            source_cell_id=(f"{source_row_id}-c{ref.source_column:02d}"
+                            if source_row_id else None),
+        ))
     return Table(
         table_id=table_id,
         document_id=document_id,
@@ -45,6 +61,7 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
         headers=detected.headers,
         header_rows=detected.header_rows,
         header_path=detected.header_path,
+        header_cells=header_cells,
         rows=rows,
         detection_method=detected.detection_method,
         confidence=detected.confidence,
