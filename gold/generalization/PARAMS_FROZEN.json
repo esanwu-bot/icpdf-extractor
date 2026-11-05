@@ -1,0 +1,52 @@
+{
+  "freeze_version": "gen-2026-11-06.1",
+  "frozen_at": "2026-11-06T00:00:00Z",
+  "purpose": "Phase 1.3 cross-PDF generalization: parser parameters and source PDFs are frozen before any run on the new vendor documents.",
+  "parser_commit": "f8032cce69ef94e30dda41a92286d0a62678f070",
+  "parser_tag": "phase1.3-evidence-slice1",
+  "config": {
+    "path": "configs/parser.yaml",
+    "sha256": "ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c",
+    "values": {
+      "pdf.render_dpi": 150,
+      "pdf.text_min_chars": 1,
+      "tables.cell_gap_pt": 8.0,
+      "tables.row_gap_factor": 2.5,
+      "tables.column_tolerance": 2,
+      "tables.header_min_hits": 2,
+      "tables.max_title_chars": 120,
+      "tables.max_cell_chars": 80,
+      "tables.min_numeric_cells": 2,
+      "tables.rule_min_width_pt": 70.0,
+      "tables.rule_min_height_pt": 15.0,
+      "tables.alignment_min_rows": 3
+    }
+  },
+  "rule": "No threshold, keyword list or header heuristic may change between this freeze and the generalization report. Any tuning discovered from these PDFs invalidates the run and must be recorded as a separate, later round.",
+  "documents": [
+    {
+      "vendor": "Micrel",
+      "mpn": "MICRF103YM",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/DAC707KP-6__MICRF103YM-Micrel-datasheet-21204957.pdf",
+      "sha256": "670a1fab95cd96244b8c8d6009d4f99351bb3d44af59ba763d7b4a2a3aca6708",
+      "page_count": 7,
+      "text_layer": true
+    },
+    {
+      "vendor": "National Semiconductor / TI",
+      "mpn": "DS10CP152TMAX",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/DS10CP152TMAX_NOPB__ds10cp152.pdf",
+      "sha256": "14f395e46ca6a2a6fa87ae780172c5d2474dbcceaea2ac81b763f9852d30fb82",
+      "page_count": 17,
+      "text_layer": true
+    },
+    {
+      "vendor": "Cypress",
+      "mpn": "CY29FCT520ATSOCT",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/CY29FCT520ATSOCT__cy29fct520t.pdf",
+      "sha256": "5f374e762b0b32cca58fe4715c18be12134ba68d63c4ca6db5358a9ce380686c",
+      "page_count": 12,
+      "text_layer": true
+    }
+  ]
+}
