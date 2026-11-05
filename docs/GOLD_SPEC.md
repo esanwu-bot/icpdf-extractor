@@ -73,6 +73,13 @@ Rules:
   tables; the decision is recorded per sample with a `kind` and a short reason.
 - TOC pages, prose, pin diagrams, charts, timing diagrams, revision history and
   legal notices remain negative by default.
+- Schematics (`schematic`), package/mechanical drawings (`drawing`) and
+  application/layout diagrams (`layout`) are negative samples even when they
+  contain ruled boxes: a box holding a component label or a dimension is not a
+  table cell.
+- A negative that the parser flags is still a scored false positive.  Negative
+  bboxes are annotated tightly so the evaluator can attribute the hit to a
+  `negative_kind`.
 
 ## 7. Evidence obligations
 

@@ -15,6 +15,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import subprocess
@@ -24,7 +25,8 @@ from pathlib import Path
 import pymupdf
 import yaml
 
-from tools.goldset.rules import build_rule_grid, rule_components
+from tools.goldset.rules import (RuleComponent, Segment, build_rule_grid,
+                                 rule_components)
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC_PATH = ROOT / "gold" / "spec.yaml"
@@ -62,10 +64,10 @@ def _header_labels(grid, header_rows: int) -> list[str]:
     return labels
 
 
-def _load_independent_review() -> dict:
-    if not INDEPENDENT_REVIEW_PATH.exists():
+def _load_independent_review(path: Path = INDEPENDENT_REVIEW_PATH) -> dict:
+    if not path.exists():
         return {"status": "pending", "items": {}}
-    return json.loads(INDEPENDENT_REVIEW_PATH.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _review_fields(item: dict, defaults: dict,
@@ -83,23 +85,41 @@ def _review_fields(item: dict, defaults: dict,
     return item.get("verdict", defaults["default_verdict"]), review
 
 
+def _merge_components(components: list[RuleComponent]) -> RuleComponent:
+    horizontal: tuple[Segment, ...] = tuple(s for c in components for s in c.horizontal)
+    vertical: tuple[Segment, ...] = tuple(s for c in components for s in c.vertical)
+    bbox = (min(c.bbox[0] for c in components), min(c.bbox[1] for c in components),
+            max(c.bbox[2] for c in components), max(c.bbox[3] for c in components))
+    return RuleComponent(bbox, horizontal, vertical)
+
+
+def _resolve_component(components: list[RuleComponent], index_spec, item_id: str,
+                       page_number: int) -> RuleComponent:
+    indices = index_spec if isinstance(index_spec, list) else [index_spec]
+    indices = [int(i) for i in indices]
+    for index in indices:
+        if index >= len(components):
+            raise ValueError(f"{item_id}: component {index} not found on page "
+                             f"{page_number} ({len(components)} present)")
+    return _merge_components([components[i] for i in indices])
+
+
 def _table_record(item: dict, pdf_meta: dict, defaults: dict,
                   independent: dict | None = None) -> dict:
     path = Path(pdf_meta["path"])
     with pymupdf.open(path) as doc:
         page = doc[item["page"] - 1]
         components = rule_components(page)
-        index = int(item["component"])
-        if index >= len(components):
-            raise ValueError(f"{item['id']}: component {index} not found on page "
-                             f"{item['page']} ({len(components)} present)")
-        component = components[index]
+        component = _resolve_component(components, item["component"], item["id"],
+                                       item["page"])
         header_rows = int(item.get("header_rows", 1))
         grid = build_rule_grid(
             page,
             component,
             header_rows=header_rows,
             column_boundaries=item.get("column_boundaries"),
+            row_boundaries=item.get("row_boundaries"),
+            bbox=tuple(item["bbox"]) if item.get("bbox") else None,
             full_width_rows=set(item.get("full_width_rows") or []),
             merges=[tuple(m) for m in (item.get("merges") or [])],
             no_merge={tuple(m) for m in (item.get("no_merge") or [])},
@@ -142,7 +162,7 @@ def _table_record(item: dict, pdf_meta: dict, defaults: dict,
         "review": review,
         "notes": item.get("notes", ""),
         "table": {
-            "bbox": [round(v, 2) for v in component.bbox],
+            "bbox": [round(v, 2) for v in grid.bbox],
             "table_type": item["table_type"],
             "header_rows": header_rows,
             "n_rows": n_rows,
@@ -179,7 +199,8 @@ def _negative_record(item: dict, pdf_meta: dict, defaults: dict,
     }
 
 
-def _render_overlay(item: dict, record: dict, pdf_meta: dict) -> Path:
+def _render_overlay(item: dict, record: dict, pdf_meta: dict,
+                    overlay_dir: Path = OVERLAY_DIR) -> Path:
     path = Path(pdf_meta["path"])
     with pymupdf.open(path) as doc:
         page = doc[item["page"] - 1]
@@ -200,12 +221,12 @@ def _render_overlay(item: dict, record: dict, pdf_meta: dict) -> Path:
         page.insert_text((clip.x0 + 3, clip.y0 + 10), label, fontsize=7,
                          color=(0.0, 0.25, 1.0) if record["kind"] == "table" else (0.85, 0.0, 0.0))
         pix = page.get_pixmap(clip=clip, dpi=110)
-    target = OVERLAY_DIR / f"{record['item_id']}.png"
+    target = overlay_dir / f"{record['item_id']}.png"
     pix.save(str(target))
     return target
 
 
-def _write_gallery(records: list[dict]) -> None:
+def _write_gallery(records: list[dict], out_dir: Path = GOLD_DIR) -> None:
     rows = []
     for record in records:
         image = f"overlays/{record['item_id']}.png"
@@ -245,11 +266,20 @@ img{{max-width:100%;border:1px solid #99a;background:#fff}}
 <p>{len(records)} items · annotation {records[0]['annotation_version']} · overlays: blue = table bbox,
 green = body cell, orange = header cell, red dashed = negative region.</p>
 <table>{''.join(rows)}</table></body></html>"""
-    (GOLD_DIR / "review.html").write_text(html, encoding="utf-8")
+    (out_dir / "review.html").write_text(html, encoding="utf-8")
 
 
-def main() -> int:
-    spec = yaml.safe_load(SPEC_PATH.read_text(encoding="utf-8"))
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--spec", type=Path, default=SPEC_PATH)
+    parser.add_argument("--out-dir", type=Path, default=GOLD_DIR)
+    parser.add_argument("--overlay-dir", type=Path, default=None)
+    args = parser.parse_args(argv)
+    spec_path = args.spec
+    out_dir = args.out_dir
+    overlay_dir = args.overlay_dir or (out_dir / "overlays")
+    independent_path = out_dir / "independent_review.json"
+    spec = yaml.safe_load(spec_path.read_text(encoding="utf-8"))
     annotation_version = spec["annotation_version"]
     defaults = {
         "annotator": spec["annotator"],
@@ -263,10 +293,10 @@ def main() -> int:
         if actual != pdf_meta["sha256"]:
             raise SystemExit(f"SHA256 mismatch for {pdf_meta['path']}: {actual}")
 
-    GOLD_DIR.mkdir(parents=True, exist_ok=True)
-    OVERLAY_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    overlay_dir.mkdir(parents=True, exist_ok=True)
 
-    independent = _load_independent_review()
+    independent = _load_independent_review(independent_path)
     records: list[dict] = []
     for item in spec["tables"]:
         item["_annotation_version"] = annotation_version
@@ -275,14 +305,14 @@ def main() -> int:
         item["_annotation_version"] = annotation_version
         records.append(_negative_record(item, pdfs[item["pdf"]], defaults, independent))
 
-    with (GOLD_DIR / "gold_table_set.jsonl").open("w", encoding="utf-8", newline="\n") as handle:
+    with (out_dir / "gold_table_set.jsonl").open("w", encoding="utf-8", newline="\n") as handle:
         for record in records:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     for item, record in zip(spec["tables"] + spec["negatives"], records):
-        _render_overlay(item, record, pdfs[item["pdf"]])
+        _render_overlay(item, record, pdfs[item["pdf"]], overlay_dir)
 
-    _write_gallery(records)
+    _write_gallery(records, out_dir)
 
     baseline_commit = subprocess.run(
         ["git", "rev-list", "-n", "1", BASELINE_TAG], cwd=ROOT,
@@ -327,10 +357,10 @@ def main() -> int:
         "human_verdicts": {verdict: sum(1 for r in records if r["human_verdict"] == verdict)
                            for verdict in sorted({r["human_verdict"] for r in records})},
     }
-    (GOLD_DIR / "manifest.json").write_text(
+    (out_dir / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(manifest["counts"], ensure_ascii=False, indent=2))
-    print(f"wrote {len(records)} records, {len(records)} overlays, gold/review.html")
+    print(f"wrote {len(records)} records, {len(records)} overlays, {out_dir / 'review.html'}")
     return 0
 
 

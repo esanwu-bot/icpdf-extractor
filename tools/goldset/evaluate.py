@@ -44,6 +44,7 @@ COARSE_ROLE = {
     "name": "symbol",
     "signal": "symbol",
     "group": "symbol",
+    "unknown": "unknown",
 }
 BASELINE_ROLES = {"min", "typ", "max", "unit", "condition", "symbol", "value", "unknown"}
 CELL_SUFFIX = re.compile(r"-c(\d+)$")
@@ -913,9 +914,9 @@ def main() -> int:
     parser.add_argument("--gold", type=Path, default=ROOT / "gold" / "gold_table_set.jsonl")
     parser.add_argument("--run", type=Path, action="append", required=True)
     parser.add_argument("--label", default="baseline-1d8c722")
-    parser.add_argument("--out", type=Path, default=ROOT / "gold" / "baseline_report.md")
-    parser.add_argument("--json", type=Path, default=ROOT / "gold" / "baseline_report.json")
-    parser.add_argument("--csv", type=Path, default=ROOT / "gold" / "baseline_tables.csv")
+    parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--json", type=Path, default=None)
+    parser.add_argument("--csv", type=Path, default=None)
     args = parser.parse_args()
 
     gold_tables, negatives, gold_meta = _load_gold(args.gold)
@@ -937,10 +938,16 @@ def main() -> int:
     report["gold_counts"] = {"tables": len(gold_tables), "negatives": len(negatives),
                              "excluded": gold_meta["excluded"]}
 
-    args.json.parent.mkdir(parents=True, exist_ok=True)
-    args.json.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    _write_markdown(args.out, report)
-    _write_csv(args.csv, report["tables"])
+    if args.json:
+        args.json.parent.mkdir(parents=True, exist_ok=True)
+        args.json.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                             encoding="utf-8")
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        _write_markdown(args.out, report)
+    if args.csv:
+        args.csv.parent.mkdir(parents=True, exist_ok=True)
+        _write_csv(args.csv, report["tables"])
 
     overall = report["overall"]
     print(json.dumps({

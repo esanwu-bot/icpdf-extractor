@@ -253,12 +253,17 @@ def build_rule_grid(page: pymupdf.Page, component: RuleComponent,
                     full_width_rows: set[int] | None = None,
                     merges: list[tuple[int, int, int, int]] | None = None,
                     no_merge: set[tuple[int, int]] | None = None,
+                    row_boundaries: list[float] | None = None,
+                    bbox: tuple[float, float, float, float] | None = None,
                     tol: float = TOL) -> RuleGrid:
     all_xs = _unique([s.c for s in component.vertical if 4.0 <= s.length], tol)
     internal_xs = [x for x in all_xs
                    if component.bbox[0] + 3.0 < x < component.bbox[2] - 3.0]
-    ys = _unique([component.bbox[1], component.bbox[3]]
-                 + [s.c for s in component.horizontal if 2.0 <= s.length], tol)
+    if row_boundaries:
+        ys = _unique(list(row_boundaries), tol)
+    else:
+        ys = _unique([component.bbox[1], component.bbox[3]]
+                     + [s.c for s in component.horizontal if 2.0 <= s.length], tol)
     if column_boundaries:
         xs = _unique(list(column_boundaries), tol)
         use_rule_columns = False
@@ -271,6 +276,7 @@ def build_rule_grid(page: pymupdf.Page, component: RuleComponent,
     if len(xs) < 2 or len(ys) < 2:
         return RuleGrid(component.bbox, xs, ys)
 
+    grid_bbox = bbox or component.bbox
     nr, nc = len(ys) - 1, len(xs) - 1
     uf = _UnionFind(nr * nc)
     body_runs: dict[int, list[tuple[float, float]]] = {}
@@ -326,7 +332,7 @@ def build_rule_grid(page: pymupdf.Page, component: RuleComponent,
                               (xs[c0], ys[r0], xs[c1 + 1], ys[r1 + 1])))
     cells.sort(key=lambda c: (c.row, c.column))
 
-    grid = RuleGrid(component.bbox, xs, ys, cells)
+    grid = RuleGrid(grid_bbox, xs, ys, cells)
     _assign_words(page, grid)
     return grid
 

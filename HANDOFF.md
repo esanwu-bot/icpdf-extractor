@@ -257,3 +257,42 @@ validation of candidate ownership + evidence alignment.
   gold v2 is documented but not migrated; no untuned vendor PDF has been
   annotated yet.  See `docs/PHASE1_3_EVIDENCE.md`.
 - Not pushed to Codeup; no LLM, DashScope or automatic parameter generation.
+
+---
+
+## Round 7 — Phase 1.3 cross-PDF generalization (2026-11-06)
+
+**Status:** generalization slice complete; Phase 2 still frozen.
+
+- Freeze first: `gold/generalization/PARAMS_FROZEN.json` records parser commit
+  `f8032cc` (tag `phase1.3-evidence-slice1`), `configs/parser.yaml` SHA-256 and
+  the three document SHA-256 values, committed in `f77ccb1` before any run.
+  No parser parameter changed afterwards.
+- New documents (never used for tuning): Micrel MICRF103 (7p), TI DS10CP152
+  (17p), TI CY29FCT520T (12p).  Runs `runs/phase13_generalization/` are ignored:
+  6 / 13 / 14 tables, 1,201 candidates.  `validate_evidence --strict`: 0 errors,
+  0 warnings on all three.
+- Gold `gen-2026-11-06.1`: 19 tables + 8 negatives, built from the independent
+  rule lattice with explicit `column_boundaries`, `row_boundaries`, `bbox` and
+  header `merges`; every overlay checked.  Tooling gained multi-component merge
+  (`component: [...]`), bbox/row overrides and `--spec/--out-dir` so new gold
+  lives beside the Phase 1.2 set instead of overwriting it.
+- Results on the frozen parser: TP 18 / FP 9 / FN 1, P 0.6667, R 0.9474,
+  F1 0.7826; 6 negative FPs; 6 out-of-scope predictions.  Per PDF: MICRF
+  2/4/1, DS10 11/1/0, CY29 5/4/0.  Rows 18/18, columns 15/18, cell F1 0.8637,
+  header 92/92 compact and strict, depth 17/18, header-cell F1 0.9892,
+  multi-layer 4/4, role 0.8542, table type 0.6111.
+- Error families: rule-poor table boundary (MICRF103 p3), drawings as false
+  positives (pinout, pipeline, package, schematic, header band), sub-rules
+  promoted to columns, one invented header on a headerless list, and `unknown`
+  leading columns guessed as `symbol`.
+- `unknown` is no longer coerced to `value` by the evaluator; Phase 1.2 metrics
+  are unchanged (46/46, 0 FP, 46 rows, 44 columns, header 1.0000/0.9582, role
+  0.9897 against frozen gold `gold-2026-11-06.1`).
+- Evaluator fix: `--out` / `--json` / `--csv` no longer default to
+  `gold/baseline_*`.  Previously every ad-hoc run rewrote the frozen baseline
+  tables CSV; now outputs are written only when a path is passed.
+- Docs: `docs/PHASE1_3_GENERALIZATION.md`; `docs/GOLD_SPEC.md` now names
+  schematic/drawing/layout negatives; `gold/README.md` documents the
+  generalization set and the frozen-parameter rule.
+- Not pushed to Codeup; no LLM, DashScope or automatic parameter generation.
