@@ -14,16 +14,18 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from icpdf.domain.common import BBox
 from icpdf.domain.table import ReconstructionStatus, TableType
+from icpdf.parser.config import TableParams
 from icpdf.parser.text_blocks import TextBlock, TextLine
 
-#: Two words belong to different columns when the horizontal gap exceeds this.
+#: Fallback defaults; the effective values come from `configs/parser.yaml`.
 CELL_GAP_PT = 8.0
-#: A table ends when the vertical gap exceeds this many median line heights.
 ROW_GAP_FACTOR = 2.5
 
 _HEADER_WORDS = {
     "symbol", "parameter", "min", "minimum", "typ", "typical", "max", "maximum",
     "unit", "units", "condition", "conditions", "test", "value", "limit", "limits",
+    "device", "orderable", "package", "status", "description", "function",
+    "pin", "name", "type", "temperature",
 }
 
 _TYPE_KEYWORDS: tuple[tuple[TableType, tuple[str, ...]], ...] = (
@@ -62,11 +64,30 @@ class DetectedTable(BaseModel):
     uncertainty_reason: str | None = None
 
 
-def _split_cells(words: list) -> list[DetectedCell]:
+def _looks_numeric(text: str) -> bool:
+    token = text.strip()
+    return bool(token) and len(token) <= 24 and any(ch.isdigit() for ch in token)
+
+
+def _is_heading(text: str, max_chars: int) -> bool:
+    """Reject revision-history sentences and bullets masquerading as headings."""
+    token = text.strip()
+    if not token or len(token) > max_chars:
+        return False
+    if token.startswith(("•", "-", "(", "[", "*")):
+        return False
+    if token.endswith((".", "。", "!", "?")):
+        return False
+    if token.count(" ") > 12:
+        return False
+    return True
+
+
+def _split_cells(words: list, gap_pt: float = CELL_GAP_PT) -> list[DetectedCell]:
     words = sorted(words, key=lambda w: w.bbox[0])
     groups: list[list] = []
     for word in words:
-        if groups and word.bbox[0] - groups[-1][-1].bbox[2] <= CELL_GAP_PT:
+        if groups and word.bbox[0] - groups[-1][-1].bbox[2] <= gap_pt:
             groups[-1].append(word)
         else:
             groups.append([word])
@@ -112,7 +133,7 @@ def _median_line_height(lines: list[TextLine]) -> float:
     return statistics.median(heights) if heights else 10.0
 
 
-def _header_score(cells: list[DetectedCell]) -> int:
+def _header_score(cells: list[DetectedCell], min_hits: int = 2) -> int:
     hits = 0
     for cell in cells:
         token = cell.text.casefold().strip(" .:")
@@ -136,9 +157,9 @@ def _bbox_union(boxes: list[BBox]) -> BBox:
 
 def _can_extend(table_rows: list[DetectedRow], rows_box: BBox,
                 cells: list[DetectedCell], last_bottom: float,
-                median_h: float) -> bool:
+                median_h: float, params: TableParams) -> bool:
     modal = statistics.mode([len(r.cells) for r in table_rows]) if table_rows else len(cells)
-    if abs(len(cells) - modal) > 2 or len(cells) < 2:
+    if abs(len(cells) - modal) > params.column_tolerance or len(cells) < 2:
         return False
     row_box = (min(c.bbox[0] for c in cells), min(c.bbox[1] for c in cells),
                max(c.bbox[2] for c in cells), max(c.bbox[3] for c in cells))
@@ -146,10 +167,12 @@ def _can_extend(table_rows: list[DetectedRow], rows_box: BBox,
     if overlap <= 0:
         return False
     gap = row_box[1] - last_bottom
-    return gap <= ROW_GAP_FACTOR * median_h
+    return gap <= params.row_gap_factor * median_h
 
 
-def detect_tables(blocks: list[TextBlock], page_number: int) -> list[DetectedTable]:
+def detect_tables(blocks: list[TextBlock], page_number: int,
+                  params: TableParams | None = None) -> list[DetectedTable]:
+    params = params or TableParams()
     rows_words = _collect_rows(blocks)
     if not rows_words:
         return []
@@ -180,8 +203,15 @@ def detect_tables(blocks: list[TextBlock], page_number: int) -> list[DetectedTab
             reason = None
             confidence = 0.9
         header_row = current[0]
-        headers = [c.text for c in header_row.cells] if _header_score(header_row.cells) >= 2 else []
+        headers = ([c.text for c in header_row.cells]
+                   if _header_score(header_row.cells, params.header_min_hits) >= params.header_min_hits
+                   else [])
         rows = current[1:] if headers else current
+        numeric = sum(1 for r in rows for c in r.cells if _looks_numeric(c.text))
+        if not headers and numeric < params.min_numeric_cells:
+            current = []
+            pending_title = None
+            return
         title = pending_title
         if title is None and headers:
             title = " / ".join(headers)
@@ -199,19 +229,26 @@ def detect_tables(blocks: list[TextBlock], page_number: int) -> list[DetectedTab
         pending_title = None
 
     for words in rows_words:
-        cells = _split_cells(words)
+        cells = _split_cells(words, params.cell_gap_pt)
         line_bbox = (min(w.bbox[0] for w in words), min(w.bbox[1] for w in words),
                      max(w.bbox[2] for w in words), max(w.bbox[3] for w in words))
         line_text = " ".join(w.text for w in words).strip()
+        if any(len(c.text) > params.max_cell_chars for c in cells):
+            close_current()
+            pending_title = None
+            last_bottom = line_bbox[3]
+            continue
         if len(cells) < 2:
             close_current()
-            if line_text and len(line_text) <= 120:
+            if _is_heading(line_text, params.max_title_chars):
                 pending_title = line_text
+            else:
+                pending_title = None
             last_bottom = line_bbox[3]
             continue
         if current:
             rows_box = _bbox_union([r.bbox for r in current])
-            if not _can_extend(current, rows_box, cells, last_bottom, median_h):
+            if not _can_extend(current, rows_box, cells, last_bottom, median_h, params):
                 close_current()
         current.append(DetectedRow(
             bbox=(min(c.bbox[0] for c in cells), min(c.bbox[1] for c in cells),

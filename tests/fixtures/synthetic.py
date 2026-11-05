@@ -134,3 +134,16 @@ def multi_mpn(path: Path) -> Path:
     doc.save(str(path))
     doc.close()
     return path
+
+
+def marker_pdf(path: Path, *, rotation: int = 0,
+               crop: tuple[float, float, float, float] | None = None) -> Path:
+    """One MARKER text at unrotated (100, 100); optional CropBox/rotation."""
+    doc = fitz.open()
+    page = _new_page(doc, rotation=rotation)
+    if crop:
+        page.set_cropbox(fitz.Rect(*crop))
+    _write(page, 100, 100, "MARKER", size=12)
+    doc.save(str(path))
+    doc.close()
+    return path

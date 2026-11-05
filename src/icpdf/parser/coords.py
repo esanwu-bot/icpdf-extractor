@@ -80,3 +80,31 @@ class PageGeometry(BaseModel):
             max(self.rect[0], min(x1, self.rect[2])),
             max(self.rect[1], min(y1, self.rect[3])),
         )
+
+    def to_display_bbox(self, bbox: BBox) -> BBox:
+        """Convert PyMuPDF text bbox (unrotated user space) into page.rect space.
+
+        Empirically (PyMuPDF 2.0), `Page.get_text()` returns bboxes in the
+        **unrotated** PDF user space for every `/Rotate` value, and does not
+        subtract a non-zero CropBox origin. `page.rect` is post-crop/post-rotate.
+
+        Algorithm: subtract the CropBox origin, rotate by /Rotate into the
+        display rectangle, then rebase onto `page.rect` origin.
+        """
+        cx0, cy0, cx1, cy1 = self.cropbox
+        width, height = cx1 - cx0, cy1 - cy0
+        u0, v0 = bbox[0] - cx0, bbox[1] - cy0
+        u1, v1 = bbox[2] - cx0, bbox[3] - cy0
+        r = self.rotation % 360
+        if r == 0:
+            xs, ys = (u0, u1), (v0, v1)
+        elif r == 90:
+            xs, ys = (height - v1, height - v0), (u0, u1)
+        elif r == 180:
+            xs, ys = (width - u1, width - u0), (height - v1, height - v0)
+        else:                                                   # 270
+            xs, ys = (v0, v1), (width - u1, width - u0)
+        return self.clamp_bbox((
+            self.rect[0] + min(xs), self.rect[1] + min(ys),
+            self.rect[0] + max(xs), self.rect[1] + max(ys),
+        ))

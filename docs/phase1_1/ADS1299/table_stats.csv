@@ -1,0 +1,392 @@
+page,table_id,table_type,reconstruction_status,rows,cols_max,cols_min,candidates,confidence,bbox,title,uncertainty_reason,diagnostic_reason
+1,p001-t01,unknown,unresolved,1,5,5,5,0.0,"[318.0, 262.0199890136719, 557.7899780273438, 271.3999938964844]",,fewer than two rows; cannot prove a table,not_a_table
+1,p001-t02,unknown,reconstructed,2,8,8,16,0.9,"[54.0, 281.5199890136719, 557.8600463867188, 304.3999938964844]",devices can be cascaded in high channel count,,
+1,p001-t03,unknown,partial,3,5,2,10,0.5,"[54.0, 342.57598876953125, 548.3379516601562, 373.8999938964844]",,"ragged rows: column counts [3, 5, 2] vs modal 3",merged_cell_uncertain
+1,p001-t04,unknown,partial,15,6,2,57,0.5,"[54.0, 447.6199951171875, 558.010986328125, 614.2999877929688]",,"ragged rows: column counts [6, 4, 4, 3, 3, 3, 4, 4, 2, 3, 4, 5, 2, 6, 4] vs modal 4",merged_cell_uncertain
+2,p002-t01,unknown,partial,6,4,3,20,0.5,"[65.30000305175781, 96.1760025024414, 557.7960205078125, 165.88999938964844]",Table of Contents,"ragged rows: column counts [3, 4, 3, 3, 4, 3] vs modal 3",row_structure_uncertain
+2,p002-t02,absolute_maximum,partial,10,3,2,24,0.5,"[65.30000305175781, 192.77597045898438, 557.89599609375, 304.8800048828125]",Supplies ................................................................... 70,"ragged rows: column counts [2, 2, 3, 2, 2, 3, 2, 2, 3, 2, 3] vs modal 2",row_structure_uncertain
+5,p005-t01,unknown,reconstructed,4,6,6,24,0.9,"[75.30000305175781, 120.7759780883789, 549.1400146484375, 167.8800048828125]",,,
+5,p005-t02,unknown,partial,2,16,15,31,0.5,"[174.36148071289062, 261.70037841796875, 421.1794738769531, 306.46728515625]",RESERVED,"ragged rows: column counts [15, 16] vs modal 15",row_structure_uncertain
+5,p005-t03,unknown,reconstructed,16,3,3,48,0.9,"[130.05859375, 319.9301452636719, 482.47296142578125, 566.8768920898438]",,,
+5,p005-t04,unknown,unresolved,1,16,16,16,0.0,"[174.36148071289062, 579.0492553710938, 421.1794738769531, 586.8417358398438]",,fewer than two rows; cannot prove a table,not_a_table
+5,p005-t05,unknown,unresolved,1,14,14,14,0.0,"[175.4200897216797, 593.2266235351562, 422.2374572753906, 616.952880859375]",,fewer than two rows; cannot prove a table,not_a_table
+6,p006-t01,unknown,partial,3,4,3,10,0.5,"[57.0, 125.70398712158203, 508.5329284667969, 156.67001342773438]",AVDD,"ragged rows: column counts [3, 4, 3] vs modal 3",row_structure_uncertain
+6,p006-t02,unknown,partial,15,4,3,59,0.5,"[57.0, 162.3040313720703, 462.2298889160156, 339.70501708984375]",AVSS,"ragged rows: column counts [3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] vs modal 4",row_structure_uncertain
+6,p006-t03,unknown,unresolved,1,3,3,3,0.0,"[57.0, 349.3039855957031, 266.89398193359375, 355.8699951171875]",,fewer than two rows; cannot prove a table,not_a_table
+6,p006-t04,unknown,unresolved,1,3,3,3,0.0,"[57.0, 369.5039978027344, 266.89398193359375, 376.07000732421875]",,fewer than two rows; cannot prove a table,not_a_table
+6,p006-t05,unknown,unresolved,1,3,3,3,0.0,"[57.0, 389.7039794921875, 266.89398193359375, 396.2699890136719]",,fewer than two rows; cannot prove a table,not_a_table
+6,p006-t06,unknown,unresolved,1,3,3,3,0.0,"[57.0, 409.90399169921875, 266.89398193359375, 416.4700012207031]",,fewer than two rows; cannot prove a table,not_a_table
+6,p006-t07,unknown,reconstructed,23,4,4,92,0.9,"[57.0, 424.760009765625, 502.48895263671875, 701.0699462890625]",,,
+6,p006-t08,unknown,partial,2,3,2,5,0.5,"[54.0, 726.176025390625, 557.794189453125, 748.8800048828125]",,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+7,p007-t01,unknown,partial,5,4,2,18,0.5,"[57.0, 104.70398712158203, 493.076904296875, 160.10498046875]",,"ragged rows: column counts [2, 4, 4, 4, 4] vs modal 4",merged_cell_uncertain
+7,p007-t02,unknown,unresolved,1,3,3,3,0.0,"[57.0, 169.70399475097656, 259.5260009765625, 176.26998901367188]",,fewer than two rows; cannot prove a table,not_a_table
+7,p007-t03,unknown,partial,17,5,2,54,0.5,"[54.0, 185.9040069580078, 542.0480346679688, 416.260009765625]",,"ragged rows: column counts [4, 4, 4, 2, 2, 3, 3, 3, 3, 5, 3, 3, 3, 5, 2, 2, 3] vs modal 3",merged_cell_uncertain
+7,p007-t04,unknown,partial,3,4,2,8,0.5,"[57.0, 507.7319641113281, 540.5280151367188, 530.1799926757812]",VALUE / UNIT,"ragged rows: column counts [2, 2, 4, 2] vs modal 2",merged_cell_uncertain
+8,p008-t01,unknown,partial,3,6,5,17,0.5,"[96.5, 131.37600708007812, 530.927978515625, 165.27996826171875]",POWER SUPPLY,"ragged rows: column counts [6, 6, 5] vs modal 6",row_structure_uncertain
+8,p008-t02,unknown,partial,3,5,4,13,0.5,"[57.0, 250.77597045898438, 530.927978515625, 284.67999267578125]",VOLTAGE REFERENCE INPUTS,"ragged rows: column counts [5, 4, 4] vs modal 4",row_structure_uncertain
+8,p008-t03,unknown,unresolved,1,6,6,6,0.0,"[57.0, 303.57598876953125, 536.5399780273438, 312.260009765625]",CLOCK INPUT,fewer than two rows; cannot prove a table,not_a_table
+8,p008-t04,unknown,unresolved,1,4,4,4,0.0,"[96.5, 329.9759826660156, 530.927978515625, 337.47998046875]",DIGITAL INPUTS,fewer than two rows; cannot prove a table,not_a_table
+8,p008-t05,unknown,unresolved,1,5,5,5,0.0,"[57.0, 356.3760070800781, 532.7760009765625, 365.0600280761719]",TEMPERATURE RANGE,fewer than two rows; cannot prove a table,not_a_table
+8,p008-t06,thermal,reconstructed,6,4,4,24,0.9,"[57.0, 435.6759948730469, 542.1360473632812, 510.3900146484375]",64 PINS,,
+9,p009-t01,unknown,partial,3,3,2,8,0.5,"[91.9000015258789, 151.10401916503906, 537.1539916992188, 183.47000122070312]",ANALOG INPUTS,"ragged rows: column counts [3, 2, 3] vs modal 3",row_structure_uncertain
+9,p009-t02,unknown,partial,2,3,2,5,0.5,"[57.0, 240.3040313720703, 462.6539611816406, 259.0699768066406]",PGA PERFORMANCE,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+9,p009-t03,unknown,unresolved,1,6,6,6,0.0,"[57.0, 289.10400390625, 539.885986328125, 297.07000732421875]",,fewer than two rows; cannot prove a table,not_a_table
+9,p009-t04,unknown,reconstructed,2,2,2,4,0.9,"[221.60000610351562, 329.7039794921875, 540.3600463867188, 341.66998291015625]","250 points, 1 second of data, gain = 24,",,
+9,p009-t05,unknown,unresolved,1,2,2,2,0.0,"[451.20001220703125, 349.90399169921875, 504.9230041503906, 356.4700012207031]","250 points, 1 second of data, gain = 24,",fewer than two rows; cannot prove a table,not_a_table
+9,p009-t06,unknown,partial,6,5,3,23,0.5,"[57.0, 378.3039855957031, 545.4819946289062, 445.8699951171875]",,"ragged rows: column counts [5, 3, 3, 5, 4, 3] vs modal 3",merged_cell_uncertain
+9,p009-t07,unknown,partial,5,6,4,25,0.5,"[57.0, 462.3599853515625, 537.1539916992188, 520.0499877929688]",AC CHANNEL PERFORMANCE,"ragged rows: column counts [6, 5, 4, 5, 5] vs modal 5",merged_cell_uncertain
+9,p009-t08,unknown,partial,7,5,3,27,0.5,"[57.0, 536.9039916992188, 542.5049438476562, 616.7050170898438]",PATIENT BIAS AMPLIFIER,"ragged rows: column counts [4, 4, 4, 5, 4, 3, 3] vs modal 4",merged_cell_uncertain
+10,p010-t01,unknown,partial,3,3,2,7,0.5,"[91.9000015258789, 163.5039825439453, 537.1539916992188, 194.47000122070312]",Continuous,"ragged rows: column counts [3, 2, 2] vs modal 2",row_structure_uncertain
+10,p010-t02,unknown,unresolved,1,2,2,2,0.0,"[221.60000610351562, 200.10401916503906, 455.083984375, 206.67001342773438]",nA,fewer than two rows; cannot prove a table,not_a_table
+10,p010-t03,unknown,unresolved,1,2,2,2,0.0,"[221.60000610351562, 212.3040313720703, 455.0920104980469, 218.87002563476562]",Current,fewer than two rows; cannot prove a table,not_a_table
+10,p010-t04,unknown,partial,3,3,2,7,0.5,"[91.9000015258789, 224.5039825439453, 538.1929931640625, 255.47000122070312]",μ A,"ragged rows: column counts [2, 2, 3] vs modal 2",row_structure_uncertain
+10,p010-t05,unknown,partial,4,4,2,13,0.5,"[57.0, 297.7039794921875, 544.5540161132812, 340.8699951171875]",INTERNAL REFERENCE,"ragged rows: column counts [4, 2, 4, 3] vs modal 4",merged_cell_uncertain
+10,p010-t06,unknown,partial,2,3,2,5,0.5,"[156.8000030517578, 370.90399169921875, 537.531005859375, 389.6700134277344]",Reading error,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+10,p010-t07,unknown,partial,5,5,3,21,0.5,"[91.9000015258789, 395.3039855957031, 541.9539794921875, 451.6700134277344]",Device wake up,"ragged rows: column counts [3, 5, 4, 4, 5] vs modal 5",merged_cell_uncertain
+10,p010-t08,unknown,partial,2,4,2,6,0.5,"[91.9000015258789, 481.7039794921875, 540.0850219726562, 501.8699951171875]",CLOCK,"ragged rows: column counts [4, 2] vs modal 4",merged_cell_uncertain
+10,p010-t09,unknown,partial,3,3,2,8,0.5,"[91.9000015258789, 506.10400390625, 538.0010375976562, 537.10498046875]",Internal clock accuracy,"ragged rows: column counts [2, 3, 3] vs modal 3",row_structure_uncertain
+10,p010-t10,unknown,reconstructed,5,5,5,25,0.9,"[57.0, 554.9039916992188, 537.06201171875, 611.25]",DIGITAL INPUT/OUTPUT (DVDD = 1.8 V to 3.6 V),,
+11,p011-t01,unknown,unresolved,1,2,2,2,0.0,"[156.8000030517578, 155.5039825439453, 455.0149841308594, 162.06997680664062]",SUPPLY CURRENT (Bias Turned Off),fewer than two rows; cannot prove a table,not_a_table
+11,p011-t02,unknown,unresolved,1,6,6,6,0.0,"[57.0, 167.70399475097656, 538.1929931640625, 175.25001525878906]",,fewer than two rows; cannot prove a table,not_a_table
+11,p011-t03,unknown,partial,8,3,2,19,0.5,"[57.0, 179.9040069580078, 538.1929931640625, 259.6700134277344]",,"ragged rows: column counts [2, 2, 3, 2, 3, 2, 3, 2] vs modal 2",row_structure_uncertain
+11,p011-t04,unknown,partial,9,5,3,34,0.5,"[91.9000015258789, 277.5039978027344, 539.1320190429688, 381.6700134277344]","POWER DISSIPATION (Analog Supply = 5 V, Bias Amplifiers Turned Off)","ragged rows: column counts [4, 4, 3, 4, 5, 3, 4, 4, 3] vs modal 4",merged_cell_uncertain
+12,p012-t01,unknown,unresolved,1,2,2,2,0.0,"[337.1000061035156, 104.97599029541016, 506.5379943847656, 112.47998809814453]",over operating ambient temperature range (unless otherwise noted),fewer than two rows; cannot prove a table,not_a_table
+12,p012-t02,unknown,partial,11,7,5,57,0.5,"[57.0, 131.37600708007812, 542.1639404296875, 272.05999755859375]",MIN / MAX / MIN / MAX / UNIT,"ragged rows: column counts [5, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] vs modal 5",merged_cell_uncertain
+12,p012-t03,unknown,unresolved,1,2,2,2,0.0,"[337.1000061035156, 317.6759948730469, 506.5379943847656, 325.17999267578125]",over operating ambient temperature range (unless otherwise noted),fewer than two rows; cannot prove a table,not_a_table
+12,p012-t04,unknown,reconstructed,4,5,5,20,0.9,"[57.0, 344.07598876953125, 539.447998046875, 392.3600158691406]",PARAMETER,,
+12,p012-t05,unknown,unresolved,1,9,9,9,0.0,"[111.71405792236328, 471.2552490234375, 441.2621765136719, 477.8032531738281]",,fewer than two rows; cannot prove a table,not_a_table
+12,p012-t06,unknown,partial,2,3,2,5,0.5,"[127.80741882324219, 596.1310424804688, 436.776611328125, 617.08544921875]",Figure 1. Serial Interface Timing,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+12,p012-t07,unknown,unresolved,1,8,8,8,0.0,"[140.7406005859375, 632.2930908203125, 450.3449401855469, 639.2459716796875]",,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t01,unknown,partial,2,3,2,5,0.5,"[90.05787658691406, 125.35301971435547, 534.914306640625, 147.11911010742188]","MHz, data rate = 250 SPS, and gain = 12 (unless otherwise noted)","ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+13,p013-t02,unknown,partial,3,3,2,7,0.5,"[73.86821746826172, 151.9535369873047, 351.58880615234375, 231.98391723632812]",0.2,"ragged rows: column counts [2, 3, 2] vs modal 2",row_structure_uncertain
+13,p013-t03,unknown,reconstructed,2,2,2,4,0.9,"[86.05313110351562, 234.0513153076172, 351.58880615234375, 258.8929748535156]",−0.3,,
+13,p013-t04,unknown,unresolved,1,11,11,11,0.0,"[101.91519165039062, 254.76611328125, 451.41534423828125, 264.1884765625]",,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t05,unknown,partial,5,4,2,12,0.5,"[84.14662170410156, 275.2157897949219, 547.9267578125, 348.2482604980469]",G003,"ragged rows: column counts [2, 2, 2, 2, 4] vs modal 2",merged_cell_uncertain
+13,p013-t06,unknown,reconstructed,2,3,3,6,0.9,"[72.46769714355469, 343.3155822753906, 351.5898742675781, 426.40936279296875]",−115,,
+13,p013-t07,unknown,unresolved,1,3,3,3,0.0,"[84.14662170410156, 407.38250732421875, 351.5898742675781, 420.2336730957031]",Gain = 4,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t08,unknown,unresolved,1,3,3,3,0.0,"[84.14662170410156, 424.52655029296875, 351.5896911621094, 435.663330078125]",Gain = 8,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t09,unknown,unresolved,1,2,2,2,0.0,"[84.14662170410156, 441.6606140136719, 351.5894775390625, 451.0829772949219]",Gain = 24,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t10,unknown,unresolved,1,14,14,14,0.0,"[100.00868225097656, 447.6661376953125, 539.9058837890625, 457.0885009765625]",,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t11,unknown,partial,12,4,2,30,0.5,"[72.46769714355469, 456.1302490234375, 547.933837890625, 618.89453125]",,"ragged rows: column counts [4, 2, 2, 3, 4, 2, 2, 2, 2, 2, 2, 3] vs modal 2",merged_cell_uncertain
+13,p013-t12,unknown,unresolved,1,2,2,2,0.0,"[95.77664947509766, 621.8606567382812, 351.5896911621094, 631.2830200195312]",Data Rate = 250 SPS to 8 kSPS,fewer than two rows; cannot prove a table,not_a_table
+13,p013-t13,unknown,partial,2,5,4,9,0.5,"[98.00654602050781, 627.8661499023438, 547.933837890625, 647.5188598632812]",,"ragged rows: column counts [5, 4] vs modal 5",row_structure_uncertain
+14,p014-t01,unknown,partial,11,4,2,33,0.5,"[72.46769714355469, 116.35285186767578, 506.0798034667969, 229.06967163085938]","MHz, data rate = 250 SPS, and gain = 12 (unless otherwise noted)","ragged rows: column counts [2, 4, 4, 4, 3, 4, 2, 4, 2, 2, 2] vs modal 2",merged_cell_uncertain
+14,p014-t02,unknown,reconstructed,2,2,2,4,0.9,"[84.14662170410156, 226.0553436279297, 351.58978271484375, 249.18296813964844]",−6,,
+14,p014-t03,unknown,unresolved,1,10,10,10,0.0,"[100.00868225097656, 245.76593017578125, 539.9057006835938, 255.18849182128906]",,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t04,unknown,partial,6,4,2,16,0.5,"[95.77664184570312, 254.23004150390625, 547.933837890625, 333.4058837890625]",,"ragged rows: column counts [4, 2, 2, 2, 3, 3] vs modal 2",merged_cell_uncertain
+14,p014-t05,unknown,partial,7,3,2,16,0.5,"[72.46769714355469, 321.8142395019531, 351.5899658203125, 415.6777038574219]",Data Rate = 500 SPS,"ragged rows: column counts [2, 2, 2, 2, 2, 3, 3] vs modal 2",row_structure_uncertain
+14,p014-t06,unknown,unresolved,1,2,2,2,0.0,"[87.95925903320312, 419.9606018066406, 351.5899658203125, 429.3829650878906]",+85°C,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t07,unknown,unresolved,1,13,13,13,0.0,"[99.91264343261719, 425.96612548828125, 543.7188720703125, 435.38848876953125]",,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t08,unknown,partial,3,4,2,8,0.5,"[95.77664184570312, 434.43023681640625, 547.933837890625, 486.1754150390625]",,"ragged rows: column counts [4, 2, 2] vs modal 2",merged_cell_uncertain
+14,p014-t09,unknown,reconstructed,2,2,2,4,0.9,"[87.95925903320312, 490.4682922363281, 351.5898742675781, 510.86273193359375]",PGA Gain = 12,,
+14,p014-t10,unknown,unresolved,1,2,2,2,0.0,"[87.95925903320312, 517.8887939453125, 351.5898742675781, 527.3111572265625]",Data Rate = 16 kSPS,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t11,unknown,unresolved,1,2,2,2,0.0,"[84.14662170410156, 559.02490234375, 351.5898742675781, 568.447265625]",−100,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t12,unknown,unresolved,1,2,2,2,0.0,"[84.14662170410156, 600.16064453125, 351.5894775390625, 609.5830078125]",−160,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t13,unknown,unresolved,1,8,8,8,0.0,"[101.91521453857422, 606.1661376953125, 541.81201171875, 615.5885009765625]",,fewer than two rows; cannot prove a table,not_a_table
+14,p014-t14,unknown,partial,2,4,2,6,0.5,"[126.4000015258789, 614.6302490234375, 547.933837890625, 653.8800048828125]",,"ragged rows: column counts [4, 2] vs modal 4",merged_cell_uncertain
+15,p015-t01,unknown,reconstructed,4,2,2,8,0.9,"[84.88872528076172, 118.6464614868164, 454.524169921875, 160.61300659179688]","MHz, data rate = 250 SPS, and gain = 12 (unless otherwise noted)",,
+15,p015-t02,unknown,unresolved,1,22,22,22,0.0,"[104.22895050048828, 250.77706909179688, 532.1407470703125, 264.2063293457031]",0,fewer than two rows; cannot prove a table,not_a_table
+15,p015-t03,unknown,partial,2,4,2,6,0.5,"[108.9000015258789, 271.8123474121094, 542.5280151367188, 309.5799865722656]",,"ragged rows: column counts [4, 2] vs modal 4",merged_cell_uncertain
+16,p016-t01,unknown,reconstructed,3,2,2,6,0.9,"[54.0, 55.70398712158203, 557.5894165039062, 109.21002197265625]","ADS1299 ,  ADS1299-4 ,  ADS1299-6",,
+16,p016-t02,unknown,partial,3,3,2,8,0.5,"[53.185882568359375, 330.52337646484375, 557.998046875, 362.59002685546875]",defined as in  Equation 1 :,"ragged rows: column counts [3, 2, 3] vs modal 3",row_structure_uncertain
+16,p016-t03,unknown,reconstructed,2,2,2,4,0.9,"[275.1000061035156, 472.9319763183594, 480.5260009765625, 485.55999755859375]",5-V Analog Supply and 4.5-V Reference (1),,
+16,p016-t04,unknown,partial,2,7,6,13,0.5,"[60.0, 491.1319885253906, 514.1459350585938, 503.760009765625]",,"ragged rows: column counts [6, 7] vs modal 6",row_structure_uncertain
+16,p016-t05,unknown,reconstructed,9,13,13,117,0.9,"[61.79999923706055, 505.1319885253906, 548.5219116210938, 600.3599853515625]",,,
+17,p017-t01,unknown,reconstructed,2,2,2,4,0.9,"[275.1000061035156, 102.43199157714844, 480.5260009765625, 115.05998992919922]",5-V Analog Supply and 4.5-V Reference,,
+17,p017-t02,unknown,partial,2,7,6,13,0.5,"[60.0, 120.63200378417969, 514.1459350585938, 133.25999450683594]",,"ragged rows: column counts [6, 7] vs modal 6",row_structure_uncertain
+17,p017-t03,unknown,reconstructed,9,13,13,117,0.9,"[61.79999923706055, 134.6320037841797, 548.5219116210938, 229.85997009277344]",,,
+17,p017-t04,unknown,reconstructed,2,2,2,4,0.9,"[275.1000061035156, 287.531982421875, 482.2619934082031, 300.1600036621094]",5-V Analog Supply and 4.5-V Reference,,
+17,p017-t05,unknown,partial,2,7,6,13,0.5,"[60.0, 305.73199462890625, 514.1459350585938, 318.3600158691406]",,"ragged rows: column counts [6, 7] vs modal 6",row_structure_uncertain
+17,p017-t06,unknown,reconstructed,9,13,13,117,0.9,"[61.79999923706055, 319.73199462890625, 548.5219116210938, 414.96002197265625]",,,
+17,p017-t07,unknown,reconstructed,9,8,8,72,0.9,"[74.5999984741211, 497.8320007324219, 538.3218994140625, 593.0599975585938]",,,
+18,p018-t01,unknown,reconstructed,3,2,2,6,0.9,"[54.0, 55.70398712158203, 557.5894165039062, 112.30999755859375]","ADS1299 ,  ADS1299-4 ,  ADS1299-6",,
+19,p019-t01,unknown,reconstructed,4,2,2,8,0.9,"[78.03575134277344, 175.70616149902344, 550.5405883789062, 211.44973754882812]",,,
+19,p019-t02,unknown,reconstructed,2,2,2,4,0.9,"[233.78468322753906, 239.5043182373047, 402.2075500488281, 253.26649475097656]",IN2P,,
+19,p019-t03,unknown,reconstructed,2,2,2,4,0.9,"[233.78468322753906, 292.095947265625, 402.2075500488281, 305.8581237792969]",IN3P,,
+19,p019-t04,unknown,partial,2,4,3,7,0.5,"[197.11598205566406, 344.6868591308594, 544.5135498046875, 358.44903564453125]",IN4P,"ragged rows: column counts [4, 3] vs modal 4",row_structure_uncertain
+19,p019-t05,unknown,reconstructed,2,3,3,6,0.9,"[233.78468322753906, 396.0491943359375, 552.1076049804688, 412.0715637207031]",IN5P,,
+19,p019-t06,unknown,reconstructed,2,2,2,4,0.9,"[233.78468322753906, 449.8672180175781, 402.16729736328125, 463.62939453125]",IN6P,,
+19,p019-t07,unknown,reconstructed,2,2,2,4,0.9,"[233.78468322753906, 502.4574279785156, 402.1776123046875, 516.2196044921875]",IN7P,,
+19,p019-t08,unknown,reconstructed,3,2,2,6,0.9,"[78.89215087890625, 544.0321044921875, 552.9994506835938, 568.809814453125]",ADS1299 Only,,
+19,p019-t09,unknown,partial,2,4,3,7,0.5,"[123.97775268554688, 660.7044677734375, 504.2271423339844, 683.9974365234375]",Amplifier,"ragged rows: column counts [4, 3] vs modal 4",row_structure_uncertain
+20,p020-t01,unknown,reconstructed,2,2,2,4,0.9,"[54.0, 175.42001342773438, 184.42002868652344, 206.69998168945312]",,,
+20,p020-t02,unknown,partial,7,3,2,16,0.5,"[53.416778564453125, 465.27392578125, 550.2459106445312, 542.3077392578125]",MUX[2:0] = 110,"ragged rows: column counts [2, 3, 2, 2, 2, 2, 3] vs modal 2",row_structure_uncertain
+20,p020-t03,unknown,reconstructed,4,2,2,8,0.9,"[161.71556091308594, 541.2774047851562, 341.65203857421875, 591.694091796875]",,,
+20,p020-t04,unknown,partial,1,4,4,4,0.5,"[82.97943878173828, 635.6729736328125, 421.72265625, 644.732666015625]",MUX[2:0] = 101,"ragged rows: column counts [2, 4] vs modal 2",not_a_table
+21,p021-t01,unknown,unresolved,1,2,2,2,0.0,"[232.6925048828125, 447.4325866699219, 312.9647521972656, 454.0613708496094]",AVDD,fewer than two rows; cannot prove a table,not_a_table
+21,p021-t02,unknown,unresolved,1,2,2,2,0.0,"[236.71478271484375, 495.31536865234375, 309.49755859375, 502.0140686035156]",To  MUX TempN,fewer than two rows; cannot prove a table,not_a_table
+21,p021-t03,unknown,unresolved,1,15,15,15,0.0,"[54.0, 584.219970703125, 556.4199829101562, 593.5999755859375]",,fewer than two rows; cannot prove a table,not_a_table
+23,p023-t01,unknown,reconstructed,8,2,2,16,0.9,"[207.5, 354.07598876953125, 390.8919982910156, 453.97998046875]",NOMINAL BANDWIDTH AT ROOM,,
+23,p023-t02,unknown,partial,1,3,3,3,0.5,"[78.051025390625, 646.094482421875, 450.9622497558594, 661.1243896484375]",described in  Equation 4 :,"ragged rows: column counts [2, 3] vs modal 2",not_a_table
+23,p023-t03,unknown,unresolved,1,6,6,6,0.0,"[153.04701232910156, 655.943603515625, 450.9622497558594, 667.4017333984375]",,fewer than two rows; cannot prove a table,not_a_table
+23,p023-t04,unknown,partial,2,3,2,5,0.5,"[54.0, 710.8199462890625, 557.9959716796875, 748.8800048828125]",V MAX_DIFF = maximum differential signal at the PGA input,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+24,p024-t01,unknown,partial,4,3,2,9,0.5,"[54.0, 164.39508056640625, 557.998046875, 209.43499755859375]",,"ragged rows: column counts [2, 2, 3, 2] vs modal 2",row_structure_uncertain
+24,p024-t02,unknown,partial,2,4,2,6,0.5,"[219.4835662841797, 420.1750183105469, 424.34100341796875, 440.4949645996094]",−160,"ragged rows: column counts [4, 2] vs modal 4",merged_cell_uncertain
+25,p025-t01,unknown,unresolved,1,3,3,3,0.0,"[238.48399353027344, 248.64498901367188, 509.6654357910156, 264.712890625]",10,fewer than two rows; cannot prove a table,not_a_table
+25,p025-t02,unknown,unresolved,1,5,5,5,0.0,"[101.30390167236328, 262.33538818359375, 468.10064697265625, 272.82305908203125]",Pin,fewer than two rows; cannot prove a table,not_a_table
+25,p025-t03,unknown,unresolved,1,2,2,2,0.0,"[236.4439697265625, 274.99517822265625, 298.8208923339844, 284.6130676269531]",,fewer than two rows; cannot prove a table,not_a_table
+25,p025-t04,unknown,reconstructed,2,2,2,4,0.9,"[54.0, 357.32000732421875, 208.55001831054688, 388.6000061035156]",Figure 26. External Reference Driver,,
+25,p025-t05,unknown,unresolved,1,2,2,2,0.0,"[126.5000991821289, 546.5469970703125, 171.1577911376953, 561.450439453125]",,fewer than two rows; cannot prove a table,not_a_table
+26,p026-t01,unknown,reconstructed,2,2,2,4,0.9,"[104.32654571533203, 190.80975341796875, 362.6437072753906, 212.98513793945312]",,,
+26,p026-t02,unknown,reconstructed,2,2,2,4,0.9,"[101.19815063476562, 275.2559814453125, 362.6437072753906, 297.4459228515625]",,,
+26,p026-t03,unknown,unresolved,1,19,19,19,0.0,"[117.06205749511719, 298.8982849121094, 523.0513916015625, 304.1935119628906]",,fewer than two rows; cannot prove a table,not_a_table
+26,p026-t04,unknown,partial,3,4,2,8,0.5,"[109.0999984741211, 336.7760009765625, 516.0446166992188, 366.3544006347656]",,"ragged rows: column counts [2, 2, 4] vs modal 2",merged_cell_uncertain
+26,p026-t05,unknown,partial,3,6,4,14,0.5,"[104.8387222290039, 364.5400695800781, 516.0446166992188, 388.4263000488281]",,"ragged rows: column counts [6, 4, 4] vs modal 4",merged_cell_uncertain
+26,p026-t06,unknown,reconstructed,3,2,2,6,0.9,"[101.72528076171875, 423.9241027832031, 366.33648681640625, 460.41033935546875]",−100,,
+26,p026-t07,unknown,unresolved,1,9,9,9,0.0,"[116.23529052734375, 457.6200866699219, 524.0090942382812, 465.3144836425781]",,fewer than two rows; cannot prove a table,not_a_table
+26,p026-t08,unknown,unresolved,1,4,4,4,0.0,"[152.34400939941406, 465.6360168457031, 526.6727905273438, 473.8760986328125]",,fewer than two rows; cannot prove a table,not_a_table
+26,p026-t09,unknown,reconstructed,1,2,2,2,0.9,"[166.3000030517578, 504.3760070800781, 468.7159729003906, 513.4800415039062]",Figure 29. Transfer Function of On-Chip Decimation Filters / Figure 30. Transfer Function of On-Chip Decimation Filters,,
+26,p026-t10,unknown,unresolved,1,9,9,9,0.0,"[242.2353057861328, 625.2200317382812, 394.116943359375, 632.9144287109375]",−140,fewer than two rows; cannot prove a table,not_a_table
+27,p027-t01,unknown,partial,4,4,2,14,0.5,"[54.0, 235.67599487304688, 529.4019775390625, 295.5]",CONFIG1.CLK_EN,"ragged rows: column counts [4, 4, 4, 4, 2] vs modal 4",merged_cell_uncertain
+28,p028-t01,unknown,reconstructed,3,2,2,6,0.9,"[54.0, 55.70398712158203, 557.5894165039062, 104.79002380371094]","ADS1299 ,  ADS1299-4 ,  ADS1299-6",,
+28,p028-t02,unknown,reconstructed,2,2,2,4,0.9,"[142.3746337890625, 209.79898071289062, 410.6203308105469, 234.71356201171875]",,,
+28,p028-t03,unknown,reconstructed,2,2,2,4,0.9,"[142.3746337890625, 265.5608825683594, 410.6197814941406, 290.632568359375]",IN1N,,
+28,p028-t04,unknown,reconstructed,2,2,2,4,0.9,"[142.3746337890625, 321.7303771972656, 410.6197814941406, 346.80169677734375]",IN2N,,
+28,p028-t05,unknown,partial,3,3,2,7,0.5,"[142.3746337890625, 378.2215576171875, 410.09332275390625, 423.6828308105469]",IN3N,"ragged rows: column counts [3, 2, 2] vs modal 2",row_structure_uncertain
+29,p029-t01,unknown,unresolved,1,2,2,2,0.0,"[89.7503890991211, 157.79031372070312, 456.03271484375, 166.4519805908203]",,fewer than two rows; cannot prove a table,not_a_table
+29,p029-t02,unknown,unresolved,1,2,2,2,0.0,"[336.505615234375, 178.93801879882812, 456.2242126464844, 185.6009521484375]",Low-Noise,fewer than two rows; cannot prove a table,not_a_table
+29,p029-t03,unknown,unresolved,1,2,2,2,0.0,"[89.7503890991211, 219.6431884765625, 456.031982421875, 228.5345916748047]",IN1N,fewer than two rows; cannot prove a table,not_a_table
+29,p029-t04,unknown,unresolved,1,2,2,2,0.0,"[336.505615234375, 240.7908935546875, 456.2243957519531, 247.4549560546875]",Low-Noise,fewer than two rows; cannot prove a table,not_a_table
+29,p029-t05,unknown,unresolved,1,2,2,2,0.0,"[89.7503890991211, 281.9501953125, 456.031982421875, 290.6166076660156]",IN2N,fewer than two rows; cannot prove a table,not_a_table
+29,p029-t06,unknown,unresolved,1,2,2,2,0.0,"[336.505615234375, 303.097900390625, 456.2243957519531, 309.7609558105469]",Low-Noise,fewer than two rows; cannot prove a table,not_a_table
+29,p029-t07,unknown,partial,3,3,2,7,0.5,"[89.7503890991211, 354.1910705566406, 455.6389465332031, 406.6331787109375]",IN3N,"ragged rows: column counts [3, 2, 2] vs modal 2",row_structure_uncertain
+31,p031-t01,unknown,partial,2,3,2,5,0.5,"[108.2789077758789, 310.51007080078125, 482.9186096191406, 324.90936279296875]",AVSS,"ragged rows: column counts [3, 2] vs modal 3",row_structure_uncertain
+33,p033-t01,unknown,unresolved,1,3,3,3,0.0,"[188.73294067382812, 193.8242645263672, 324.8583068847656, 205.500732421875]",,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t02,unknown,unresolved,1,4,4,4,0.0,"[264.2242736816406, 214.6337127685547, 482.6770324707031, 226.3101806640625]",PGA1P,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t03,unknown,partial,2,3,2,5,0.5,"[264.2242736816406, 234.09986877441406, 430.8427734375, 262.335205078125]",PGA2P,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+33,p033-t04,unknown,unresolved,1,4,4,4,0.0,"[188.41964721679688, 269.6950378417969, 430.8427734375, 282.4472961425781]",PGA1N,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t05,unknown,partial,2,4,3,7,0.5,"[188.73294067382812, 289.81182861328125, 482.98919677734375, 303.99163818359375]",PGA2N,"ragged rows: column counts [3, 4] vs modal 3",row_structure_uncertain
+33,p033-t06,unknown,unresolved,1,4,4,4,0.0,"[264.2242736816406, 313.1246032714844, 482.6770324707031, 324.80108642578125]",PGA3P,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t07,unknown,partial,2,3,2,5,0.5,"[264.2242736816406, 332.5907287597656, 430.8427734375, 360.8260803222656]",PGA4P,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+33,p033-t08,unknown,unresolved,1,4,4,4,0.0,"[188.41964721679688, 368.1866760253906, 430.8427734375, 380.9382019042969]",PGA3N,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t09,unknown,partial,2,4,3,7,0.5,"[188.73294067382812, 388.302734375, 482.98919677734375, 402.4833984375]",PGA4N,"ragged rows: column counts [3, 4] vs modal 3",row_structure_uncertain
+33,p033-t10,unknown,unresolved,1,4,4,4,0.0,"[264.2242736816406, 411.61676025390625, 482.6770324707031, 423.2928466796875]",PGA5P,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t11,unknown,partial,2,3,2,5,0.5,"[264.2242736816406, 431.08074951171875, 430.8427734375, 459.3160705566406]",PGA6P,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+33,p033-t12,unknown,unresolved,1,4,4,4,0.0,"[188.419677734375, 466.67730712890625, 430.8427734375, 479.42816162109375]",PGA5N,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t13,unknown,partial,2,4,3,7,0.5,"[188.73294067382812, 486.79449462890625, 482.98919677734375, 500.97430419921875]",PGA6N,"ragged rows: column counts [3, 4] vs modal 3",row_structure_uncertain
+33,p033-t14,unknown,unresolved,1,4,4,4,0.0,"[264.2242736816406, 510.10760498046875, 482.6770324707031, 521.7841186523438]",PGA7P,fewer than two rows; cannot prove a table,not_a_table
+33,p033-t15,unknown,partial,2,3,2,5,0.5,"[264.2242736816406, 529.572509765625, 430.8427734375, 557.807861328125]",PGA8P,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+33,p033-t16,unknown,partial,6,4,2,16,0.5,"[135.15550231933594, 565.1689453125, 482.98919677734375, 620.0643920898438]",PGA7N,"ragged rows: column counts [4, 2, 2, 3, 3, 2] vs modal 2",merged_cell_uncertain
+34,p034-t01,unknown,partial,2,5,2,7,0.5,"[62.81170654296875, 195.0161895751953, 551.0210571289062, 230.63990783691406]",Device  N / Device  2 / Device  1,"ragged rows: column counts [3, 2, 5] vs modal 3",merged_cell_uncertain
+34,p034-t02,unknown,reconstructed,2,2,2,4,0.9,"[54.0, 326.8919982910156, 211.48500061035156, 358.8999938964844]",Figure 39. BIAS Drive Connection for Multiple Devices,,
+35,p035-t01,unknown,partial,9,3,2,26,0.5,"[54.0, 110.7759780883789, 483.2480163574219, 236.60000610351562]",Table 7. Settling Time for Different Data Rates,"ragged rows: column counts [3, 3, 3, 3, 3, 3, 3, 3, 2] vs modal 3",row_structure_uncertain
+35,p035-t02,unknown,reconstructed,2,2,2,4,0.9,"[54.0, 381.82000732421875, 186.35000610351562, 413.1000061035156]",,,
+35,p035-t03,unknown,unresolved,1,5,5,5,0.0,"[170.92147827148438, 619.65283203125, 430.4562683105469, 625.0286865234375]",DRDY,fewer than two rows; cannot prove a table,not_a_table
+36,p036-t01,unknown,partial,2,3,2,5,0.5,"[181.61329650878906, 534.7666625976562, 395.8660888671875, 564.5953369140625]",START Pin,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+37,p037-t01,unknown,unresolved,1,3,3,3,0.0,"[214.9484405517578, 165.4026336669922, 348.20587158203125, 172.43280029296875]",or,fewer than two rows; cannot prove a table,not_a_table
+37,p037-t02,unknown,partial,2,4,4,8,0.5,"[57.0, 259.3760070800781, 532.6639404296875, 281.2600402832031]",Table 8. Timing Characteristics for  Figure 43 (1),"ragged rows: column counts [2, 4, 4] vs modal 4",column_structure_uncertain
+37,p037-t03,unknown,unresolved,1,3,3,3,0.0,"[218.12100219726562, 441.3498840332031, 506.52984619140625, 451.7769470214844]",,fewer than two rows; cannot prove a table,not_a_table
+38,p038-t01,unknown,reconstructed,3,2,2,6,0.9,"[54.0, 55.70398712158203, 557.5894165039062, 107.0000228881836]","ADS1299 ,  ADS1299-4 ,  ADS1299-6",,
+38,p038-t02,unknown,reconstructed,7,2,2,14,0.9,"[174.0, 234.6320037841797, 418.27197265625, 326.47998046875]","INPUT SIGNAL, V IN",,
+39,p039-t01,unknown,reconstructed,2,2,2,4,0.9,"[54.0, 137.15682983398438, 557.998046875, 171.00003051757812]",t SCLK <,,
+39,p039-t02,unknown,partial,2,10,9,19,0.5,"[101.80352020263672, 421.1423645019531, 475.6271667480469, 439.54229736328125]",216  SCLKs,"ragged rows: column counts [10, 9] vs modal 10",row_structure_uncertain
+40,p040-t01,unknown,reconstructed,5,3,3,15,0.9,"[57.0, 222.97598266601562, 460.63201904296875, 283.2799987792969]",System Commands,,
+40,p040-t02,unknown,reconstructed,2,3,3,6,0.9,"[57.0, 324.3760070800781, 460.1520080566406, 345.0799865722656]",This mode is the default mode at power-up. (1),,
+40,p040-t03,unknown,partial,3,4,2,10,0.5,"[54.0, 362.2319641113281, 538.3719482421875, 401.2799987792969]",Register Read Commands,"ragged rows: column counts [4, 4, 2] vs modal 4",merged_cell_uncertain
+43,p043-t01,unknown,unresolved,1,4,4,4,0.0,"[210.04959106445312, 259.1573791503906, 397.7442626953125, 264.34417724609375]",CS,fewer than two rows; cannot prove a table,not_a_table
+43,p043-t02,unknown,reconstructed,2,3,3,6,0.9,"[136.9898681640625, 298.5867004394531, 442.8768310546875, 328.58013916015625]",SCLK,,
+43,p043-t03,unknown,unresolved,1,4,4,4,0.0,"[208.5500030517578, 553.6596069335938, 396.2442321777344, 558.846435546875]",CS,fewer than two rows; cannot prove a table,not_a_table
+43,p043-t04,unknown,unresolved,1,5,5,5,0.0,"[143.7312469482422, 593.0889282226562, 440.10748291015625, 598.5285034179688]",SCLK,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t01,unknown,unresolved,1,11,11,11,0.0,"[59.900001525878906, 143.43199157714844, 536.4359741210938, 149.0599822998047]",DEFAULT,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t02,unknown,unresolved,1,7,7,7,0.0,"[69.5, 165.83201599121094, 527.8219604492188, 171.4600067138672]",Read Only ID Registers,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t03,unknown,partial,2,10,9,19,0.5,"[69.5, 188.2319793701172, 533.3079223632812, 205.0599822998047]",Global Settings Across Channels,"ragged rows: column counts [9, 10] vs modal 9",row_structure_uncertain
+44,p044-t04,unknown,unresolved,1,10,10,10,0.0,"[69.5, 214.1320037841797, 550.8977661132812, 219.75999450683594]",BIAS_LOFF_,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t05,unknown,unresolved,1,7,7,7,0.0,"[69.5, 228.83201599121094, 534.7958984375, 234.4600067138672]",SENS,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t06,unknown,reconstructed,8,7,7,56,0.9,"[69.0, 251.2319793701172, 502.61993408203125, 335.260009765625]",Channel-Specific Settings,,
+44,p044-t07,unknown,reconstructed,4,11,11,44,0.9,"[69.0, 339.8880310058594, 546.6519165039062, 380.05999755859375]",,,
+44,p044-t08,unknown,unresolved,1,8,8,8,0.0,"[69.5, 384.6880187988281, 552.1438598632812, 391.260009765625]",,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t09,unknown,reconstructed,2,11,11,22,0.9,"[69.5, 408.031982421875, 549.6458740234375, 424.8600158691406]",Lead-Off Status Registers (Read-Only Registers),,
+44,p044-t10,unknown,unresolved,1,5,5,5,0.0,"[69.5, 441.6319885253906, 480.77191162109375, 447.260009765625]",GPIO and OTHER Registers,fewer than two rows; cannot prove a table,not_a_table
+44,p044-t11,unknown,reconstructed,2,11,11,22,0.9,"[69.5, 452.8320007324219, 536.4359741210938, 469.6600036621094]",,,
+44,p044-t12,unknown,unresolved,1,9,9,9,0.0,"[69.5, 478.73199462890625, 536.4359741210938, 484.3600158691406]",,fewer than two rows; cannot prove a table,not_a_table
+45,p045-t01,unknown,unresolved,1,8,8,8,0.0,"[83.19999694824219, 152.57601928710938, 528.6480102539062, 160.08001708984375]",Figure 50. ID Control Register,fewer than two rows; cannot prove a table,not_a_table
+45,p045-t02,unknown,reconstructed,2,4,4,8,0.9,"[126.19999694824219, 164.57601928710938, 516.4960327148438, 184.08001708984375]",,,
+45,p045-t03,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 234.07601928710938, 362.3240051269531, 241.58001708984375]",Table 12. ID Control Register Field Descriptions,,
+45,p045-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 265.2759704589844, 362.3240051269531, 272.77996826171875]",,fewer than two rows; cannot prove a table,not_a_table
+45,p045-t05,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 287.4759826660156, 404.2160339355469, 294.97998046875]",,fewer than two rows; cannot prove a table,not_a_table
+45,p045-t06,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 318.6759948730469, 404.842041015625, 326.17999267578125]",11 : ADS1299-x,fewer than two rows; cannot prove a table,not_a_table
+46,p046-t01,unknown,partial,3,8,6,20,0.5,"[71.9000015258789, 130.67599487304688, 528.6480102539062, 162.17999267578125]",Figure 51. CONFIG1: Configuration Register 1,"ragged rows: column counts [8, 6, 6] vs modal 6",merged_cell_uncertain
+46,p046-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 212.17599487304688, 360.1080017089844, 219.67999267578125]",Table 13. Configuration Register 1 Field Descriptions,,
+46,p046-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 234.37600708007812, 473.6200256347656, 241.8800048828125]",Always write 1h,fewer than two rows; cannot prove a table,not_a_table
+46,p046-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 272.8320007324219, 393.58197021484375, 282.0799865722656]",1 : Multiple readback mode,fewer than two rows; cannot prove a table,not_a_table
+46,p046-t05,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 323.7760009765625, 360.1080017089844, 331.2799987792969]",1 : Oscillator clock output enabled,fewer than two rows; cannot prove a table,not_a_table
+46,p046-t06,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 345.9759826660156, 386.1919860839844, 353.47998046875]",Always write 2h,fewer than two rows; cannot prove a table,not_a_table
+47,p047-t01,unknown,partial,3,8,7,22,0.5,"[71.9000015258789, 130.67599487304688, 528.6480102539062, 162.17999267578125]",Figure 52. CONFIG2: Configuration Register 2,"ragged rows: column counts [8, 7, 7] vs modal 7",row_structure_uncertain
+47,p047-t02,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 212.17599487304688, 360.1080017089844, 219.67999267578125]",Table 14. Configuration Register 2 Field Descriptions,,
+47,p047-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 234.37600708007812, 373.1360168457031, 241.8800048828125]",Always write 6h,fewer than two rows; cannot prove a table,not_a_table
+47,p047-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 274.57598876953125, 360.1080017089844, 282.0799865722656]",1 : Test signals are generated internally,fewer than two rows; cannot prove a table,not_a_table
+47,p047-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 296.7760009765625, 406.17401123046875, 304.2799987792969]",Always write 0h,fewer than two rows; cannot prove a table,not_a_table
+47,p047-t06,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 336.9759826660156, 406.63800048828125, 344.47998046875]",1 : 2 × –(VREFP – VREFN) / 2400,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t01,unknown,unresolved,1,8,8,8,0.0,"[83.19999694824219, 130.67599487304688, 528.6480102539062, 138.17999267578125]",Figure 53. CONFIG3: Configuration Register 3,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t02,unknown,unresolved,1,7,7,7,0.0,"[61.70000076293945, 147.17599487304688, 547.9639892578125, 154.67999267578125]",BIAS_LOFF_,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t03,unknown,unresolved,1,8,8,8,0.0,"[71.9000015258789, 163.67599487304688, 535.135986328125, 171.17999267578125]",SENS,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t04,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 221.17599487304688, 435.0580139160156, 231.77996826171875]",Table 15. Configuration Register 3 Field Descriptions,,
+48,p048-t05,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 264.4759826660156, 360.1080017089844, 271.97998046875]",1 : Enable internal reference buffer,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 286.6759948730469, 397.6000061035156, 294.17999267578125]",,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 344.8760070800781, 384.66802978515625, 352.3800048828125]",MUX_Setting 010  (V REF ),fewer than two rows; cannot prove a table,not_a_table
+48,p048-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 385.07598876953125, 394.1860046386719, 392.5799865722656]",1 : BIASREF signal (AVDD + AVSS) / 2 generated internally,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 425.2760009765625, 402.1820373535156, 432.7799987792969]",1 : BIAS buffer is enabled,fewer than two rows; cannot prove a table,not_a_table
+48,p048-t10,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 465.4759826660156, 400.4120178222656, 472.97998046875]",1 : BIAS sense is enabled,fewer than two rows; cannot prove a table,not_a_table
+49,p049-t01,unknown,unresolved,1,8,8,8,0.0,"[83.19999694824219, 130.67599487304688, 528.6480102539062, 138.17999267578125]",Figure 54. LOFF: Lead-Off Control Register,fewer than two rows; cannot prove a table,not_a_table
+49,p049-t02,unknown,reconstructed,2,4,4,8,0.9,"[118.9000015258789, 142.67599487304688, 525.8280029296875, 162.17999267578125]",,,
+49,p049-t03,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 212.17599487304688, 440.8180236816406, 222.77996826171875]",Table 16. Lead-Off Control Register Field Descriptions,,
+49,p049-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 390.4759826660156, 360.1080017089844, 397.97998046875]",111 : 30%,fewer than two rows; cannot prove a table,not_a_table
+49,p049-t05,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 412.6759948730469, 428.3780212402344, 420.17999267578125]",,fewer than two rows; cannot prove a table,not_a_table
+49,p049-t06,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 479.8760070800781, 396.2380065917969, 487.3800048828125]",11 : 24 µA,fewer than two rows; cannot prove a table,not_a_table
+50,p050-t01,unknown,unresolved,1,8,8,8,0.0,"[83.19999694824219, 152.67599487304688, 528.6480102539062, 160.17999267578125]",Figure 55. CHnSET: Individual Channel Settings Register,fewer than two rows; cannot prove a table,not_a_table
+50,p050-t02,unknown,reconstructed,2,4,4,8,0.9,"[71.9000015258789, 164.67599487304688, 482.2940368652344, 184.17999267578125]",,,
+50,p050-t03,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 234.17599487304688, 371.6040344238281, 244.77996826171875]",Bit / Field / Type / Reset / Description,,
+50,p050-t04,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 313.4759826660156, 360.2440185546875, 320.97998046875]",,fewer than two rows; cannot prove a table,not_a_table
+50,p050-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 407.6759948730469, 390.45404052734375, 415.17999267578125]",111 : Do not use,fewer than two rows; cannot prove a table,not_a_table
+50,p050-t06,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 456.8760070800781, 377.5500183105469, 464.3800048828125]",1 : Closed,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t01,unknown,reconstructed,3,8,8,24,0.9,"[71.4000015258789, 169.57601928710938, 540.3760375976562, 201.08001708984375]",Figure 56. BIAS_SENSP: BIAS Positive Signal Derivation Register,,
+51,p051-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 251.07601928710938, 373.3060302734375, 258.58001708984375]",Table 18. BIAS Positive Signal Derivation Field Descriptions,,
+51,p051-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 291.2760009765625, 373.3060302734375, 298.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 331.4759826660156, 373.3060302734375, 338.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 371.6759948730469, 373.3060302734375, 379.17999267578125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 411.8760070800781, 373.3060302734375, 419.3800048828125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 452.07598876953125, 373.3060302734375, 459.5799865722656]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 492.2760009765625, 373.3060302734375, 499.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+51,p051-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 532.4760131835938, 373.3060302734375, 539.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t01,unknown,reconstructed,3,8,8,24,0.9,"[71.19999694824219, 169.57601928710938, 540.6240234375, 201.08001708984375]",Figure 57. BIAS_SENSN: BIAS Negative Signal Derivation Register,,
+52,p052-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 251.07601928710938, 373.7560119628906, 258.58001708984375]",Table 19. BIAS Negative Signal Derivation Field Descriptions,,
+52,p052-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 291.2760009765625, 373.7560119628906, 298.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 331.4759826660156, 373.7560119628906, 338.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 371.6759948730469, 373.7560119628906, 379.17999267578125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 411.8760070800781, 373.7560119628906, 419.3800048828125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 452.07598876953125, 373.7560119628906, 459.5799865722656]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 492.2760009765625, 373.7560119628906, 499.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+52,p052-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 532.4760131835938, 373.7560119628906, 539.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t01,unknown,reconstructed,3,8,8,24,0.9,"[70.30000305175781, 180.57601928710938, 541.5, 212.08001708984375]",Figure 58. LOFF_SENSP: Positive Signal Lead-Off Detection Register,,
+53,p053-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 262.0760192871094, 372.8680419921875, 269.58001708984375]",Table 20. Positive Signal Lead-Off Detection Field Descriptions,,
+53,p053-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 302.2760009765625, 372.8680419921875, 309.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 342.4759826660156, 372.8680419921875, 349.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 382.6759948730469, 372.8680419921875, 390.17999267578125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 422.8760070800781, 372.8680419921875, 430.3800048828125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 463.07598876953125, 372.8680419921875, 470.5799865722656]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 503.2760009765625, 372.8680419921875, 510.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+53,p053-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 543.4760131835938, 372.8680419921875, 550.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t01,unknown,reconstructed,3,8,8,24,0.9,"[69.69999694824219, 180.57601928710938, 542.2360229492188, 212.08001708984375]",Figure 59. LOFF_SENSN: Negative Signal Lead-Off Detection Register,,
+54,p054-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 262.0760192871094, 373.3179931640625, 269.58001708984375]",Table 21. Negative Signal Lead-Off Detection Field Descriptions,,
+54,p054-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 302.2760009765625, 373.3179931640625, 309.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 342.4759826660156, 373.3179931640625, 349.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 382.6759948730469, 373.3179931640625, 390.17999267578125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 422.8760070800781, 373.3179931640625, 430.3800048828125]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 463.07598876953125, 373.3179931640625, 470.5799865722656]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 503.2760009765625, 373.3179931640625, 510.7799987792969]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+54,p054-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 543.4760131835938, 373.3179931640625, 550.97998046875]",1 : Enabled,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t01,unknown,reconstructed,3,8,8,24,0.9,"[62.29999923706055, 141.67599487304688, 549.4920043945312, 173.17999267578125]",Figure 60. LOFF_FLIP: Lead-Off Flip Register,,
+55,p055-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 223.17599487304688, 431.37603759765625, 230.67999267578125]",Table 22. Lead-Off Flip Register Field Descriptions,,
+55,p055-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 272.3760070800781, 431.37603759765625, 279.8800048828125]",,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 321.57598876953125, 431.37603759765625, 329.0799865722656]",,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 370.7760009765625, 431.37603759765625, 378.2799987792969]",,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 419.9759826660156, 431.37603759765625, 427.47998046875]",,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 469.1759948730469, 431.37603759765625, 476.67999267578125]",,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 518.3760375976562, 434.0420227050781, 525.8800048828125]",,fewer than two rows; cannot prove a table,not_a_table
+55,p055-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 567.5760498046875, 434.0420227050781, 575.0800170898438]",,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t01,unknown,reconstructed,3,8,8,24,0.9,"[66.30000305175781, 169.57601928710938, 545.4920043945312, 201.08001708984375]",Figure 61. LOFF_STATP: Lead-Off Positive Signal Status Register (Read-Only),,
+56,p056-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 251.07601928710938, 484.89202880859375, 258.58001708984375]",Table 23. Lead-Off Positive Signal Status Field Descriptions,,
+56,p056-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 291.2760009765625, 484.89202880859375, 298.7799987792969]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 331.4759826660156, 484.89202880859375, 338.97998046875]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 371.6759948730469, 484.89202880859375, 379.17999267578125]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 411.8760070800781, 484.89202880859375, 419.3800048828125]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 452.07598876953125, 484.89202880859375, 459.5799865722656]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 492.2760009765625, 484.89202880859375, 499.7799987792969]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+56,p056-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 532.4760131835938, 484.89202880859375, 539.97998046875]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t01,unknown,reconstructed,3,8,8,24,0.9,"[66.0999984741211, 169.57601928710938, 545.739990234375, 201.08001708984375]",Figure 62. LOFF_STATN: Lead-Off Negative Signal Status Register (Read-Only),,
+57,p057-t02,unknown,reconstructed,1,5,5,5,0.9,"[74.4000015258789, 251.07601928710938, 487.1220397949219, 258.58001708984375]",Table 24. Lead-Off Negative Signal Status Field Descriptions,,
+57,p057-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 291.2760009765625, 487.1220397949219, 298.7799987792969]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t04,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 331.4759826660156, 487.1220397949219, 338.97998046875]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 371.6759948730469, 487.1220397949219, 379.17999267578125]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 411.8760070800781, 487.1220397949219, 419.3800048828125]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 452.07598876953125, 487.1220397949219, 459.5799865722656]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 492.2760009765625, 487.1220397949219, 499.7799987792969]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+57,p057-t09,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 532.4760131835938, 487.1220397949219, 539.97998046875]",1 : Electrode is off,fewer than two rows; cannot prove a table,not_a_table
+58,p058-t01,unknown,unresolved,1,8,8,8,0.0,"[83.19999694824219, 141.67599487304688, 528.6480102539062, 149.17999267578125]",Figure 63. GPIO: General-Purpose I/O Register,fewer than two rows; cannot prove a table,not_a_table
+58,p058-t02,unknown,reconstructed,2,2,2,4,0.9,"[159.3000030517578, 153.67599487304688, 452.59600830078125, 173.17999267578125]",,,
+58,p058-t03,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 223.17599487304688, 362.9200134277344, 230.67999267578125]",Table 25. General-Purpose I/O Field Descriptions,,
+58,p058-t04,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 290.3760070800781, 465.38604736328125, 297.8800048828125]",,fewer than two rows; cannot prove a table,not_a_table
+59,p059-t01,unknown,reconstructed,3,8,8,24,0.9,"[71.9000015258789, 141.67599487304688, 539.9960327148438, 173.17999267578125]",Figure 64. MISC1: Miscellaneous 1 Register,,
+59,p059-t02,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 223.17599487304688, 360.1080017089844, 230.67999267578125]",Table 26. Miscellaneous 1 Register Field Descriptions,,
+59,p059-t03,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 245.37600708007812, 442.52801513671875, 252.8800048828125]",Always write 0h,fewer than two rows; cannot prove a table,not_a_table
+59,p059-t04,unknown,unresolved,1,5,5,5,0.0,"[71.0999984741211, 294.57598876953125, 360.1080017089844, 302.0799865722656]",1 : Switches closed,fewer than two rows; cannot prove a table,not_a_table
+59,p059-t05,unknown,reconstructed,3,8,8,24,0.9,"[71.9000015258789, 383.57598876953125, 539.9960327148438, 415.0799865722656]",Figure 65. MISC1: Miscellaneous 1 Register,,
+59,p059-t06,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 473.8760070800781, 360.1080017089844, 481.3800048828125]",Table 27. Miscellaneous 1 Register Field Descriptions,,
+60,p060-t01,unknown,unresolved,1,8,8,8,0.0,"[83.19999694824219, 130.67599487304688, 528.6480102539062, 138.17999267578125]",Figure 66. CONFIG4: Configuration Register 4,fewer than two rows; cannot prove a table,not_a_table
+60,p060-t02,unknown,unresolved,1,7,7,7,0.0,"[83.19999694824219, 147.17599487304688, 528.6480102539062, 154.67999267578125]",PD_LOFF_,fewer than two rows; cannot prove a table,not_a_table
+60,p060-t03,unknown,unresolved,1,8,8,8,0.0,"[71.9000015258789, 163.67599487304688, 539.9960327148438, 171.17999267578125]",COMP,fewer than two rows; cannot prove a table,not_a_table
+60,p060-t04,unknown,reconstructed,1,5,5,5,0.9,"[71.0999984741211, 221.17599487304688, 360.1080017089844, 228.67999267578125]",Table 28. Configuration Register 4 Field Descriptions,,
+60,p060-t05,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 243.37600708007812, 412.6400146484375, 250.8800048828125]",Always write 0h,fewer than two rows; cannot prove a table,not_a_table
+60,p060-t06,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 283.57598876953125, 360.1080017089844, 291.0799865722656]",1 : Single-shot mode,fewer than two rows; cannot prove a table,not_a_table
+60,p060-t07,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 305.7760009765625, 451.4660339355469, 313.2799987792969]",Always write 0h,fewer than two rows; cannot prove a table,not_a_table
+60,p060-t08,unknown,unresolved,1,5,5,5,0.0,"[74.4000015258789, 345.9759826660156, 360.1080017089844, 353.47998046875]",1 : Lead-off comparators enabled,fewer than two rows; cannot prove a table,not_a_table
+61,p061-t01,unknown,reconstructed,2,2,2,4,0.9,"[54.0, 177.89202880859375, 222.6300048828125, 209.89999389648438]",,,
+62,p062-t01,unknown,partial,3,3,2,8,0.5,"[134.18482971191406, 365.7064208984375, 453.3192138671875, 388.6539001464844]",SDATAC,"ragged rows: column counts [2, 3, 3] vs modal 3",row_structure_uncertain
+62,p062-t02,unknown,reconstructed,2,2,2,4,0.9,"[243.57376098632812, 418.0189208984375, 381.9592590332031, 435.8094787597656]",// Set Device for DR = f MOD  / 4096,,
+63,p063-t01,unknown,partial,3,3,2,7,0.5,"[63.0, 149.0040283203125, 475.7999572753906, 173.40402221679688]",// dc lead-off,"ragged rows: column counts [3, 2, 2] vs modal 2",row_structure_uncertain
+63,p063-t02,unknown,reconstructed,3,2,2,6,0.9,"[63.0, 240.7039794921875, 456.59991455078125, 265.1039733886719]",,,
+63,p063-t03,unknown,partial,4,3,2,10,0.5,"[54.0, 304.60400390625, 547.7999877929688, 351.5]",,"ragged rows: column counts [2, 3, 3, 2] vs modal 2",row_structure_uncertain
+63,p063-t04,unknown,partial,2,3,2,5,0.5,"[158.35760498046875, 643.675537109375, 414.33172607421875, 671.5032958984375]",BIASINV,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+64,p064-t01,unknown,partial,2,4,2,6,0.5,"[225.85470581054688, 320.9851379394531, 388.13458251953125, 342.2901611328125]",Device  1,"ragged rows: column counts [4, 2] vs modal 4",merged_cell_uncertain
+64,p064-t02,unknown,unresolved,1,3,3,3,0.0,"[277.4179992675781, 381.3181457519531, 388.14556884765625, 388.8289794921875]",Device  2,fewer than two rows; cannot prove a table,not_a_table
+65,p065-t01,unknown,reconstructed,2,8,8,16,0.9,"[54.563716888427734, 203.10214233398438, 521.18408203125, 225.69020080566406]",,,
+65,p065-t02,unknown,partial,12,5,2,37,0.5,"[114.39437103271484, 241.6945343017578, 551.6118774414062, 392.3998107910156]",GPO1,"ragged rows: column counts [4, 2, 4, 5, 2, 4, 4, 3, 2, 3, 2, 2] vs modal 2",merged_cell_uncertain
+65,p065-t03,unknown,unresolved,1,3,3,3,0.0,"[100.89019775390625, 609.2462768554688, 317.86944580078125, 622.32958984375]",,fewer than two rows; cannot prove a table,not_a_table
+65,p065-t04,unknown,unresolved,1,9,9,9,0.0,"[104.87770080566406, 641.1021118164062, 492.0328369140625, 648.055419921875]",DAISY_IN 0,fewer than two rows; cannot prove a table,not_a_table
+65,p065-t05,unknown,partial,2,6,4,10,0.5,"[103.54759979248047, 666.4732055664062, 473.06427001953125, 698.4913330078125]",,"ragged rows: column counts [6, 4] vs modal 6",merged_cell_uncertain
+66,p066-t01,unknown,unresolved,1,3,3,3,0.0,"[106.13001251220703, 413.8040466308594, 256.0864562988281, 432.007080078125]",R Filt,fewer than two rows; cannot prove a table,not_a_table
+66,p066-t02,unknown,partial,4,3,2,10,0.5,"[106.13001251220703, 434.9607849121094, 477.0281066894531, 485.1989440917969]",+,"ragged rows: column counts [2, 2, 3, 3] vs modal 2",row_structure_uncertain
+66,p066-t03,unknown,unresolved,1,7,7,7,0.0,"[202.7103271484375, 481.3805847167969, 475.09765625, 494.8047180175781]",,fewer than two rows; cannot prove a table,not_a_table
+66,p066-t04,unknown,unresolved,1,4,4,4,0.0,"[332.427978515625, 510.1578674316406, 501.0572204589844, 521.1565551757812]",BIASINV,fewer than two rows; cannot prove a table,not_a_table
+67,p067-t01,unknown,reconstructed,2,2,2,4,0.9,"[53.42323303222656, 139.71353149414062, 236.24798583984375, 157.9314422607422]",AVDD,,
+67,p067-t02,unknown,reconstructed,2,2,2,4,0.9,"[53.39736557006836, 170.48452758789062, 236.24798583984375, 191.1354217529297]",ADC,,
+67,p067-t03,unknown,reconstructed,2,2,2,4,0.9,"[53.397708892822266, 202.8750457763672, 236.24798583984375, 221.67611694335938]",ADC,,
+67,p067-t04,unknown,reconstructed,2,2,2,4,0.9,"[53.397708892822266, 234.11390686035156, 236.24798583984375, 253.45484924316406]",ADC,,
+67,p067-t05,unknown,partial,5,3,2,13,0.5,"[54.985382080078125, 264.53948974609375, 526.0713500976562, 311.6425476074219]",ADC,"ragged rows: column counts [3, 3, 3, 2, 2] vs modal 3",row_structure_uncertain
+67,p067-t06,unknown,unresolved,1,6,6,6,0.0,"[126.68867492675781, 325.15301513671875, 551.0337524414062, 340.3044128417969]",BIASINV,fewer than two rows; cannot prove a table,not_a_table
+67,p067-t07,unknown,reconstructed,5,2,2,10,0.9,"[54.0, 522.9760131835938, 454.56597900390625, 596.0]",Table 29. EEG Data Acquisition Design Requirements,,
+68,p068-t01,unknown,reconstructed,2,3,3,6,0.9,"[54.0, 714.3336791992188, 557.902099609375, 748.8800048828125]",,,
+69,p069-t01,unknown,unresolved,1,2,2,2,0.0,"[235.89801025390625, 242.431884765625, 332.7540283203125, 256.1720275878906]",AVDD,fewer than two rows; cannot prove a table,not_a_table
+69,p069-t02,unknown,unresolved,1,3,3,3,0.0,"[159.74786376953125, 269.06195068359375, 378.5499267578125, 284.3020935058594]",INxP,fewer than two rows; cannot prove a table,not_a_table
+69,p069-t03,unknown,unresolved,1,11,11,11,0.0,"[217.63673400878906, 637.794677734375, 414.3030090332031, 647.5116577148438]",,fewer than two rows; cannot prove a table,not_a_table
+70,p070-t01,unknown,unresolved,1,14,14,14,0.0,"[54.0, 140.72000122070312, 556.5999145507812, 150.14999389648438]",,fewer than two rows; cannot prove a table,not_a_table
+70,p070-t02,unknown,reconstructed,4,2,2,8,0.9,"[78.0, 493.3899230957031, 434.8385925292969, 554.760009765625]",VCAP1,,
+70,p070-t03,unknown,partial,3,4,2,10,0.5,"[54.0, 633.5320434570312, 537.06396484375, 683.1099853515625]",Table 30. Timing Requirements for  Figure 76,"ragged rows: column counts [3, 4, 4, 2] vs modal 4",merged_cell_uncertain
+71,p071-t01,unknown,unresolved,1,2,2,2,0.0,"[200.52890014648438, 102.11717987060547, 273.9673156738281, 107.4234848022461]",Connecting the Device to Unipolar (5 V and 3.3 V) Supplies (continued),fewer than two rows; cannot prove a table,not_a_table
+71,p071-t02,unknown,unresolved,1,2,2,2,0.0,"[311.6629943847656, 129.2961883544922, 362.7285461425781, 135.92495727539062]",,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t03,unknown,unresolved,1,2,2,2,0.0,"[152.22189331054688, 140.07318115234375, 206.0596466064453, 146.7019500732422]",,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t04,unknown,unresolved,1,2,2,2,0.0,"[327.2223815917969, 184.8824920654297, 381.42291259765625, 191.511962890625]",VREFP,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t05,unknown,unresolved,1,6,6,6,0.0,"[198.43829345703125, 265.999755859375, 475.5549011230469, 274.86029052734375]",VCAP4,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t06,unknown,unresolved,1,4,4,4,0.0,"[151.2187957763672, 455.38116455078125, 343.304931640625, 462.00994873046875]",+3.3 V,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t07,unknown,unresolved,1,2,2,2,0.0,"[332.8070068359375, 501.66314697265625, 390.7781982421875, 508.2923278808594]",VREFP,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t08,unknown,unresolved,1,2,2,2,0.0,"[186.16720581054688, 545.3760375976562, 302.8658142089844, 550.6820068359375]",Device,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t09,unknown,unresolved,1,5,5,5,0.0,"[329.50201416015625, 601.6868286132812, 476.555908203125, 609.192626953125]",AVSS1 AVSS DGND,fewer than two rows; cannot prove a table,not_a_table
+71,p071-t10,unknown,unresolved,1,2,2,2,0.0,"[190.63629150390625, 645.3431396484375, 244.47415161132812, 651.971923828125]",,fewer than two rows; cannot prove a table,not_a_table
+72,p072-t01,unknown,reconstructed,3,2,2,6,0.9,"[54.0, 55.70398712158203, 557.5894165039062, 112.30999755859375]","ADS1299 ,  ADS1299-4 ,  ADS1299-6",,
+73,p073-t01,unknown,partial,16,3,2,35,0.5,"[117.77647399902344, 242.32957458496094, 389.5329284667969, 317.27227783203125]",,"ragged rows: column counts [2, 2, 2, 3, 3, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2] vs modal 2",row_structure_uncertain
+74,p074-t01,unknown,reconstructed,4,2,2,8,0.9,"[54.0, 55.70398712158203, 557.5894165039062, 134.00003051757812]","ADS1299 ,  ADS1299-4 ,  ADS1299-6",,
+74,p074-t02,unknown,reconstructed,3,6,6,18,0.9,"[75.30000305175781, 306.2760009765625, 533.8380126953125, 340.17999267578125]",,,
+76,p076-t01,unknown,unresolved,1,6,6,6,0.0,"[153.6540069580078, 132.2989959716797, 770.3739624023438, 143.94200134277344]",,fewer than two rows; cannot prove a table,not_a_table
+76,p076-t02,unknown,unresolved,1,2,2,2,0.0,"[500.8949890136719, 145.29798889160156, 593.2660522460938, 153.5419921875]",,fewer than two rows; cannot prove a table,not_a_table
+76,p076-t03,unknown,unresolved,1,10,10,10,0.0,"[50.329002380371094, 155.75900268554688, 787.384033203125, 166.75100708007812]",,fewer than two rows; cannot prove a table,not_a_table
+76,p076-t04,unknown,unresolved,1,10,10,10,0.0,"[46.54899978637695, 179.25900268554688, 787.384033203125, 190.25100708007812]",TRAY (10+1),fewer than two rows; cannot prove a table,not_a_table
+76,p076-t05,unknown,reconstructed,3,10,10,30,0.9,"[43.66100311279297, 202.75900268554688, 787.384033203125, 240.75100708007812]",TRAY (10+1),,
+76,p076-t06,unknown,unresolved,1,10,10,10,0.0,"[46.54899978637695, 253.25900268554688, 787.384033203125, 264.2510070800781]",TRAY (10+1),fewer than two rows; cannot prove a table,not_a_table
+76,p076-t07,unknown,reconstructed,3,10,10,30,0.9,"[43.66100311279297, 276.7590026855469, 787.384033203125, 314.7510070800781]",TRAY (10+1),,
+76,p076-t08,unknown,unresolved,1,10,10,10,0.0,"[48.99300003051758, 327.2590026855469, 783.8280029296875, 338.2510070800781]",TRAY (5+1),fewer than two rows; cannot prove a table,not_a_table
+76,p076-t09,unknown,reconstructed,4,10,10,40,0.9,"[40.76900100708008, 350.7590026855469, 783.8280029296875, 402.2510070800781]",TRAY (5+1),,
+78,p078-t01,unknown,reconstructed,2,2,2,4,0.9,"[87.85004425048828, 117.98565673828125, 417.1222229003906, 141.1855926513672]",TAPE AND REEL INFORMATION,,
+78,p078-t02,unknown,reconstructed,6,2,2,12,0.9,"[261.7303466796875, 196.96978759765625, 481.1864318847656, 264.0898132324219]",Diameter,,
+78,p078-t03,unknown,partial,2,5,4,9,0.5,"[228.89828491210938, 338.52203369140625, 438.4426574707031, 370.4339904785156]",Sprocket Holes,"ragged rows: column counts [4, 5] vs modal 4",row_structure_uncertain
+78,p078-t04,unknown,partial,1,9,9,9,0.5,"[168.3280029296875, 448.1609802246094, 545.1599731445312, 459.1769714355469]",Device / Package Package Pins / SPQ / Reel / Reel / A0 / B0 / K0 / P1 / W / Pin1,"ragged rows: column counts [11, 9] vs modal 11",not_a_table
+78,p078-t05,unknown,reconstructed,4,13,13,52,0.9,"[76.14599609375, 471.02099609375, 532.7160034179688, 522.5130004882812]",,,
+79,p079-t01,unknown,reconstructed,4,8,8,32,0.9,"[77.56399536132812, 445.6999816894531, 523.6849975585938, 497.1919860839844]",Device / Package Type / Package Drawing / Pins / SPQ / Length (mm) / Width (mm) / Height (mm),,
+80,p080-t01,unknown,reconstructed,6,13,13,78,0.9,"[75.31199645996094, 458.7729797363281, 548.6929931640625, 537.2650146484375]",,,
+81,p081-t01,unknown,partial,2,3,2,5,0.5,"[65.81999969482422, 74.05598449707031, 568.1598510742188, 122.30500030517578]",MTQF006A – JANUARY 1995 – REVISED DECEMBER 1996,"ragged rows: column counts [2, 3] vs modal 2",row_structure_uncertain
+81,p081-t02,unknown,unresolved,1,2,2,2,0.0,"[145.13400268554688, 130.677978515625, 262.0870056152344, 141.6939697265625]","0,17",fewer than two rows; cannot prove a table,not_a_table
+81,p081-t03,unknown,unresolved,1,2,2,2,0.0,"[105.22400665283203, 170.19000244140625, 300.6910095214844, 181.208984375]",,fewer than two rows; cannot prove a table,not_a_table
+81,p081-t04,unknown,unresolved,1,2,2,2,0.0,"[105.00000762939453, 276.0379943847656, 301.09100341796875, 287.0569763183594]",,fewer than two rows; cannot prove a table,not_a_table
+81,p081-t05,unknown,unresolved,1,2,2,2,0.0,"[147.0050048828125, 315.3269958496094, 260.5559997558594, 326.3429870605469]","0,13 NOM",fewer than two rows; cannot prove a table,not_a_table
+81,p081-t06,unknown,partial,4,3,2,9,0.5,"[186.97300720214844, 338.85400390625, 530.1630249023438, 390.8590087890625]","7,50 TYP","ragged rows: column counts [2, 2, 2, 3] vs modal 2",row_structure_uncertain
+81,p081-t07,unknown,unresolved,1,2,2,2,0.0,"[121.20899963378906, 404.50201416015625, 436.8529968261719, 417.1080017089844]","1,05",fewer than two rows; cannot prove a table,not_a_table
+81,p081-t08,unknown,unresolved,1,2,2,2,0.0,"[105.95899963378906, 452.75, 356.17901611328125, 467.45098876953125]",Seating Plane,fewer than two rows; cannot prove a table,not_a_table

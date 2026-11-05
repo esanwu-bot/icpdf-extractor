@@ -119,3 +119,28 @@ The same numeric text in two tables yields two distinct candidate IDs.
 DashScope provider, prompt builder, candidate-only output schema, and Python-side
 validation of candidate ownership + evidence alignment.
 
+---
+
+## Round 3 — Phase 1.1 real-datasheet diagnosis (2026-11-05)
+
+**Status:** diagnostic only; Phase 1 **not accepted**; Phase 2 remains blocked.
+
+- Coordinate chain fixed from empirical PyMuPDF 2.0 evidence: `get_text()` bboxes
+  are unrotated user-space; `page.rect` is post-crop/post-rotate. Added
+  `PageGeometry.to_display_bbox()` (0/90/180/270 + CropBox) and routed text
+  blocks through it; renderer uses integer DPI required by PyMuPDF 2.0.
+- Thresholds moved to `configs/parser.yaml` (`cell_gap_pt`, `row_gap_factor`,
+  `column_tolerance`, `header_min_hits`, `max_title_chars`, `max_cell_chars`,
+  `min_numeric_cells`); effective config + SHA-256 recorded in `run_manifest.json`.
+- Real PDFs parsed: LM358 (68p), ADS1299 (84p), ADC12DJ5200 (180p).
+- Critical finding: severe over-detection (412/391/891 tables; median 1 row;
+  unknown table_type 410/389/889; `not_a_table` 236/199/413).
+  Candidate bbox localization is 60/60 in the 20-per-model sample, but row/column
+  attribution is mostly unverifiable because headers are not recognized.
+- Full evidence and failure cases: `docs/PHASE1_1_DIAGNOSIS.md`,
+  `docs/phase1_1/<model>/`.
+- Tests: `python -m pytest -q` → 48 passed.
+- Decision: do not enter Phase 2; first fix Table Detector boundaries/headers
+  and build a human-labelled table gold set.
+
+

@@ -12,6 +12,7 @@ import pymupdf as fitz
 from icpdf import PARSER_VERSION, __version__
 from icpdf.domain import Product
 from icpdf.parser.candidate_registry import build_candidates
+from icpdf.parser.config import load_config
 from icpdf.parser.page_renderer import render_page
 from icpdf.parser.pdf_loader import LoadedPDF, load_pdf
 from icpdf.parser.table_detector import detect_tables
@@ -22,11 +23,13 @@ from icpdf.storage.run_store import RunStore
 CONTRACT_VERSION = "data-contract/v0.2"
 
 
-def _sanitized_config(requested_mpn: str, dpi: float) -> dict:
+def _sanitized_config(requested_mpn: str, dpi: float, config, config_sha: str) -> dict:
     """Never write secret values into a run artifact."""
     return {
         "requested_mpn": requested_mpn,
         "dpi": dpi,
+        "parser_config": config.model_dump(mode="json"),
+        "parser_config_sha256": config_sha,
         "llm": {
             "provider": "dashscope",
             "model": os.getenv("ICPDF_LLM_MODEL", ""),
@@ -39,9 +42,11 @@ def _sanitized_config(requested_mpn: str, dpi: float) -> dict:
 
 
 def parse_pdf(pdf_path: str | Path, requested_mpn: str,
-              runs_root: str | Path = "runs", *, dpi: float = 150.0,
-              run_id: str | None = None) -> dict:
-    loaded: LoadedPDF = load_pdf(pdf_path, dpi=dpi)
+              runs_root: str | Path = "runs", *, dpi: float | None = None,
+              run_id: str | None = None, config_path: str | Path | None = None) -> dict:
+    config, config_sha = load_config(config_path)
+    effective_dpi = float(dpi) if dpi else float(config.pdf.render_dpi)
+    loaded: LoadedPDF = load_pdf(pdf_path, dpi=effective_dpi)
     document = loaded.document
     run = RunStore.create(runs_root, run_id)
     source_sha = run.copy_source(loaded.path)
@@ -59,11 +64,12 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
             geometry = loaded.geometries[page_index]
             blocks = extract_text_blocks(page, page_number, geometry)
             all_blocks.extend(block.model_dump(mode="json") for block in blocks)
-            detected = detect_tables(blocks, page_number)
+            detected = detect_tables(blocks, page_number, config.tables)
             if detected:
                 rendered_pages.append(page_number)
                 render_page(loaded.path, page_number,
-                            run.dir / "pages" / f"page-{page_number:04d}.png", dpi=dpi)
+                            run.dir / "pages" / f"page-{page_number:04d}.png",
+                            dpi=effective_dpi)
             for index, item in enumerate(detected, 1):
                 all_tables.append(build_table(item, document.document_id, index))
 
@@ -81,7 +87,8 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
         product_type="unknown",
     )
     run.write_json("product.json", product.model_dump(mode="json"))
-    run.write_json("run_config.json", _sanitized_config(requested_mpn, dpi))
+    run.write_json("run_config.json",
+                   _sanitized_config(requested_mpn, effective_dpi, config, config_sha))
 
     manifest = run.write_manifest({
         "run_id": run.run_id,
@@ -92,8 +99,10 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
         "project_version": __version__,
         "parser_version": PARSER_VERSION,
         "contract_version": CONTRACT_VERSION,
+        "parser_config": config.model_dump(mode="json"),
+        "parser_config_sha256": config_sha,
         "platform": platform.platform(),
-        "dpi": dpi,
+        "dpi": effective_dpi,
         "page_count": document.page_count,
         "table_count": len(all_tables),
         "candidate_count": len(candidates.candidates),

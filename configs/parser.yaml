@@ -1,12 +1,20 @@
-# Parser configuration (Phase 1 defaults; not yet consumed by Phase 0 code)
+# Parser configuration (effective values are hashed into run_manifest.json)
 pdf:
   render_dpi: 150
-  # Coordinates are reported in PDF page space: origin top-left, unit = point (1/72 inch).
-  coordinate_system: pdf_page_top_left_points
   text_min_chars: 1
 
 tables:
-  # A table may be reported as unresolved when row/column structure cannot be proven.
-  detector: pymupdf_lines_and_alignment
-  min_confidence: 0.60
-  allow_unresolved: true
+  # A new column starts when the horizontal word gap exceeds this many points.
+  cell_gap_pt: 8.0
+  # A table ends when the next row starts further than this multiple of median line height.
+  row_gap_factor: 2.5
+  # Ragged rows may differ from the modal column count by at most this many columns.
+  column_tolerance: 2
+  # Minimum header-keyword hits to treat the first row as a header.
+  header_min_hits: 2
+  # Candidate heading lines longer than this are not used as a table title.
+  max_title_chars: 120
+  # A cell longer than this is prose, not a table cell; do not start a table from it.
+  max_cell_chars: 80
+  # A non-headed table must contain at least this many numeric-looking cells.
+  min_numeric_cells: 2

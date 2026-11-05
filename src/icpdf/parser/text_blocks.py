@@ -63,7 +63,8 @@ def extract_text_blocks(page, page_number: int, geometry: PageGeometry) -> list[
             span_texts: list[str] = []
             for span_index, span in enumerate(line.get("spans", [])):
                 text = str(span.get("text") or "")
-                bbox = geometry.clamp_bbox(tuple(span.get("bbox") or (0, 0, 0, 0)))
+                raw_bbox = tuple(span.get("bbox") or (0, 0, 0, 0))
+                bbox = geometry.to_display_bbox(raw_bbox)  # unrotated → page.rect
                 spans_out.append(TextSpan(
                     span_id=f"p{page_number}-b{block_index}-l{line_index}-s{span_index}",
                     bbox=bbox, text=text, font=span.get("font"),

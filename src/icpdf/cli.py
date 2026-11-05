@@ -34,10 +34,11 @@ def init(runs: Path = typer.Option(Path("runs"), help="runtime artifact root")) 
 def parse(pdf: Path = typer.Option(..., help="source PDF"),
           mpn: str = typer.Option(..., help="requested MPN"),
           runs: Path = typer.Option(Path("runs"), help="artifact root"),
-          dpi: float = typer.Option(150.0, help="render DPI")) -> None:
+          dpi: float = typer.Option(0.0, help="render DPI; 0 = use parser config"),
+          config: Path | None = typer.Option(None, help="parser YAML config")) -> None:
     """Parse a PDF into deterministic artifacts (Phase 1)."""
     from icpdf.parser.pipeline import parse_pdf
-    result = parse_pdf(pdf, mpn, runs, dpi=dpi)
+    result = parse_pdf(pdf, mpn, runs, dpi=(dpi or None), config_path=config)
     typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
 
 
