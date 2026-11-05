@@ -1,0 +1,116 @@
+{
+  "schema_version": "gold-schema/v1",
+  "annotation_version": "gen-2026-11-06.2",
+  "generated_at": "2026-11-05T19:33:39+00:00",
+  "annotator": "icpdf rule-lattice annotator + page-image inspection",
+  "reviewed_at": "2026-11-06",
+  "review_method": "independent second pass: every item re-opened as a standalone PDF crop before comparing with the annotation; parser output consulted only after the annotation was fixed",
+  "independent_review": {
+    "status": "complete",
+    "reviewer": "independent second pass (fresh context, PDF-first)",
+    "reviewed_at": "2026-11-06",
+    "method": "Each item was inspected on a standalone crop rendered from the original PDF with no parser overlay (tools/goldset/render_review_crops.py). Gold geometry, header depth, merge spans and column roles were then checked against the page's own text and vector ruling. Parser output was consulted only afterwards, to classify failures; no gold decision was copied from a parser box.",
+    "record": "gold/generalization/review_record.md",
+    "items_reviewed": 29,
+    "items_pending": 0,
+    "pending_items": [],
+    "scope": {
+      "tables": 21,
+      "negatives": 8,
+      "pdfs": [
+        "micrf103",
+        "ds10cp152",
+        "cy29fct520"
+      ],
+      "crops": "gold/generalization/review_crops/indep_<item_id>.png",
+      "parser_output_blind": true,
+      "focus_items": [
+        "MICRF103-P03-T01",
+        "CY29FCT520-P05-T01",
+        "CY29FCT520-P06-T01",
+        "CY29FCT520-P08-T01"
+      ]
+    },
+    "corrections": [
+      {
+        "item": "CY29FCT520-P10-T01",
+        "version": "gen-2026-11-06.2",
+        "change": "added as a positive table",
+        "reason": "The PINS ** / DIM dimension table inside the package drawing is a real 3x5 table; the v1 negative covered it, so the negative could not distinguish a drawing hit from a table hit."
+      },
+      {
+        "item": "DS10CP152-P13-T02",
+        "version": "gen-2026-11-06.2",
+        "change": "added as a positive table",
+        "reason": "Headerless 5x2 dimension-description table under the TAPE DIMENSIONS figure; v1 negative N03 covered its right column. Cell borders are axis-aligned quadrilateral outlines, so the item uses component: null and builds ruling from quad edges."
+      },
+      {
+        "item": "DS10CP152-N03-P13",
+        "version": "gen-2026-11-06.2",
+        "change": "bbox shrunk from [275.5, 118.0, 505.7, 264.1] to [275.5, 118.0, 505.7, 208.0]",
+        "reason": "The old box included the real P13-T02 table starting at y=213.5; the negative now stops at the figure bottom (y=208.0)."
+      },
+      {
+        "item": "all negatives",
+        "version": "gen-2026-11-06.2",
+        "change": "all bboxes and kinds re-derived from the rendered page",
+        "reason": "Five of eight v1 negatives reproduced a parser prediction exactly (MICRF103-N02, DS10CP152-N01, CY29FCT520-N01/N02/N03); three reproduced a rule component (MICRF103-N01, DS10CP152-N02, DS10CP152-N03). This is annotation provenance leakage. Every negative was checked against the rendered page and re-drawn; CY29FCT520-N03 was retained only because the parser box coincides exactly with the drawing extents 65.8/106.8/566.2/475.6 measured from the page."
+      },
+      {
+        "item": "DS10CP152-N01-P01",
+        "version": "gen-2026-11-06.2",
+        "change": "negative_kind layout -> prose; extent extended to cover FEATURES and DESCRIPTION",
+        "reason": "The v1 box ended at y=173.9 (the parser's FEATURES heading box) and omitted the DESCRIPTION prose; APPLICATIONS starts at y=338."
+      },
+      {
+        "item": "CY29FCT520-N01-P01",
+        "version": "gen-2026-11-06.2",
+        "change": "negative_kind drawing -> pin_diagram; bbox re-drawn",
+        "reason": "The v1 box was the parser's 76.6/112.9/486.5/234.3 prediction and covered only part of the pinout; the actual top/side view spans 397.1/74.8/493.6/256.6."
+      },
+      {
+        "item": "CY29FCT520-P06-T01",
+        "version": "gen-2026-11-06.2",
+        "change": "header text corrected from duplicated overprint",
+        "reason": "The PDF overprints the UNIT word twice at identical coordinates; the annotation lattice concatenated it as 'UNIT UNIT'. Identical word tuples are now de-duplicated, giving the printed label 'UNIT'."
+      }
+    ]
+  },
+  "baseline_tag": "phase1.1-baseline",
+  "baseline_commit": "1d8c7220601db734b63437abd41c36739a42aa89",
+  "pdfs": {
+    "micrf103": {
+      "label": "MICRF103",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/DAC707KP-6__MICRF103YM-Micrel-datasheet-21204957.pdf",
+      "sha256": "670a1fab95cd96244b8c8d6009d4f99351bb3d44af59ba763d7b4a2a3aca6708"
+    },
+    "ds10cp152": {
+      "label": "DS10CP152",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/DS10CP152TMAX_NOPB__ds10cp152.pdf",
+      "sha256": "14f395e46ca6a2a6fa87ae780172c5d2474dbcceaea2ac81b763f9852d30fb82"
+    },
+    "cy29fct520": {
+      "label": "CY29FCT520",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/CY29FCT520ATSOCT__cy29fct520t.pdf",
+      "sha256": "5f374e762b0b32cca58fe4715c18be12134ba68d63c4ca6db5358a9ce380686c"
+    }
+  },
+  "counts": {
+    "tables": 21,
+    "negatives": 8,
+    "negative_kinds": [
+      "drawing",
+      "pin_diagram",
+      "prose",
+      "schematic"
+    ],
+    "tables_per_pdf": {
+      "micrf103": 3,
+      "ds10cp152": 12,
+      "cy29fct520": 6
+    }
+  },
+  "human_verdicts": {
+    "accepted": 29
+  }
+}

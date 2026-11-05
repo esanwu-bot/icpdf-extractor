@@ -26,13 +26,12 @@ import pymupdf
 import yaml
 
 from tools.goldset.rules import (RuleComponent, Segment, build_rule_grid,
-                                 rule_components)
+                                 page_segments, rule_components)
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC_PATH = ROOT / "gold" / "spec.yaml"
 GOLD_DIR = ROOT / "gold"
 OVERLAY_DIR = GOLD_DIR / "overlays"
-INDEPENDENT_REVIEW_PATH = GOLD_DIR / "independent_review.json"
 BASELINE_TAG = "phase1.1-baseline"
 
 
@@ -64,7 +63,7 @@ def _header_labels(grid, header_rows: int) -> list[str]:
     return labels
 
 
-def _load_independent_review(path: Path = INDEPENDENT_REVIEW_PATH) -> dict:
+def _load_independent_review(path: Path) -> dict:
     if not path.exists():
         return {"status": "pending", "items": {}}
     return json.loads(path.read_text(encoding="utf-8"))
@@ -104,14 +103,119 @@ def _resolve_component(components: list[RuleComponent], index_spec, item_id: str
     return _merge_components([components[i] for i in indices])
 
 
+def _quad_border_segments(page: pymupdf.Page,
+                          bbox: tuple[float, float, float, float],
+                          tol: float = 2.0) -> list[Segment]:
+    """Borders of axis-aligned "qu" cell outlines inside ``bbox``.
+
+    Some datasheets draw ruled tables as one quadrilateral per cell.  Those
+    edges are real ruling but ``page_segments`` only reads lines and rects.
+    """
+    x0, y0, x1, y1 = bbox
+    segments: list[Segment] = []
+    for drawing in page.get_drawings():
+        for item in drawing["items"]:
+            if item[0] != "qu":
+                continue
+            rect = item[1].rect
+            if rect.x1 < x0 - tol or rect.x0 > x1 + tol:
+                continue
+            if rect.y1 < y0 - tol or rect.y0 > y1 + tol:
+                continue
+            rx0, ry0 = max(rect.x0, x0), max(rect.y0, y0)
+            rx1, ry1 = min(rect.x1, x1), min(rect.y1, y1)
+            if rx1 - rx0 < 1.0 or ry1 - ry0 < 1.0:
+                continue
+            segments.extend([
+                Segment("h", rx0, rx1, ry0),
+                Segment("h", rx0, rx1, ry1),
+                Segment("v", ry0, ry1, rx0),
+                Segment("v", ry0, ry1, rx1),
+            ])
+    return segments
+
+
+def _synthetic_component(page: pymupdf.Page,
+                         bbox: tuple[float, float, float, float],
+                         item_id: str) -> RuleComponent:
+    """Component for tables the lattice cannot cluster (e.g. quad-only ruling)."""
+    x0, y0, x1, y1 = bbox
+    tol = 2.0
+    horizontal: list[Segment] = []
+    vertical: list[Segment] = []
+    for seg in list(page_segments(page)) + _quad_border_segments(page, bbox):
+        if seg.orientation == "h":
+            if y0 - tol <= seg.c <= y1 + tol:
+                a, b = max(seg.a, x0), min(seg.b, x1)
+                if b - a >= 2.0:
+                    horizontal.append(Segment("h", a, b, seg.c))
+        elif x0 - tol <= seg.c <= x1 + tol:
+            a, b = max(seg.a, y0), min(seg.b, y1)
+            if b - a >= 2.0:
+                vertical.append(Segment("v", a, b, seg.c))
+    if not horizontal or not vertical:
+        raise ValueError(f"{item_id}: no ruling found inside bbox {bbox} for the "
+                         "synthetic component")
+    return RuleComponent(tuple(bbox), tuple(horizontal), tuple(vertical))
+
+
+def _normalize_merges(item: dict) -> list[tuple[int, int, int, int]]:
+    """v2 span records map to the grid's inclusive rectangle form.
+
+    Frozen v1 specs use ``merges: [[row_start, row_end, column_start,
+    column_end]]``; v2 uses ``merged_cells: [{row, column, row_span,
+    column_span}]``.  Both describe cell regions, never boundaries.
+    """
+    spans = []
+    for record in item.get("merged_cells") or []:
+        row = int(record["row"])
+        column = int(record["column"])
+        row_span = int(record.get("row_span", 1))
+        column_span = int(record.get("column_span", 1))
+        if row_span < 1 or column_span < 1:
+            raise ValueError(f"{item['id']}: merged_cells spans must be >= 1")
+        spans.append((row, row + row_span - 1, column, column + column_span - 1))
+    spans.extend(tuple(int(v) for v in m) for m in item.get("merges") or [])
+    return spans
+
+
+def _normalize_no_merge(item: dict) -> set[tuple[int, int]]:
+    """v2 boundary segments map to the (row, left-cell) pairs the grid uses.
+
+    A ``vertical`` segment at ``column_boundaries[k]`` over rows
+    ``start..end`` prevents the grid from merging cells (row, k-1) and
+    (row, k).  Frozen v1 specs already store those cell pairs directly.
+    """
+    cells: set[tuple[int, int]] = set()
+    for record in item.get("no_merge") or []:
+        if not isinstance(record, dict):
+            cells.add(tuple(int(v) for v in record))
+            continue
+        orientation = record.get("orientation", "vertical")
+        if orientation != "vertical":
+            raise ValueError(f"{item['id']}: unsupported no_merge orientation {orientation}")
+        boundary = int(record["boundary"])
+        if boundary < 1:
+            raise ValueError(f"{item['id']}: no_merge boundary index must be >= 1")
+        for row in range(int(record["start"]), int(record["end"]) + 1):
+            cells.add((row, boundary - 1))
+    return cells
+
+
 def _table_record(item: dict, pdf_meta: dict, defaults: dict,
                   independent: dict | None = None) -> dict:
     path = Path(pdf_meta["path"])
     with pymupdf.open(path) as doc:
         page = doc[item["page"] - 1]
-        components = rule_components(page)
-        component = _resolve_component(components, item["component"], item["id"],
-                                       item["page"])
+        if item.get("component") is None:
+            if not item.get("bbox"):
+                raise ValueError(f"{item['id']}: component: null requires an "
+                                 "explicit bbox")
+            component = _synthetic_component(page, tuple(item["bbox"]), item["id"])
+        else:
+            components = rule_components(page)
+            component = _resolve_component(components, item["component"],
+                                           item["id"], item["page"])
         header_rows = int(item.get("header_rows", 1))
         grid = build_rule_grid(
             page,
@@ -121,11 +225,25 @@ def _table_record(item: dict, pdf_meta: dict, defaults: dict,
             row_boundaries=item.get("row_boundaries"),
             bbox=tuple(item["bbox"]) if item.get("bbox") else None,
             full_width_rows=set(item.get("full_width_rows") or []),
-            merges=[tuple(m) for m in (item.get("merges") or [])],
-            no_merge={tuple(m) for m in (item.get("no_merge") or [])},
+            merges=_normalize_merges(item),
+            no_merge=_normalize_no_merge(item),
         )
     n_columns = len(grid.xs) - 1
     n_rows = len(grid.ys) - 1
+    logical_columns = item.get("logical_columns", n_columns)
+    if logical_columns is not None and int(logical_columns) != n_columns:
+        raise ValueError(f"{item['id']}: logical_columns={logical_columns} but the "
+                         f"logical grid has {n_columns} columns")
+    visual_status = item.get("visual_boundary_status", "printed")
+    visual_columns = item.get("visual_columns")
+    if visual_status == "not_printed":
+        if visual_columns is not None:
+            raise ValueError(f"{item['id']}: not_printed tables must set "
+                             "visual_columns: null")
+    elif visual_columns is None:
+        visual_columns = n_columns
+    if visual_columns is not None and int(visual_columns) < 1:
+        raise ValueError(f"{item['id']}: visual_columns must be >= 1")
     verdict, review = _review_fields(item, defaults, independent)
     roles = list(item["column_roles"])
     if len(roles) != n_columns:
@@ -167,6 +285,12 @@ def _table_record(item: dict, pdf_meta: dict, defaults: dict,
             "header_rows": header_rows,
             "n_rows": n_rows,
             "n_columns": n_columns,
+            "logical_columns": logical_columns,
+            "visual_columns": (int(visual_columns) if visual_columns is not None
+                               else None),
+            "visual_boundary_status": visual_status,
+            "partial_boundaries": [round(float(v), 2)
+                                   for v in item.get("partial_boundaries") or []],
             "n_data_rows": n_rows - header_rows,
             "headers": _header_labels(grid, header_rows),
             "column_roles": roles,
@@ -232,8 +356,11 @@ def _write_gallery(records: list[dict], out_dir: Path = GOLD_DIR) -> None:
         image = f"overlays/{record['item_id']}.png"
         if record["kind"] == "table":
             table = record["table"]
+            visual = table.get("visual_columns")
             detail = (f"{table['n_columns']}c x {table['n_rows']}r "
-                      f"(header {table['header_rows']}) · {table['table_type']}")
+                      f"(header {table['header_rows']}) · {table['table_type']} · "
+                      f"visual {visual if visual is not None else 'n/a'} "
+                      f"({table['visual_boundary_status']})")
             roles = ", ".join(table["column_roles"])
             extra = f"<div class='roles'>{roles}</div>"
             if table.get("cross_page"):
@@ -322,12 +449,17 @@ def main(argv: list[str] | None = None) -> int:
                 if r["review"].get("independent_review") not in (None, "pending")]
     pending = [r["item_id"] for r in records
                if r["review"].get("independent_review") in (None, "pending")]
+    record_path = (out_dir / "review_record.md").resolve()
+    try:
+        record_label = record_path.relative_to(ROOT).as_posix()
+    except ValueError:
+        record_label = record_path.as_posix()
     independent_summary = {
         "status": independent.get("status", "pending"),
         "reviewer": independent.get("reviewer"),
         "reviewed_at": independent.get("reviewed_at"),
         "method": independent.get("method"),
-        "record": "gold/review_record.md",
+        "record": record_label,
         "items_reviewed": len(reviewed),
         "items_pending": len(pending),
         "pending_items": pending,

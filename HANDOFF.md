@@ -296,3 +296,47 @@ validation of candidate ownership + evidence alignment.
   schematic/drawing/layout negatives; `gold/README.md` documents the
   generalization set and the frozen-parameter rule.
 - Not pushed to Codeup; no LLM, DashScope or automatic parameter generation.
+
+---
+
+## Round 8 — Gold Spec v2 + independent gold review (2026-11-06)
+
+**Status:** gold-side work complete; generalization metrics are internal only;
+Detector code untouched.
+
+- **Gold Spec v2.** `docs/GOLD_SPEC.md` resolves the v1 contradiction by
+  recording `visual_columns` + `visual_boundary_status` separately from
+  `logical_columns`, with four metrics that have distinct denominators and
+  exclusions (visual boundary, logical column, header attribution, role
+  accuracy).  `merged_cells` is span-based and points at cells; `no_merge`
+  points at boundary segments.  Ambiguous tables are no longer excluded
+  wholesale; only the specific metric with no comparable representation is.
+- **Tooling.** `tools/goldset/annotate.py` accepts `merged_cells` /
+  `no_merge` / `visual_columns` / `logical_columns` / `partial_boundaries`,
+  supports `component: null` (synthetic component built from `page_segments`
+  plus axis-aligned quadrilateral cell outlines), and derives the review-record
+  path from `--out-dir`.  `tools/goldset/evaluate.py` emits the four new
+  column metrics plus mismatch cases.  `tools/goldset/rules.py` de-duplicates
+  identical overprinted word objects (CY29 UNIT overprint).
+  New `tools/goldset/render_review_crops.py` renders standalone PDF crops for
+  independent review.
+- **Independent review.** `gold/generalization/independent_review.json` and
+  `review_record.md`: all 21 tables and 8 negatives checked PDF-first on
+  overlay-free crops.  Statuses: 9 confirmed, 9 confirmed_with_note,
+  11 corrected.  Corrections: added CY29FCT520-P10-T01 and
+  DS10CP152-P13-T02, shrank DS10CP152-N03-P13 to the drawing, reclassified
+  DS10CP152-N01 as prose, re-drew all negatives.  Provenance defect recorded:
+  five of eight v1 negatives were parser boxes and three were rule components.
+- **Gold `gen-2026-11-06.2`:** 21 tables / 8 negatives (MICRF 3/2, DS10 12/3,
+  CY29 6/3).  `gen-2026-11-06.1` remains frozen and immutable.
+- **Internal results on the frozen parser:** TP 19 / FP 7 / FN 2, P 0.7308,
+  R 0.9048, F1 0.8085; 4 negative FPs; 7 out-of-scope.  Rows 19/19, visual
+  boundary 11/17, logical column 16/19, cell F1 0.8443, header 95/95, depth
+  18/19, header-cell F1 0.9896, multi-layer 4/4, role 0.8586, type 0.6316.
+  New FN families: MICRF103-P03 fragmentation (outer boundary) and
+  DS10CP152-P13-T02 (quadrilateral-only ruling, invisible to line/rect
+  detection).
+- **Not an acceptance version.** Phase 2 stays frozen, the generalization gate
+  stays open, and no unreviewed metric is packaged as a pass.  Detector
+  parameters are frozen; no MICRF-specific special case was written.
+- Not pushed to Codeup.

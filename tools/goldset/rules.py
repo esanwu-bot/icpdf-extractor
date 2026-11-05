@@ -338,7 +338,17 @@ def build_rule_grid(page: pymupdf.Page, component: RuleComponent,
 
 
 def _assign_words(page: pymupdf.Page, grid: RuleGrid) -> None:
-    words = page.get_text("words", sort=False)
+    words = []
+    seen: set[tuple[float, float, float, float, str]] = set()
+    for word in page.get_text("words", sort=False):
+        # Some datasheets overprint the same text object twice; keep one copy
+        # so a printed label such as UNIT is not concatenated as UNIT UNIT.
+        key = (round(word[0], 2), round(word[1], 2), round(word[2], 2),
+               round(word[3], 2), word[4])
+        if key in seen:
+            continue
+        seen.add(key)
+        words.append(word)
     by_cell: dict[int, list[tuple[float, float, float, float, str]]] = {}
     for word in words:
         x0, y0, x1, y1, text = word[:5]

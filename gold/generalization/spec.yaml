@@ -2,7 +2,9 @@
 #
 # These three vendor documents did not participate in any rule tuning.  The
 # parser parameters were frozen in PARAMS_FROZEN.json before this file was
-# written; nothing here may be changed after the first generalization run.
+# written.  Version .1 was frozen before the independent review; version .2
+# records the corrections that review produced (redrawn negative extents, the
+# page-10 PINS/DIM table, and visual/logical column metadata).
 #
 # The rule lattice proposes the grid; every entry below was checked against a
 # rendered page image.  Logical tables that the lattice splits into row bands
@@ -10,11 +12,11 @@
 # plus explicit row/column boundaries.
 
 schema_version: "gold-schema/v1"
-annotation_version: "gen-2026-11-06.1"
+annotation_version: "gen-2026-11-06.2"
 reviewed_at: "2026-11-06"
 annotator: "icpdf rule-lattice annotator + page-image inspection"
-review_method: "each table checked against the rendered datasheet page; headers and roles read from the printed labels"
-reviewer: "pending independent review"
+review_method: "independent second pass: every item re-opened as a standalone PDF crop before comparing with the annotation; parser output consulted only after the annotation was fixed"
+reviewer: "independent second pass (fresh context, PDF-first)"
 default_verdict: accepted
 
 pdfs:
@@ -40,6 +42,9 @@ tables:
     header_rows: 1
     table_type: ordering_information
     column_roles: [symbol, condition, value]
+    visual_columns: 3
+    logical_columns: 3
+    visual_boundary_status: printed
     notes: "Ordering Information; right column of page 1"
   - id: MICRF103-P02-T01
     pdf: micrf103
@@ -48,6 +53,9 @@ tables:
     header_rows: 1
     table_type: pin_functions
     column_roles: [pin, name, description]
+    visual_columns: 3
+    logical_columns: 3
+    visual_boundary_status: printed
     notes: "Pin Description"
   - id: MICRF103-P03-T01
     pdf: micrf103
@@ -63,7 +71,10 @@ tables:
                      448.1, 475.4, 502.8, 530.0, 546.5, 562.8, 590.2, 606.5,
                      622.8, 650.2, 666.6, 682.9, 699.2, 715.6, 732.0]
     full_width_rows: [1, 9, 15, 19]
-    notes: "Electrical Characteristics; outer Symbol and Units columns are delimited only by the horizontal rules (46.8-586.8), so the parser's rule-bbox table loses both"
+    visual_columns: 6
+    logical_columns: 6
+    visual_boundary_status: implied_outer
+    notes: "Electrical Characteristics; the Symbol and Units columns have no drawn side rules, so the outer boundaries are implied by the horizontal-rule extents (46.8-586.8); the five internal separators are printed"
 
   # ---------------- DS10CP152 (National / TI) ----------------
   - id: DS10CP152-P02-T01
@@ -73,6 +84,9 @@ tables:
     header_rows: 1
     table_type: pin_functions
     column_roles: [name, pin, value, description]
+    visual_columns: 4
+    logical_columns: 4
+    visual_boundary_status: printed
     notes: "PIN DESCRIPTIONS"
   - id: DS10CP152-P03-T01
     pdf: ds10cp152
@@ -81,7 +95,11 @@ tables:
     header_rows: 0
     table_type: absolute_maximum
     column_roles: [name, value]
-    notes: "Absolute Maximum Ratings; headerless two-column list with group rows"
+    visual_columns: 2
+    logical_columns: 2
+    visual_boundary_status: partial
+    partial_boundaries: [331.0]
+    notes: "Absolute Maximum Ratings; headerless two-column list with group rows; the centre rule spans only some row bands"
   - id: DS10CP152-P03-T02
     pdf: ds10cp152
     page: 3
@@ -89,6 +107,9 @@ tables:
     header_rows: 1
     table_type: recommended_operating
     column_roles: [unknown, min, typ, max, unit]
+    visual_columns: 5
+    logical_columns: 5
+    visual_boundary_status: printed
     notes: "Recommended Operating Conditions; first column has no printed label"
   - id: DS10CP152-P04-T01
     pdf: ds10cp152
@@ -98,7 +119,11 @@ tables:
     table_type: electrical_characteristics
     column_roles: [symbol, name, condition, min, typ, max, unit]
     column_boundaries: [54.1, 89.1, 285.6, 426.8, 462.0, 492.3, 527.3, 557.9]
-    notes: "DC Electrical Characteristics; the 346.1 rule is a body-only condition sub-rule, not a column"
+    visual_columns: 8
+    logical_columns: 7
+    visual_boundary_status: partial
+    partial_boundaries: [346.1]
+    notes: "DC Electrical Characteristics; the 346.1 rule exists only in a body condition band, so it is a visual boundary but not a logical column"
   - id: DS10CP152-P05-T01
     pdf: ds10cp152
     page: 5
@@ -107,7 +132,11 @@ tables:
     table_type: electrical_characteristics
     column_roles: [symbol, name, condition, min, typ, max, unit]
     column_boundaries: [54.1, 123.6, 278.4, 428.0, 462.9, 492.9, 527.9, 557.7]
-    notes: "AC Electrical Characteristics; the 363.1 rule is a body-only condition sub-rule, not a column"
+    visual_columns: 8
+    logical_columns: 7
+    visual_boundary_status: partial
+    partial_boundaries: [363.1]
+    notes: "AC Electrical Characteristics; the 363.1 rule spans only the lower body rows, so it is a visual boundary but not a logical column"
   - id: DS10CP152-P07-T01
     pdf: ds10cp152
     page: 7
@@ -115,6 +144,9 @@ tables:
     header_rows: 1
     table_type: other
     column_roles: [condition, condition, value, value]
+    visual_columns: 4
+    logical_columns: 4
+    visual_boundary_status: printed
     notes: "Table 1. Switch Configuration Truth Table"
   - id: DS10CP152-P07-T02
     pdf: ds10cp152
@@ -123,6 +155,9 @@ tables:
     header_rows: 1
     table_type: other
     column_roles: [condition, condition, value, value]
+    visual_columns: 4
+    logical_columns: 4
+    visual_boundary_status: printed
     notes: "Table 2. Output Enable Truth Table"
   - id: DS10CP152-P11-T01
     pdf: ds10cp152
@@ -131,7 +166,10 @@ tables:
     header_rows: 1
     table_type: ordering_information
     column_roles: [value, value, value, value, value, value, value, value, condition, value]
-    notes: "PACKAGING INFORMATION (landscape); Package/Pins and Package qty/Carrier are single cells"
+    visual_columns: null
+    logical_columns: 10
+    visual_boundary_status: not_printed
+    notes: "PACKAGING INFORMATION (landscape); no internal vertical rules, so the logical columns come from the printed header labels only and the table is excluded from visual boundary exactness"
   - id: DS10CP152-P13-T01
     pdf: ds10cp152
     page: 13
@@ -139,7 +177,24 @@ tables:
     header_rows: 1
     table_type: other
     column_roles: [symbol, value, value, value, value, value, value, value, value, value, value, value, value]
+    visual_columns: 13
+    logical_columns: 13
+    visual_boundary_status: printed
     notes: "Tape and reel dimensions"
+  - id: DS10CP152-P13-T02
+    pdf: ds10cp152
+    page: 13
+    component: null
+    header_rows: 0
+    table_type: other
+    column_roles: [symbol, value]
+    bbox: [257.4, 213.4, 505.8, 264.0]
+    column_boundaries: [257.4, 275.5, 505.8]
+    row_boundaries: [213.4, 223.6, 233.7, 243.8, 253.9, 264.0]
+    visual_columns: 2
+    logical_columns: 2
+    visual_boundary_status: printed
+    notes: "Headerless dimension-description table under the TAPE DIMENSIONS figure; all cell borders are axis-aligned quadrilateral outlines (qu), so component: null builds the ruling from those edges; rows A0/B0/K0/W/P1"
   - id: DS10CP152-P14-T01
     pdf: ds10cp152
     page: 14
@@ -147,6 +202,9 @@ tables:
     header_rows: 1
     table_type: other
     column_roles: [symbol, value, value, value, value, value, value, value]
+    visual_columns: 8
+    logical_columns: 8
+    visual_boundary_status: printed
     notes: "Tube dimensions"
   - id: DS10CP152-P15-T01
     pdf: ds10cp152
@@ -155,6 +213,9 @@ tables:
     header_rows: 1
     table_type: other
     column_roles: [symbol, value, value, value, value, value, value, value, value]
+    visual_columns: 9
+    logical_columns: 9
+    visual_boundary_status: printed
     notes: "Tray dimensions"
 
   # ---------------- CY29FCT520 (Cypress / TI) ----------------
@@ -166,8 +227,13 @@ tables:
     table_type: recommended_operating
     column_roles: [unknown, min, typ, max, min, typ, max, unit]
     column_boundaries: [45.5, 331.9, 362.9, 393.2, 421.4, 452.5, 483.0, 511.1, 547.0]
-    merges: [[0, 0, 1, 3], [0, 0, 4, 6]]
-    notes: "recommended operating conditions; two-row header; the left band has no printed column label or internal rule, so it stays one unknown column"
+    merged_cells:
+      - {row: 0, column: 1, row_span: 1, column_span: 3}
+      - {row: 0, column: 4, row_span: 1, column_span: 3}
+    visual_columns: 4
+    logical_columns: 8
+    visual_boundary_status: printed
+    notes: "recommended operating conditions; four printed bands (left band, two device groups, unit); MIN/NOM/MAX inside each group have no printed separators and are logical columns derived from the header labels"
   - id: CY29FCT520-P04-T02
     pdf: cy29fct520
     page: 4
@@ -176,8 +242,14 @@ tables:
     table_type: electrical_characteristics
     column_roles: [symbol, condition, min, typ, max, min, typ, max, unit]
     column_boundaries: [45.5, 108.3, 325.7, 357.4, 388.5, 418.4, 450.5, 481.2, 511.1, 547.0]
-    merges: [[0, 0, 2, 4], [0, 0, 5, 7]]
-    notes: "electrical characteristics over recommended operating free-air temperature range; MIN/TYP/MAX split at header-label midpoints"
+    merged_cells:
+      - {row: 0, column: 2, row_span: 1, column_span: 3}
+      - {row: 0, column: 5, row_span: 1, column_span: 3}
+    visual_columns: 6
+    logical_columns: 9
+    visual_boundary_status: partial
+    partial_boundaries: [173.2]
+    notes: "electrical characteristics; the 173.2 rule covers only a condition sub-band, and the MIN/TYP/MAX splits are header-label-derived"
   - id: CY29FCT520-P05-T01
     pdf: cy29fct520
     page: 5
@@ -186,8 +258,14 @@ tables:
     table_type: electrical_characteristics
     column_roles: [symbol, condition, min, typ, max, min, typ, max, unit]
     column_boundaries: [66.2, 129.0, 346.4, 377.2, 409.7, 439.1, 470.0, 502.4, 531.9, 567.8]
-    merges: [[0, 0, 2, 4], [0, 0, 5, 7]]
-    notes: "electrical characteristics (continued)"
+    merged_cells:
+      - {row: 0, column: 2, row_span: 1, column_span: 3}
+      - {row: 0, column: 5, row_span: 1, column_span: 3}
+    visual_columns: 7
+    logical_columns: 9
+    visual_boundary_status: partial
+    partial_boundaries: [193.9, 266.0]
+    notes: "electrical characteristics (continued); two body-only condition sub-rules are visual boundaries, not logical columns"
   - id: CY29FCT520-P06-T01
     pdf: cy29fct520
     page: 6
@@ -196,8 +274,15 @@ tables:
     table_type: recommended_operating
     column_roles: [unknown, condition, min, max, min, max, unit]
     column_boundaries: [45.5, 289.8, 337.7, 389.7, 424.4, 476.4, 511.1, 547.0]
-    merges: [[0, 0, 0, 1], [0, 0, 2, 3], [0, 0, 4, 5]]
-    notes: "timing requirements, ATDMB/BTDMB groups; left band is unlabeled (symbol + description merged by rules)"
+    merged_cells:
+      - {row: 0, column: 0, row_span: 1, column_span: 2}
+      - {row: 0, column: 2, row_span: 1, column_span: 2}
+      - {row: 0, column: 4, row_span: 1, column_span: 2}
+    visual_columns: 5
+    logical_columns: 7
+    visual_boundary_status: partial
+    partial_boundaries: [289.8]
+    notes: "timing requirements, ATDMB/BTDMB groups; the 289.8 Data/I rule is body-only, and the MIN/MAX splits are header-label-derived"
   - id: CY29FCT520-P08-T01
     pdf: cy29fct520
     page: 8
@@ -206,54 +291,79 @@ tables:
     table_type: ordering_information
     column_roles: [value, value, value, value, value, value, value, value, value, condition, value, value]
     column_boundaries: [36.8, 148.0, 196.0, 256.5, 293.5, 316.5, 360.0, 412.0, 500.0, 580.0, 660.0, 760.0, 832.7]
-    notes: "PACKAGING INFORMATION (landscape); no vertical rules, boundaries from header labels"
+    visual_columns: null
+    logical_columns: 12
+    visual_boundary_status: not_printed
+    notes: "PACKAGING INFORMATION (landscape); no internal vertical rules, boundaries come from the printed header labels only"
+  - id: CY29FCT520-P10-T01
+    pdf: cy29fct520
+    page: 10
+    component: 1
+    header_rows: 1
+    table_type: other
+    column_roles: [symbol, value, value]
+    bbox: [414.4, 123.2, 543.7, 267.2]
+    column_boundaries: [414.4, 471.7, 508.1, 543.7]
+    row_boundaries: [123.2, 152.0, 180.8, 209.3, 238.5, 267.2]
+    visual_columns: 3
+    logical_columns: 3
+    visual_boundary_status: printed
+    notes: "PINS/DIM dimension table printed inside the package drawing; the top-left header cell is diagonally split (PINS ** over the pin-count columns, DIM over the dimension column); rows A MAX / A MIN / B MAX / B MIN"
 
 negatives:
   - id: MICRF103-N01-P01
     pdf: micrf103
     page: 1
     negative_kind: schematic
-    bbox: [140.1, 564.8, 395.0, 699.1]
-    notes: "Typical Application schematic"
+    bbox: [135.2, 552.0, 500.3, 720.1]
+    bbox_source: rendered_page
+    notes: "Figure 1 Typical Application; extent drawn from the rendered figure"
   - id: MICRF103-N02-P04
     pdf: micrf103
     page: 4
     negative_kind: schematic
-    bbox: [242.9, 208.4, 372.7, 263.7]
-    notes: "Test Circuit; parser produced p004-t01 here"
+    bbox: [159.9, 193.7, 430.9, 279.2]
+    bbox_source: rendered_page
+    notes: "Test Circuit figure; extent drawn from the rendered figure"
   - id: DS10CP152-N01-P01
     pdf: ds10cp152
     page: 1
-    negative_kind: layout
-    bbox: [54.0, 129.8, 558.0, 173.9]
-    notes: "features/description header band; parser produced p001-t01 here"
+    negative_kind: prose
+    bbox: [54.0, 126.7, 558.0, 336.0]
+    bbox_source: rendered_page
+    notes: "FEATURES and DESCRIPTION text bands; APPLICATIONS starts at y=338, so the box stops before it"
   - id: DS10CP152-N02-P06
     pdf: ds10cp152
     page: 6
     negative_kind: schematic
-    bbox: [230.8, 122.3, 408.0, 187.0]
-    notes: "AC Test Circuit"
+    bbox: [116.4, 106.0, 494.4, 208.4]
+    bbox_source: rendered_page
+    notes: "Figure 1 AC Test Circuit; extent drawn from the rendered figure"
   - id: DS10CP152-N03-P13
     pdf: ds10cp152
     page: 13
     negative_kind: drawing
-    bbox: [331.5, 136.2, 436.0, 202.8]
-    notes: "package drawing inside tape-and-reel figure"
+    bbox: [275.5, 118.0, 505.7, 208.0]
+    bbox_source: rendered_page
+    notes: "TAPE DIMENSIONS figure; the box stops at y=208 because the real headerless dimension table (P13-T02) starts at y=213.4"
   - id: CY29FCT520-N01-P01
     pdf: cy29fct520
     page: 1
-    negative_kind: drawing
-    bbox: [76.6, 112.9, 486.5, 234.3]
-    notes: "pinout drawing; parser produced p001-t01 here"
+    negative_kind: pin_diagram
+    bbox: [397.1, 74.8, 493.6, 256.6]
+    bbox_source: rendered_page
+    notes: "pinout drawing (top view and side view)"
   - id: CY29FCT520-N02-P02
     pdf: cy29fct520
     page: 2
     negative_kind: schematic
-    bbox: [147.1, 87.8, 446.2, 193.1]
-    notes: "PIPELINE INSTRUCTION TABLE diagram; parser produced p002-t01 here"
+    bbox: [157.3, 74.8, 437.7, 191.2]
+    bbox_source: rendered_page
+    notes: "PIPELINE INSTRUCTION TABLE block diagram"
   - id: CY29FCT520-N03-P10
     pdf: cy29fct520
     page: 10
     negative_kind: drawing
     bbox: [65.8, 106.8, 566.2, 475.6]
-    notes: "package drawing; parser produced p010-t01 here"
+    bbox_source: rendered_page
+    notes: "package drawing; contains the positive PINS/DIM table island at [414.4, 123.2, 543.7, 267.2], which is excluded from negative FP when matched"

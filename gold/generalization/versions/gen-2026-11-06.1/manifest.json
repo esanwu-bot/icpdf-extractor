@@ -1,0 +1,84 @@
+{
+  "schema_version": "gold-schema/v1",
+  "annotation_version": "gen-2026-11-06.1",
+  "generated_at": "2026-11-05T18:55:49+00:00",
+  "annotator": "icpdf rule-lattice annotator + page-image inspection",
+  "reviewed_at": "2026-11-06",
+  "review_method": "each table checked against the rendered datasheet page; headers and roles read from the printed labels",
+  "independent_review": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewed_at": null,
+    "method": null,
+    "record": "gold/review_record.md",
+    "items_reviewed": 0,
+    "items_pending": 27,
+    "pending_items": [
+      "MICRF103-P01-T01",
+      "MICRF103-P02-T01",
+      "MICRF103-P03-T01",
+      "DS10CP152-P02-T01",
+      "DS10CP152-P03-T01",
+      "DS10CP152-P03-T02",
+      "DS10CP152-P04-T01",
+      "DS10CP152-P05-T01",
+      "DS10CP152-P07-T01",
+      "DS10CP152-P07-T02",
+      "DS10CP152-P11-T01",
+      "DS10CP152-P13-T01",
+      "DS10CP152-P14-T01",
+      "DS10CP152-P15-T01",
+      "CY29FCT520-P04-T01",
+      "CY29FCT520-P04-T02",
+      "CY29FCT520-P05-T01",
+      "CY29FCT520-P06-T01",
+      "CY29FCT520-P08-T01",
+      "MICRF103-N01-P01",
+      "MICRF103-N02-P04",
+      "DS10CP152-N01-P01",
+      "DS10CP152-N02-P06",
+      "DS10CP152-N03-P13",
+      "CY29FCT520-N01-P01",
+      "CY29FCT520-N02-P02",
+      "CY29FCT520-N03-P10"
+    ],
+    "scope": {},
+    "corrections": []
+  },
+  "baseline_tag": "phase1.1-baseline",
+  "baseline_commit": "1d8c7220601db734b63437abd41c36739a42aa89",
+  "pdfs": {
+    "micrf103": {
+      "label": "MICRF103",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/DAC707KP-6__MICRF103YM-Micrel-datasheet-21204957.pdf",
+      "sha256": "670a1fab95cd96244b8c8d6009d4f99351bb3d44af59ba763d7b4a2a3aca6708"
+    },
+    "ds10cp152": {
+      "label": "DS10CP152",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/DS10CP152TMAX_NOPB__ds10cp152.pdf",
+      "sha256": "14f395e46ca6a2a6fa87ae780172c5d2474dbcceaea2ac81b763f9852d30fb82"
+    },
+    "cy29fct520": {
+      "label": "CY29FCT520",
+      "path": "E:/workspace/IcPdfParser/data/pdfs/CY29FCT520ATSOCT__cy29fct520t.pdf",
+      "sha256": "5f374e762b0b32cca58fe4715c18be12134ba68d63c4ca6db5358a9ce380686c"
+    }
+  },
+  "counts": {
+    "tables": 19,
+    "negatives": 8,
+    "negative_kinds": [
+      "drawing",
+      "layout",
+      "schematic"
+    ],
+    "tables_per_pdf": {
+      "micrf103": 3,
+      "ds10cp152": 11,
+      "cy29fct520": 5
+    }
+  },
+  "human_verdicts": {
+    "accepted": 27
+  }
+}

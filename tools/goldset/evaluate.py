@@ -167,6 +167,11 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
     gold_table = gold["table"]
     gold_rows = gold_table["n_rows"]
     gold_columns = gold_table["n_columns"]
+    gold_logical = gold_table.get("logical_columns", gold_columns)
+    gold_visual = gold_table.get("visual_columns", gold_columns)
+    visual_status = gold_table.get("visual_boundary_status", "printed")
+    visual_comparable = gold_visual is not None and visual_status != "not_printed"
+    logical_comparable = gold_logical is not None
     pred_rows = len(pred["rows"])
     pred_columns = _prediction_columns(pred)
 
@@ -178,8 +183,9 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
     pred_headers = [_norm(h) for h in pred.get("headers") or []]
     gold_keys = [_compact(h) for h in gold_headers]
     pred_keys = [_compact(h) for h in pred_headers]
-    comparable = pred_columns == gold_columns and len(pred_headers) == gold_columns
-    # Column attribution is scored over gold columns that actually carry a
+    comparable = (logical_comparable and pred_columns == gold_logical
+                  and len(pred_headers) == gold_logical)
+    # Column attribution is scored over logical columns that actually carry a
     # label; an empty gold label is annotation debt, not a predicted miss.
     labeled_columns = [index for index, key in enumerate(gold_keys) if key]
     if comparable:
@@ -199,7 +205,7 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
     gold_roles = [COARSE_ROLE.get(role, "value") for role in gold_table["column_roles"]]
     pred_roles = [roles.get((pred["table_id"], column), "unknown")
                   for column in range(pred_columns)]
-    role_length_ok = pred_columns == gold_columns
+    role_length_ok = logical_comparable and pred_columns == gold_logical
     role_hits = sum(1 for g, p in zip(gold_roles, pred_roles)
                     if role_length_ok and g == p)
     gold_header_rows = int(gold_table.get("header_rows", 0))
@@ -210,8 +216,15 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
                  "exact": gold_rows == pred_rows,
                  "error": pred_rows - gold_rows},
         "columns": {"gold": gold_columns, "pred": pred_columns,
-                    "exact": gold_columns == pred_columns,
-                    "error": pred_columns - gold_columns},
+                    "exact": role_length_ok,
+                    "error": pred_columns - gold_columns,
+                    "visual_gold": gold_visual,
+                    "visual_status": visual_status,
+                    "visual_comparable": visual_comparable,
+                    "visual_exact": visual_comparable and pred_columns == gold_visual,
+                    "logical_gold": gold_logical,
+                    "logical_comparable": logical_comparable,
+                    "logical_exact": role_length_ok},
         "cells": {"gold": len(gold_text), "pred": len(pred_text),
                   "tp": text_tp, "fp": text_fp, "fn": text_fn},
         "headers": {"column_hits": header_hits, "column_hits_strict": header_hits_strict,
@@ -467,6 +480,15 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
             "pred_header_rows": item["structure"]["headers"]["pred_rows"],
         } for item in details if item["matched"]
             and not item["structure"]["columns"]["exact"]],
+        "visual_column_mismatch": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "visual_columns": item["structure"]["columns"]["visual_gold"],
+            "logical_columns": item["structure"]["columns"]["logical_gold"],
+            "visual_status": item["structure"]["columns"]["visual_status"],
+            "pred_columns": item["pred_columns"],
+        } for item in details if item["matched"]
+            and item["structure"]["columns"]["visual_comparable"]
+            and not item["structure"]["columns"]["visual_exact"]],
         "header_text_mismatch": [{
             "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
             "gold_headers": item["structure"]["headers"]["gold_text"],
@@ -511,6 +533,18 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
     if matched_details:
         exact_rows = sum(1 for item in matched_details if item["structure"]["rows"]["exact"])
         exact_columns = sum(1 for item in matched_details if item["structure"]["columns"]["exact"])
+        visual_comparable = [item for item in matched_details
+                             if item["structure"]["columns"]["visual_comparable"]]
+        visual_exact = sum(1 for item in visual_comparable
+                           if item["structure"]["columns"]["visual_exact"])
+        visual_excluded = sum(1 for item in matched_details
+                              if item["structure"]["columns"]["visual_status"] == "not_printed")
+        logical_comparable = [item for item in matched_details
+                              if item["structure"]["columns"]["logical_comparable"]]
+        logical_exact = sum(1 for item in logical_comparable
+                            if item["structure"]["columns"]["logical_exact"])
+        logical_excluded = sum(1 for item in matched_details
+                               if not item["structure"]["columns"]["logical_comparable"])
         count_exact = sum(1 for item in matched_details
                           if item["structure"]["rows"]["exact"]
                           and item["structure"]["columns"]["exact"])
@@ -559,6 +593,12 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
             "matched": len(matched_details),
             "row_count_exact": exact_rows,
             "column_count_exact": exact_columns,
+            "visual_column_count_exact": visual_exact,
+            "visual_column_tables": len(visual_comparable),
+            "visual_column_excluded_not_printed": visual_excluded,
+            "logical_column_count_exact": logical_exact,
+            "logical_column_tables": len(logical_comparable),
+            "logical_column_excluded_undecided": logical_excluded,
             "row_and_column_exact": count_exact,
             "cell_text_tp": text_tp, "cell_text_fp": text_fp, "cell_text_fn": text_fn,
             "cell_text_f1": round(text_f1, 4),
@@ -596,7 +636,13 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                 "detection_precision": "TP + in-scope FP (predictions on annotated pages)",
                 "detection_recall": "TP + FN (accepted gold tables)",
                 "row_count": f"{len(matched_details)} matched tables",
-                "column_count": f"{len(matched_details)} matched tables",
+                "column_count": f"{len(matched_details)} matched tables "
+                                "(logical columns; v1-compatible)",
+                "visual_column_count": f"{len(visual_comparable)} matched tables with printed, "
+                                       f"partial or implied visual boundaries; "
+                                       f"{visual_excluded} not_printed tables excluded",
+                "logical_column_count": f"{len(logical_comparable)} matched tables with a decided "
+                                        f"logical mapping; {logical_excluded} undecided excluded",
                 "cell_text": "matched tables; multiset F1 over non-empty cell texts",
                 "header_cell_text": f"{len(comparable)} matched tables with equal column count; "
                                     "multiset F1 over non-empty header labels, whitespace-free",
@@ -757,7 +803,14 @@ def _write_markdown(path: Path, report: dict) -> None:
         "| --- | --- |",
         f"| Matched tables | {structure['matched']} |",
         f"| Row count exact | {structure.get('row_count_exact', 0)} |",
-        f"| Column count exact | {structure.get('column_count_exact', 0)} |",
+        f"| Column count exact (logical, v1-compatible) | "
+        f"{structure.get('column_count_exact', 0)} |",
+        f"| Visual boundary exact | {structure.get('visual_column_count_exact', 0)} "
+        f"(of {structure.get('visual_column_tables', 0)} comparable; "
+        f"{structure.get('visual_column_excluded_not_printed', 0)} not printed excluded) |",
+        f"| Logical column exact | {structure.get('logical_column_count_exact', 0)} "
+        f"(of {structure.get('logical_column_tables', 0)} decided; "
+        f"{structure.get('logical_column_excluded_undecided', 0)} undecided excluded) |",
         f"| Row and column exact | {structure.get('row_and_column_exact', 0)} |",
         f"| Cell-text F1 | {structure.get('cell_text_f1', 0.0):.4f} |",
         f"| Header column accuracy | {structure.get('header_column_accuracy', 0.0):.4f} |",
@@ -816,6 +869,7 @@ def _write_markdown(path: Path, report: dict) -> None:
         f"- In-scope false positives: {len(report['error_cases']['in_scope_false_positives'])}",
         f"- Row-count mismatches: {len(report['error_cases']['row_count_mismatch'])}",
         f"- Column-count mismatches: {len(report['error_cases']['column_count_mismatch'])}",
+        f"- Visual-column mismatches: {len(report['error_cases']['visual_column_mismatch'])}",
         f"- Header-text mismatches: {len(report['error_cases']['header_text_mismatch'])}",
         f"- Column-role mismatches: {len(report['error_cases']['column_role_mismatch'])}",
         "",
@@ -838,6 +892,11 @@ def _write_markdown(path: Path, report: dict) -> None:
                      f"gold {item['gold_columns']} -> pred {item['pred_columns']} "
                      f"(header rows {item['gold_header_rows']} -> "
                      f"{item['pred_header_rows']}) |")
+    for item in report["error_cases"]["visual_column_mismatch"]:
+        lines.append(f"| visual cols | {item['item_id']} | {item['page']} | "
+                     f"visual {item['visual_columns']} / logical "
+                     f"{item['logical_columns']} ({item['visual_status']}) -> "
+                     f"pred {item['pred_columns']} |")
     for item in report["error_cases"]["header_text_mismatch"]:
         lines.append(f"| headers | {item['item_id']} | {item['page']} | "
                      f"{item['column_hits']}/{item['columns']} column labels match |")

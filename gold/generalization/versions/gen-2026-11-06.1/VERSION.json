@@ -1,0 +1,13 @@
+{
+  "annotation_version": "gen-2026-11-06.1",
+  "gold_dir": "gold/generalization",
+  "frozen_at": "2026-11-05T19:22:20+00:00",
+  "source_commit": "ee456ab2c6484649bddcac2a9217087c3a164190",
+  "files": {
+    "spec.yaml": "22e5308f6129a7e7ecce58e38711d6348ea45df2fc4e29234f74d367ba69faa8",
+    "gold_table_set.jsonl": "58f82a10a26b55d80a3be623c11fd4901feb3bc0958352a6daaf72f268e16bac",
+    "manifest.json": "8133b103de74d70587126c96239f674d671088f7568b193268d087bd343d9362",
+    "PARAMS_FROZEN.json": "b02c54e5f832bf49fea523813bd783562be903976f3deb38f62ac242874c30da"
+  },
+  "note": "Immutable snapshot; corrections require a new annotation_version."
+}

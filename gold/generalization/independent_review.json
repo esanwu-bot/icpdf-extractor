@@ -1,0 +1,210 @@
+{
+  "status": "complete",
+  "reviewer": "independent second pass (fresh context, PDF-first)",
+  "reviewed_at": "2026-11-06",
+  "method": "Each item was inspected on a standalone crop rendered from the original PDF with no parser overlay (tools/goldset/render_review_crops.py). Gold geometry, header depth, merge spans and column roles were then checked against the page's own text and vector ruling. Parser output was consulted only afterwards, to classify failures; no gold decision was copied from a parser box.",
+  "scope": {
+    "tables": 21,
+    "negatives": 8,
+    "pdfs": ["micrf103", "ds10cp152", "cy29fct520"],
+    "crops": "gold/generalization/review_crops/indep_<item_id>.png",
+    "parser_output_blind": true,
+    "focus_items": ["MICRF103-P03-T01", "CY29FCT520-P05-T01", "CY29FCT520-P06-T01", "CY29FCT520-P08-T01"]
+  },
+  "corrections": [
+    {
+      "item": "CY29FCT520-P10-T01",
+      "version": "gen-2026-11-06.2",
+      "change": "added as a positive table",
+      "reason": "The PINS ** / DIM dimension table inside the package drawing is a real 3x5 table; the v1 negative covered it, so the negative could not distinguish a drawing hit from a table hit."
+    },
+    {
+      "item": "DS10CP152-P13-T02",
+      "version": "gen-2026-11-06.2",
+      "change": "added as a positive table",
+      "reason": "Headerless 5x2 dimension-description table under the TAPE DIMENSIONS figure; v1 negative N03 covered its right column. Cell borders are axis-aligned quadrilateral outlines, so the item uses component: null and builds ruling from quad edges."
+    },
+    {
+      "item": "DS10CP152-N03-P13",
+      "version": "gen-2026-11-06.2",
+      "change": "bbox shrunk from [275.5, 118.0, 505.7, 264.1] to [275.5, 118.0, 505.7, 208.0]",
+      "reason": "The old box included the real P13-T02 table starting at y=213.5; the negative now stops at the figure bottom (y=208.0)."
+    },
+    {
+      "item": "all negatives",
+      "version": "gen-2026-11-06.2",
+      "change": "all bboxes and kinds re-derived from the rendered page",
+      "reason": "Five of eight v1 negatives reproduced a parser prediction exactly (MICRF103-N02, DS10CP152-N01, CY29FCT520-N01/N02/N03); three reproduced a rule component (MICRF103-N01, DS10CP152-N02, DS10CP152-N03). This is annotation provenance leakage. Every negative was checked against the rendered page and re-drawn; CY29FCT520-N03 was retained only because the parser box coincides exactly with the drawing extents 65.8/106.8/566.2/475.6 measured from the page."
+    },
+    {
+      "item": "DS10CP152-N01-P01",
+      "version": "gen-2026-11-06.2",
+      "change": "negative_kind layout -> prose; extent extended to cover FEATURES and DESCRIPTION",
+      "reason": "The v1 box ended at y=173.9 (the parser's FEATURES heading box) and omitted the DESCRIPTION prose; APPLICATIONS starts at y=338."
+    },
+    {
+      "item": "CY29FCT520-N01-P01",
+      "version": "gen-2026-11-06.2",
+      "change": "negative_kind drawing -> pin_diagram; bbox re-drawn",
+      "reason": "The v1 box was the parser's 76.6/112.9/486.5/234.3 prediction and covered only part of the pinout; the actual top/side view spans 397.1/74.8/493.6/256.6."
+    },
+    {
+      "item": "CY29FCT520-P06-T01",
+      "version": "gen-2026-11-06.2",
+      "change": "header text corrected from duplicated overprint",
+      "reason": "The PDF overprints the UNIT word twice at identical coordinates; the annotation lattice concatenated it as 'UNIT UNIT'. Identical word tuples are now de-duplicated, giving the printed label 'UNIT'."
+    }
+  ],
+  "open_questions": [
+    "DS10CP152-P13-T02 is fully ruled but drawn as quadrilateral cell outlines; the frozen parser and the rule lattice both ignore 'qu' edges, so this table is a genuine detector miss rather than a gold artefact.",
+    "CY29FCT520-P06-T01 column 1 has no printed header label; its 'condition' role is a content-based decision (Data / I), not header attribution. It stays out of header attribution and counts as mapped for role accuracy.",
+    "CY29FCT520-P10-T01 labels the dimension column through a diagonal split header cell; the gold keeps one header cell with text 'PINS ** / DIM' and three logical columns."
+  ],
+  "items": {
+    "MICRF103-P01-T01": {
+      "status": "confirmed",
+      "note": "Ordering Information: 3 printed columns x 1 data row; all boundaries ruled.",
+      "evidence": "crop indep_MICRF103-P01-T01.png; vector ruling 4 verticals / 2 horizontals"
+    },
+    "MICRF103-P02-T01": {
+      "status": "confirmed",
+      "note": "Pin Description: 3 columns x 8 data rows; Pin Number is numeric and Pin Function wraps inside the cell.",
+      "evidence": "crop indep_MICRF103-P02-T01.png"
+    },
+    "MICRF103-P03-T01": {
+      "status": "confirmed_with_note",
+      "note": "Electrical characteristics: 6 columns x 29 data rows; section labels (Power Supply, RF Output Section, ...) are full-width body rows. Outer vertical edges are not printed, hence implied_outer with 6 visual = 6 logical.",
+      "evidence": "crop indep_MICRF103-P03-T01.png; the parser splits this table into three fragments (best IoU 0.2335), which is a detector failure, not a gold defect"
+    },
+    "DS10CP152-P02-T01": {
+      "status": "confirmed",
+      "note": "PIN DESCRIPTIONS: 4 columns x 7 data rows; multiline Pin Name and I/O, Type cells.",
+      "evidence": "crop indep_DS10CP152-P02-T01.png"
+    },
+    "DS10CP152-P03-T01": {
+      "status": "confirmed_with_note",
+      "note": "Absolute Maximum Ratings is a headerless 2-column key/value list (21 rows); no column header row exists, so header_rows=0.",
+      "evidence": "crop indep_DS10CP152-P03-T01.png"
+    },
+    "DS10CP152-P03-T02": {
+      "status": "confirmed",
+      "note": "Recommended Operating Conditions: 5 columns x 3 data rows; the top-left corner cell is genuinely blank, so column 0 is unknown.",
+      "evidence": "crop indep_DS10CP152-P03-T02.png"
+    },
+    "DS10CP152-P04-T01": {
+      "status": "confirmed_with_note",
+      "note": "DC Electrical Characteristics: 7 logical columns; a body-only condition sub-rule at x=346.1 yields 8 visual columns with a partial boundary. Group labels are full-width body rows.",
+      "evidence": "crop indep_DS10CP152-P04-T01.png; partial boundary 346.1"
+    },
+    "DS10CP152-P05-T01": {
+      "status": "confirmed_with_note",
+      "note": "AC Electrical Characteristics: 7 logical columns; condition sub-rule at x=363.1 gives 8 visual columns (partial). Jitter sub-columns are condition attributes, not logical columns.",
+      "evidence": "crop indep_DS10CP152-P05-T01.png; partial boundary 363.1"
+    },
+    "DS10CP152-P07-T01": {
+      "status": "confirmed",
+      "note": "Table 1 Switch Configuration Truth Table: 4 columns x 4 data rows.",
+      "evidence": "crop indep_DS10CP152-P07-T01.png"
+    },
+    "DS10CP152-P07-T02": {
+      "status": "confirmed",
+      "note": "Table 2 Output Enable Truth Table: 4 columns x 4 data rows.",
+      "evidence": "crop indep_DS10CP152-P07-T02.png"
+    },
+    "DS10CP152-P11-T01": {
+      "status": "confirmed_with_note",
+      "note": "Packaging Information (landscape): 10 logical columns x 4 data rows. Column separators are not ruled, only shaded header bands, so visual_boundary_status=not_printed and visual_columns=null.",
+      "evidence": "crop indep_DS10CP152-P11-T01.png"
+    },
+    "DS10CP152-P13-T01": {
+      "status": "confirmed",
+      "note": "Tape and reel dimensions: 13 columns x 1 data row; single-row table retained.",
+      "evidence": "crop indep_DS10CP152-P13-T01.png"
+    },
+    "DS10CP152-P13-T02": {
+      "status": "corrected",
+      "note": "New headerless 5x2 dimension-description table (A0/B0/K0/W/P1) under TAPE DIMENSIONS. All cell borders are axis-aligned quadrilateral outlines; ruling built from quad edges. Printed visual grid 2 = logical 2.",
+      "evidence": "crop indep_DS10CP152-P13-T02.png; drawings at x 257.4/275.5/505.7 and y 213.5/223.6/233.7/243.8/253.9/264.0"
+    },
+    "DS10CP152-P14-T01": {
+      "status": "confirmed",
+      "note": "Tube dimensions: 8 columns x 1 data row; single-row table retained.",
+      "evidence": "crop indep_DS10CP152-P14-T01.png"
+    },
+    "DS10CP152-P15-T01": {
+      "status": "confirmed",
+      "note": "Reel dimensions: 9 columns x 2 data rows.",
+      "evidence": "crop indep_DS10CP152-P15-T01.png"
+    },
+    "CY29FCT520-P04-T01": {
+      "status": "confirmed_with_note",
+      "note": "Recommended operating conditions: two-level header; 4 printed columns (blank corner + two device groups + UNIT) against 8 logical columns (MIN/NOM/MAX twice). Blank corner stays unknown.",
+      "evidence": "crop indep_CY29FCT520-P04-T01.png"
+    },
+    "CY29FCT520-P04-T02": {
+      "status": "confirmed_with_note",
+      "note": "Electrical characteristics: 9 logical columns; 6 printed columns because the MIN/TYP/MAX sub-rules at x=173.2 exist only in some rows (partial).",
+      "evidence": "crop indep_CY29FCT520-P04-T02.png"
+    },
+    "CY29FCT520-P05-T01": {
+      "status": "confirmed_with_note",
+      "note": "Electrical characteristics (continued): 9 logical columns; 7 visual with partial separators at 193.9 and 266.0 caused by nested MIN/TYP/MAX condition bands.",
+      "evidence": "crop indep_CY29FCT520-P05-T01.png"
+    },
+    "CY29FCT520-P06-T01": {
+      "status": "corrected",
+      "note": "Timing requirements: 7 logical columns x 5 data rows; the first two header cells are blank (PARAMETER and TEST CONDITIONS are unlabelled), so column 0 is unknown and column 1 gets condition from its Data/I content. Duplicate overprinted UNIT word object collapsed to 'UNIT'. 5 visual columns via partial separator 289.8.",
+      "evidence": "crop indep_CY29FCT520-P06-T01.png; duplicate UNIT at identical coordinates"
+    },
+    "CY29FCT520-P08-T01": {
+      "status": "confirmed_with_note",
+      "note": "Packaging Information: 12 logical columns x 4 data rows; no vertical ruling at all, so visual_boundary_status=not_printed and logical columns come from header labels only.",
+      "evidence": "crop indep_CY29FCT520-P08-T01.png"
+    },
+    "CY29FCT520-P10-T01": {
+      "status": "corrected",
+      "note": "New PINS ** / DIM dimension table inside the package drawing: 3 columns x 4 data rows; diagonal split header cell; 3 printed visual = 3 logical.",
+      "evidence": "crop indep_CY29FCT520-P10-T01.png; ruling 414.4-543.7 x 123.2-267.2"
+    },
+    "MICRF103-N01-P01": {
+      "status": "corrected",
+      "note": "Figure 1 Typical Application schematic. v1 bbox was the rule component 140.1/564.8/395.0/699.1; now drawn from the rendered figure 135.2/552.0/500.3/720.1.",
+      "evidence": "crop indep_MICRF103-N01-P01.png"
+    },
+    "MICRF103-N02-P04": {
+      "status": "corrected",
+      "note": "Test Circuit schematic. v1 bbox equalled parser prediction p004-t01; now drawn from the rendered figure 159.9/193.7/430.9/279.2.",
+      "evidence": "crop indep_MICRF103-N02-P04.png"
+    },
+    "DS10CP152-N01-P01": {
+      "status": "corrected",
+      "note": "Prose negative: FEATURES and DESCRIPTION text bands. v1 was kind=layout with the parser box 54.0/129.8/558.0/173.9; now 54.0/126.7/558.0/336.0, stopping before APPLICATIONS at y=338.",
+      "evidence": "crop indep_DS10CP152-N01-P01.png"
+    },
+    "DS10CP152-N02-P06": {
+      "status": "corrected",
+      "note": "Figure 1 AC Test Circuit schematic. v1 bbox was the rule component 230.8/122.3/408.0/187.0; now 116.4/106.0/494.4/208.4 from the rendered figure.",
+      "evidence": "crop indep_DS10CP152-N02-P06.png"
+    },
+    "DS10CP152-N03-P13": {
+      "status": "corrected",
+      "note": "TAPE DIMENSIONS drawing. v1 bbox was a rule component 331.5/136.2/436.0/202.8 and the box also swallowed the P13-T02 table; now 275.5/118.0/505.7/208.0 over the figure only.",
+      "evidence": "crop indep_DS10CP152-N03-P13.png"
+    },
+    "CY29FCT520-N01-P01": {
+      "status": "corrected",
+      "note": "Pinout drawing (top and side view); kind changed from drawing to pin_diagram. v1 bbox equalled parser prediction p001-t01; now 397.1/74.8/493.6/256.6 from the rendered figure.",
+      "evidence": "crop indep_CY29FCT520-N01-P01.png"
+    },
+    "CY29FCT520-N02-P02": {
+      "status": "corrected",
+      "note": "PIPELINE INSTRUCTION TABLE block diagram. v1 bbox equalled parser prediction p002-t01; now 157.3/74.8/437.7/191.2 from the rendered figure.",
+      "evidence": "crop indep_CY29FCT520-N02-P02.png"
+    },
+    "CY29FCT520-N03-P10": {
+      "status": "corrected",
+      "note": "Package drawing; contains positive island CY29FCT520-P10-T01. The v1 bbox equalled parser prediction p010-t01 but also coincides exactly with the drawing extents measured from the page (65.8/106.8/566.2/475.6), so it was retained. The island exclusion is now recorded in the note.",
+      "evidence": "crop indep_CY29FCT520-N03-P10.png; drawing extents recomputed from page geometry"
+    }
+  }
+}
