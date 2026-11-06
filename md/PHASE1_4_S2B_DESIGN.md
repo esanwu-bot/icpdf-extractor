@@ -1,9 +1,9 @@
 # Phase 1.4 S2b — Logical Boundary Lattice and Projection
 
-**Status:** design proposal only (revision r3, based on `eac55f4`). No
-implementation, schema change, Gold change or pipeline integration is authorized
-by this document. Implementation starts only after the Reviewer closes the
-items in §1.
+**Status:** design proposal only (revision r13, based on `6f3e58d` plus the
+additive code slice recorded in §3.1, §5.6, §5.7 and §7.3). No implementation,
+schema change, Gold change or pipeline integration is authorized by this
+document. Implementation starts only after the Reviewer closes the items in §1.
 
 **Relationship to the approved S2 design:** `docs/PHASE1_4_S2.md` remains the
 umbrella design. S2b narrows its §5–§7 to the logical column lattice and the
@@ -13,11 +13,105 @@ proposal for review, not a replacement of the approved principles.
 ## 1. Review resolution map
 
 This revision answers the seven review items and the P0/P1 findings on
-`cf59799` (r2), plus the eight blocking findings in the r2 re-review. Nothing
-below is an implementation claim; every repository statement is backed by a
-path and line reference in §3.
+`cf59799` (r2), the eight blocking findings in the r2 re-review, the four
+residual ambiguities found in the line-by-line r3 review, the three
+lexical/group defects found in the r4 review, the N6 reconstruction gap found
+in the r5 review, the hyphen-rule ambiguity found in the r6 review, the
+classification contradiction plus the two evidence-transport defects found in
+the r7 review, and the `kind` misreading and second transport loss found in the
+r8 review, the four N7/N8 closure items found in the r9 re-review, the five
+residual constraints in the r10 re-review, and the two remaining boundaries in
+the r11 re-review.
+Nothing below is an implementation claim; every repository statement is backed
+by a path and line reference in §3.
 
-**r3 review findings (latest round).**
+**r13 review findings (current round).**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| R13-D4 | `word_boundary_tie` had no defined landing: it must be a validator/runtime count, not a reason code or a persisted assignment field, counting each exact hit once and never making the table unresolved | §7.3 item 2 (outer-extent precondition and tie rule); §10.2 (removed from the code list; diagnostic-count paragraph) |
+| R13-D5 | The row-local rank formula and the alignment-grid word capture were design claims without repository evidence | §3.1 (current models); §5.6 (two index spaces and capture); §7.3 (D5 capture facts); §11 invariant 10 |
+| R13-D6 | `non-decreasing` contradicted the closed D3 strict-ascending rule; old-artifact load order, artifact-only validation and fresh-parse audit were not separated; `grid.ys` copy wording was wrong | §5.7; §7.3 D6; §11 invariants 16, 18 and 19; §13 |
+
+**r12 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| R12-S2BID | The rules did not say whether a non-derived s2b positive may share a physical identity with a v1 positive; the only permitted cross-set reuse must be the declared v2-to-s2b relation | §12.1 D, s2b cross-set row and rule 5; §14 item 22; §15 R11-N7-2 |
+| R12-ROOT | A valid JSON root can be an array, string, number or `null`, and `params` can be a non-object; both must be schema-invalid, not an unclassified exception | §5.8, root and `params` object checks; §11 invariant 17; §15 R11-N8LOAD-1 |
+
+**r11 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| R11-N7-1 | `(pdf_sha256, page, table_index)` of a positive must not repeat across v1 and v2; a v1/v2 pair describing one physical table counts it twice, and this version has no exception | §12.1 D, cross-manifest physical identity |
+| R11-N7-2 | `item_id` uniqueness was scoped to v1 plus v2; it must cover all three manifests, and `derived_from_item_id` is a provenance reference that cannot replace the s2b item's own id | §12.1 D, global id and derivation |
+| R11-N8LOAD-1 | A type check on a caller-supplied object does not prove loader origin; the validator must take raw bytes and call the loader itself, and loader failures need distinct codes | §5.8, raw-bytes validator and three failure classes |
+| R11-N8LOAD-2 | `snapshot_sha256` hashes canonical JSON, not raw bytes; the stored-value wording claimed otherwise | §5.8, hash semantics paragraph and type rule 2 |
+| R11-22 | The §14 item 22 exception needs three constraints: a v2 positive source, fully equal identities, and no multiple s2b ids per physical table | §14 item 22; §12.1 D derivation |
+
+**r10 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| R10-N7SET | The 46 / 19 / 21 / 8 arithmetic holds, but set exclusivity, id de-duplication and source identity have no machine-checked constraint | §12.1, manifest identity and merge checks |
+| R10-N8VER | The serializer sends every version other than v1 to the v2 field set, so an unknown version can produce a v3-labelled v2 snapshot | §5.8, explicit version dispatch |
+| R10-N8LOAD | A plain `dict` cannot hold duplicate keys, so a `dict`-typed validator never sees them | §5.8, `load_table_params_snapshot` and `LoadedTableParamsSnapshot` |
+| R10-N8FIELDS | One delivered field name read `merge_column_tol_ptl`; the v1 field set needs verification against `config.py` and per-field type rules | §5.8, field table and type rules; §16.6 records the delivery defect |
+
+**r9 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| R9-KIND | `kind` must be `header` for `row_end < header_rows`, `data` for `row_start >= header_rows`, and `logical_cell_kind_boundary` when a cell crosses the header boundary | §5.6 item 1: the r8 text already said this; the `<` was lost in rendering. r9 states it with `≤`/`≥` and a six-row decision table and removes the bare `<` from the rule |
+| R9-WORD | "words with no assigned word produce no logical cell" is the wrong subject; the rule is about a physical cell with no word in any logical column | §5.6 item 1, first bullet |
+| R9-LOSS2 | The delivered §5.6 and §16 still arrived with lost operators, merged fences and truncated shell commands, so byte-equality could not be checked | §16.6: both sections delivered out-of-band as base64 with SHA-256 |
+| R9-ORDER | The comparison script should also reject an end heading that precedes its start heading | §16.2, §16.3 (`line_of`, exit 4), §16.4 |
+
+**r8 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| R8-CLASS | `V-10V` satisfies the `identifier` regex and contains a digit, so the run `5V-10V` cannot be tokens `5`,`V-10V`, accepted by `identifier`, and `unclassified` at the same time | §6.3.1: content classes are run-level, `identifier` is single-token, and its downstream effect is defined |
+| R8-LOSS | The pasted §5.6 pseudocode lost `*`, `<=`, and parts of the loop tail, and the pasted §16 script lost `printf`/`wc`/`diff` characters | §5.6 item 3 and §16.3, each with a byte-exact base64 copy and its SHA-256 in §16.6 |
+| R8-ANCHOR | `index($0,s)==1` is a prefix test, so `## 12.` also selects `## 12.2`/`## 12.3`; heading matching must be exact | §16.2, §16.3 (`$0==s`), §16.4 |
+
+**r7 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| N5-hyphen | "`-` between two word-class characters" cannot separate `CLK-1` from `5-10`, because digits are word-class | §6.3.1 word-run hyphen rule, test vectors |
+| N5-mult | A multiplier must not be extracted from inside a token already matched as a complete unit | §6.3.1 multiplier rule, `10kΩ` vector |
+| N6-verify | The pseudocode must be shown equal to `structure.py`, and the full §5.6 text must be delivered without character loss | §5.6 item 3, delivery message |
+| N7/N8 | §16 must record both input digests, heading anchors, excerpt sizes, exit codes and per-invariant results | §16 |
+
+**r6 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| N6-text | `LogicalCell.text` still referenced `_words_to_text` without the line-grouping, running-mean and tie rules written into the document | §5.6 item 3 |
+| N5-token | Longest-match and sign-context tokenization had no normative test vectors | §6.3.1 |
+| N7/N8 | Only a no-touch diff was shown; the full document was not re-verified | §5.8, §11–§13, §16 |
+
+**r5 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| N5-1 | `..` is a range connector but tokenization only splits on "a comparison operator or a range dash"; multi-character operators have no longest-match rule | §6.3.1 |
+| N5-2 | The operand grammar is undefined: generic comparison, range and symbol binding do not say which sides must be value-bearing | §6.3.1 |
+| N5-3 | The symbol list ends in `…`, so implementations may admit `VIN`, `TEMP`, `CLK` | §6.3.1 |
+| S3-span | Requiring each ref to agree with the previous ref still permits chain merging | §5.3, §9.2, §11 |
+
+**r4 review findings.**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| N2 | Source-cell containment is closed on both ends, so an x that lands on a shared cell edge can match two cells | §5.3, §6.3 |
+| N3 | `region_extent` validates a region's internals but never proves that region belongs to this table | §5.3, §9.2, §11 |
+| N5 | `short_label` is tested before the relational marker, so `A=B` can never become `condition_expression`; range connectors lack a tokenization rule | §6.3.1 |
+| S3 | "At most one ref per `(grid_row, edge)`" contradicts accepting several agreeing refs | §5.3, §11 |
+
+**r3 review findings.**
 
 | Item | Reviewer finding | Answer in |
 | --- | --- | --- |
@@ -103,6 +197,7 @@ class DetectedCell(BaseModel):
     column_index: int = Field(ge=0)
     row_span: int = Field(default=1, ge=1)
     column_span: int = Field(default=1, ge=1)
+    word_ids: tuple[str, ...] = ()      # D5 additive; no cell identity
 ```
 
 `src/icpdf/parser/table_detector.py:38`:
@@ -156,17 +251,26 @@ class DetectedTable(BaseModel):
     visual_columns: int | None = None
     partial_boundaries: tuple[float, ...] = ()
     visual_boundary_evidence: tuple[VisualBoundary, ...] = ()
+    # Phase 1.4 S2b (D6) - physical lattice copied verbatim; never affects the grid.
+    grid_ys: tuple[float, ...] = ()
+    n_rows: int = Field(default=0, ge=0)
 ```
 
 Consequences that the design must respect:
 
 - `DetectedCell` has **no** `cell_id`; its parser-level identity is
-  `(DetectedRow.grid_row, index within DetectedRow.cells)`.
+  `(DetectedRow.grid_row, index within DetectedRow.cells)`. `word_ids` is
+  additive payload, not identity.
 - `DetectedHeaderCell` has **no** `header_cell_id`; its parser-level identity is
   `(level, column, source_row, source_column)`.
-- `DetectedTable` does **not** persist `grid.xs`, `grid.ys`, or per-cell word
-  ids. Those exist only in the intermediate `TableGrid` / `TextWord` objects
-  during `detect_tables()`.
+- `DetectedTable` does **not** persist `grid.xs`. It persists `grid.ys`
+  verbatim as `grid_ys` plus `n_rows` (D6), and each `DetectedCell` carries
+  its assigned `word_ids` (D5). `grid.xs` still exists only in the
+  intermediate `TableGrid` during `detect_tables()`.
+- `DetectedRow.cells` holds only non-empty cells of one grid row, in flat
+  `TableGrid.cells` order; the flat index is **not** recoverable from the
+  row-local position when empty cells precede it. See §7.3 for the two index
+  spaces.
 - `DetectedTable.column_roles` is the existing per-physical-column role list
   from `infer_semantics`; S2b logical roles must not overwrite it.
 
@@ -474,7 +578,8 @@ gutter increments `rule_bands` and `gutter_bands` individually but only once in
 `label_aligned`); a candidate that intersects no band has
 `nonempty_bands == 0` and no ratio. The denominator is:
 
-- `subrule_promoted`: bands with at least one word center strictly right of x;
+- `subrule_promoted`: bands **in `rule_bands`** with at least one word center
+  strictly right of x, whether or not a source cell was found;
 - `label_aligned`: body bands with at least one word anywhere in the table;
 - other kinds: bands with at least one word anywhere in the table.
 
@@ -587,7 +692,9 @@ the audit does not re-run the canopy decision.
     gap.
 - `left_anchor_ref` must appear in `left_header_cell_refs` and
   `right_anchor_ref` in `right_header_cell_refs`. Anchors are the cells
-  immediately adjacent to x at `level`.
+  immediately adjacent to x at `level`. Because both lists are nearest-first,
+  the anchor is exactly the first element of its list; a record whose anchor is
+  not the head of a non-empty list is `boundary_evidence_mismatch`.
 - `left_header_cell_refs` lists every header cell at `level` whose x-span lies
   wholly on the left (`bbox[2] <= x + tol`), nearest first; the right list is
   the mirror image (`bbox[0] >= x - tol`, nearest first). Extra refs are
@@ -603,10 +710,20 @@ the audit does not re-run the canopy decision.
 **`SubrulePromotedEvidence` is per band, per cell, per word (N2).**
 
 - `rule_bands` is sorted and unique, inside `[0, n_rows - 1]`.
+- The **source cell** of a band is the unique `DetectedCell` whose bbox contains
+  `x` (`bbox[0] <= x <= bbox[2]`) and whose grid-row coverage includes that
+  band. Containment is closed at both endpoints on purpose: when `x` lies
+  exactly on an edge shared by two cells, both qualify, the band has no source
+  cell, and the candidate is `unresolved` (`subrule_source_cell_ambiguous`).
+  This is a deliberate fail-closed boundary, not a rounding artefact. No
+  half-open rewrite and no epsilon are permitted, because either would silently
+  change physical cell ownership.
 - `nonempty_bands` is the number of bands in `rule_bands` with at least one
   word center strictly right of x inside the table, counted before
-  classification. It is recomputable and never smaller than
-  `len(label_assignments)`.
+  classification and regardless of whether a source cell was found. It is
+  recomputable and never smaller than `len(label_assignments)`. A band with
+  right-side words but an ambiguous source cell still counts in the
+  denominator; the denominator is never "bands that produced a source cell".
 - At most one `SubruleLabelAssignment` per `grid_row`; `grid_row` is unique,
   sorted, and a member of `rule_bands`.
 - Each assignment's `physical_cell_ref` resolves to a real `DetectedCell`;
@@ -638,12 +755,20 @@ the audit does not re-run the canopy decision.
 
 **`StructuralEdgeEvidence` de-duplication (S3).**
 
-- Refs are sorted by `(grid_row, cell_index, edge)` and the same tuple appears
-  at most once; a duplicate is `boundary_evidence_duplicate_ref`.
-- At most one ref per `(grid_row, edge)`; two refs for the same row and edge
-  must agree on x within tolerance or the candidate is unresolved.
-- "Repeats in at least two row bands" means at least two distinct `grid_row`
-  values after de-duplication, not two cells in one row.
+- Refs are sorted by `(grid_row, cell_index, edge)`. That exact triple may
+  appear once; a repeat is `boundary_evidence_duplicate_ref` and is rejected.
+- Several distinct cells may reference the same `(grid_row, edge)`. They form
+  one **source group**: every ref is kept. The group must satisfy
+  `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt`, i.e. every member is
+  measured against the group extremes, never against the previous ref. Chain
+  membership is forbidden: refs whose consecutive gaps are all within tolerance
+  but whose total span exceeds it are `unresolved`
+  (`boundary_evidence_mismatch`). There is no "at most one ref per
+  `(grid_row, edge)`" rule; the group is the unit and no ref is collapsed to a
+  representative.
+- "Repeats in at least two row bands" counts distinct `grid_row` values across
+  groups. It never counts cells inside a group, so one row with three agreeing
+  cells is still one band.
 - Every ref resolves; its edge x is within `visual_boundary_tol_pt` of the
   logical x; `physical_rule_component_ids` is a subset of `region_components`.
 
@@ -666,8 +791,19 @@ The current parser constructs `implied_outer` at
 emits at most one such record. The evidence records that encoding instead of
 relying on positional convention:
 
+- **Region identity is resolved before anything else.** The region is chosen
+  from the table, never from geometry. The fresh parse runs the same
+  `detect_table_regions(layout, params)` pass; the target region is the one
+  whose component-id set equals `set(DetectedTable.region_components)`
+  (`table_detector.py:176`). Exactly one region must match: zero matches is
+  `boundary_evidence_missing_ref`, two or more is `region_lattice_inconsistent`.
+  The matched region must also satisfy `region.source ==
+  table.detection_method`, `region.boundary_source == table.boundary_source`
+  and the same page; any mismatch is `boundary_evidence_stale`. An equal
+  extent alone never establishes ownership.
 - `implied_outer_evidence_index` is the index into the fresh
-  `TableRegion.evidence` tuple where `kind == "implied_outer"`.
+  `TableRegion.evidence` tuple where `kind == "implied_outer"`, inside the
+  region identified above.
 - `implied_outer_values` equals that record's `values` exactly;
   `extent_left == implied_outer_values[0]` and
   `extent_right == implied_outer_values[1]`.
@@ -718,9 +854,9 @@ in §11, stated with their sources:
 | `subrule_promoted` | `visual_boundary_index`, non-empty `rule_bands`, `nonempty_bands > 0`, `label_assignments` | same visual checks; coverage `< visual_full_height_coverage`; `rule_bands` inside grid rows; `grid_row`s unique and inside `rule_bands`; `len(label_assignments) >= logical_subrule_promote_min_bands`; `short_label_ratio` recomputed from the assignments equals the stored value and is `>= logical_subrule_promote_min_ratio`; every word id exists, is right of `x`, and is in its declared physical cell; `selected_run_bbox` is the word union. Missing/duplicate band -> `boundary_evidence_duplicate_ref`; ratio mismatch -> `boundary_evidence_mismatch`; run tie -> `subrule_run_tie`. |
 | `header_canopy` | `level`, `boundary_edge`, both anchor refs, non-empty left/right ref lists, `left_label`, `right_label` | every ref resolves to a `DetectedHeaderCell` by `(level, source_row, source_column, column)`; all refs have `level == evidence.level`; `level < header_rows`; bbox inside the table; the left refs lie at or left of `x`, the right refs at or right; anchors are the nearest cells on their side and satisfy the `boundary_edge` position rule; labels equal the anchors' normalized text and are distinct; two same-level cells touching `x` -> `header_level_tie`; missing side -> `header_missing_for_canopy`. |
 | `label_aligned` | non-empty `grid_rows`, non-empty `word_ids` | rows in `[header_rows, n_rows)`; every word id exists on the page and inside the table; no word crosses `x`; `gutter_ratio` recomputes from `gutter_bands` and `nonempty_bands`; `gutter_ratio >= logical_label_min_band_ratio`; `len(grid_rows) >= logical_label_min_bands`. |
-| `structural` | non-empty `physical_cell_edge_refs` | each ref resolves to a real `DetectedCell`; refs are sorted and unique; at most one per `(grid_row, edge)`; the edge is within tolerance of `x`; at least two distinct `grid_row` values remain after de-duplication; no word crosses `x`. `physical_rule_component_ids`, when present, must all be in `region_components`. Duplicate -> `boundary_evidence_duplicate_ref`. |
+| `structural` | non-empty `physical_cell_edge_refs` | each ref resolves to a real `DetectedCell`; refs are sorted and unique per `(grid_row, cell_index, edge)`; several refs for one `(grid_row, edge)` form a source group that keeps every ref and must satisfy `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt`; the edge is within tolerance of `x`; at least two distinct `grid_row` values remain across groups; no word crosses `x`. `physical_rule_component_ids`, when present, must all be in `region_components`. Duplicate triple -> `boundary_evidence_duplicate_ref`; disagreement inside a group -> `boundary_evidence_mismatch`. |
 | `table_bbox` | `edge`, `page_number`, `table_bbox` | only for outer boundaries; `page_number` and `table_bbox` equal the fresh `DetectedTable` exactly; `x` equals `table_bbox[0]` (left) or `table_bbox[2]` (right) within tolerance. Stale page/bbox -> `boundary_evidence_stale`. An internal boundary may not use this kind. |
-| `region_extent` | `edge`, `page_number`, non-empty `region_component_ids`, `extent_left`, `extent_right`, `boundary_source`, `implied_outer_evidence_index`, `implied_outer_values` | only for outer boundaries; `implied_outer_evidence_index` selects a fresh `TableRegion.evidence` record of kind `implied_outer`; `implied_outer_values == values`, `extent_left == values[0]`, `extent_right == values[1]`; `region_component_ids` equals that record's `component_ids` set; `boundary_source` equals the fresh region source and is in `{implied_horizontal, implied_alignment, mixed}`; `x` equals the selected extent within tolerance. Missing record -> `boundary_evidence_missing_ref`; mismatch -> `boundary_evidence_stale`. Never infer an extent from the bbox. |
+| `region_extent` | `edge`, `page_number`, non-empty `region_component_ids`, `extent_left`, `extent_right`, `boundary_source`, `implied_outer_evidence_index`, `implied_outer_values` | only for outer boundaries; the region is resolved first by `region_components` equality (zero matches -> `boundary_evidence_missing_ref`, several -> `region_lattice_inconsistent`); `implied_outer_evidence_index` then selects that region's `TableRegion.evidence` record of kind `implied_outer`; `implied_outer_values == values`, `extent_left == values[0]`, `extent_right == values[1]`; `region_component_ids` equals that record's `component_ids` set; `boundary_source` equals the fresh region source and is in `{implied_horizontal, implied_alignment, mixed}`; `x` equals the selected extent within tolerance. Missing record -> `boundary_evidence_missing_ref`; mismatch -> `boundary_evidence_stale`. Never infer an extent from the bbox. |
 
 `visual_segment_indices` are indices into `VisualBoundary.segments` for the
 boundary at `visual_boundary_index`. The S2a segment order is deterministic
@@ -918,9 +1054,49 @@ union across all logical cells is a disjoint partition.
 
 `PhysicalCellRef.cell_index` is the parser-level identity because
 `DetectedCell` has no `cell_id` (§3.1). After rebuild, `cell_id` is filled and
-the domain `Cell` can use `cell_id` directly. `cell_index` is the index in
-`DetectedRow.cells`, not the physical grid column; `column_index` is carried for
-readability and must match the referenced cell.
+the domain `Cell` can use `cell_id` directly. `cell_index` is the row-local
+index in `DetectedRow.cells`, not the physical grid column and not the flat
+`TableGrid.cells` index; `column_index` is carried for readability and must
+match the referenced cell.
+
+**Two index spaces (D5).** The flat `TableGrid.cells` index and the row-local
+`DetectedRow.cells` index are different:
+
+- the flat index enumerates every `GridCell`, including empty ones, across all
+  rows (`structure.py:322-326`);
+- the row-local index enumerates only cells with
+  `cell.row == grid_row` and non-empty text, in flat order
+  (`table_detector.py:142-151`).
+
+The conversion from a row-local position `j` in row `r` back to a flat index
+is therefore
+
+```text
+flat = offset(r) + j + skipped_before(r, j)
+```
+
+where `offset(r)` counts every flat cell with `cell.row < r` and
+`skipped_before(r, j)` counts the empty same-row cells that precede the
+target. Counting only preceding non-empty cells is **not** the flat index
+whenever the row has an empty cell before the target or any earlier row has
+cells. The current pipeline never performs this conversion: `word_ids` are
+attached at enumeration time from the flat key, and no flat index is
+persisted on `DetectedCell`.
+
+The capture itself is additive. `_assign_words` already builds `by_cell`
+keyed by the flat index and now stores it as
+`TableGrid.cell_words: dict[int, tuple[TextWord, ...]]`
+(`structure.py:78`, `structure.py:338`); values keep the `_assign_words`
+traversal order, which is `layout.words` order, not reading order.
+`_alignment_grid` never calls `_assign_words`; it now records each group as
+`cell_words[len(cells)] = tuple(group)` immediately before appending the cell
+(`structure.py:633`), so both grid builders fill the cache. `detect_tables`
+reads `grid.cell_words.get(flat_index, ())` while it enumerates `grid.cells`
+(`table_detector.py:142-151`) and copies the ids to
+`DetectedCell.word_ids`; `build_table` copies them again to the domain
+`Cell.word_ids` (`table_rebuilder.py:39`). No other consumer may treat this
+cache as evidence, and an empty tuple means "this grid builder recorded no
+words for that cell", never "the words were disproved".
 
 The physical→logical cell relation is many-to-many and lives on the logical
 side. A reverse cache `logical_cell_ids` on `DetectedCell` is derived, never
@@ -933,8 +1109,10 @@ normative; an independent reader must be able to rebuild each field.
 
 - One `DetectedCell` covers rows `grid_row .. grid_row + row_span - 1` and
   physical columns `column_index .. column_index + column_span - 1`.
-- Assign each of its words to exactly one logical column by center x (§7.3);
-  words with no assigned word produce no logical cell.
+- Assign each of its words to exactly one logical column by center x (§7.3).
+  A physical cell whose words land in no logical column produces no
+  `LogicalCell`; the rule is about the cell, not about a word that lacks an
+  assignment.
 - Take the maximal consecutive runs of logical columns that contain at least
   one assigned word. Each run yields one logical-cell candidate:
   `logical_column` = run start, `logical_column_span` = run length, and
@@ -951,9 +1129,23 @@ normative; an independent reader must be able to rebuild each field.
   detected cell.
 - Within one logical column, logical-cell row ranges must be disjoint. An
   intersection is `mapping_row_overlap` and the table is unresolved.
-- `kind = "header"` iff `row_end < header_rows`, `"data"` iff
-  `row_start >= header_rows`; a cell crossing the header boundary is
-  `logical_cell_kind_boundary` and unresolved.
+- `kind` follows `header_rows`, the number of header rows; physical rows are
+  0-based, so the header occupies rows 0 through `header_rows - 1` inclusive.
+  `kind = "header"` iff `row_end ≤ header_rows - 1`. `kind = "data"` iff
+  `row_start ≥ header_rows`. Any other combination crosses the header
+  boundary and is `logical_cell_kind_boundary`, with the table unresolved.
+  The two conditions are exhaustive over integer rows: the first accepts every
+  cell entirely inside the header, the second every cell entirely inside the
+  body, and nothing is left but a crossing cell.
+
+  | `header_rows` | `row_start` | `row_end` | Result |
+  | --- | --- | --- | --- |
+  | 2 | 0 | 0 | `header` |
+  | 2 | 0 | 1 | `header` |
+  | 2 | 1 | 1 | `header` |
+  | 2 | 2 | 2 | `data` |
+  | 2 | 1 | 2 | `logical_cell_kind_boundary`, unresolved |
+  | 0 | 0 | 0 | `data` |
 
 *2. bbox.*
 
@@ -965,13 +1157,55 @@ by word center. The validator recomputes the union from `word_ids`.
 
 *3. text and word order.*
 
-`LogicalCell.text` is `_words_to_text(assigned_words)` from
-`structure.py:335-352`, applied to exactly the assigned words:
+`LogicalCell.text` is exactly `_words_to_text(assigned_words)`
+(`structure.py:335-351`), applied to the assigned words of the logical cell.
+The function is normative; an independent reimplementation must match it
+operation for operation:
 
-- sort by `((y0 + y1) / 2, x0)`;
-- group into lines with `line_tol = max(2.0, median(word_height) * 0.55)`;
-- join words inside a line with one ASCII space in x order;
-- join lines with `\n`; strip the result.
+```text
+def words_to_text(words):
+    ordered = stable_sort(words, key=lambda w: ((w.y0 + w.y1) / 2, w.x0))
+    heights = [w.y1 - w.y0 for w in ordered if w.y1 > w.y0]
+    line_tol = max(2.0, (median(heights) if heights else 8.0) * 0.55)
+    lines, centers = [], []
+    for w in ordered:
+        c = (w.y0 + w.y1) / 2
+        if lines and abs(c - centers[-1]) <= line_tol:
+            lines[-1].append(w)
+            centers[-1] = sum((u.y0 + u.y1) / 2 for u in lines[-1]) / len(lines[-1])
+        else:
+            lines.append([w])
+            centers.append(c)
+    rendered = [" ".join(w.text for w in stable_sort(line, key=lambda w: w.x0))
+                for line in lines]
+    return "\n".join(rendered).strip()
+```
+
+This block is reproduced byte-exactly in the delivery message, with its
+SHA-256, so it can be rebuilt even if a transport swallows `*` or an operator.
+
+Normative details:
+
+- `stable_sort` is stable: equal keys keep the incoming order. `heights`
+  excludes every word with `y1 - y0 <= 0`. `median` is `statistics.median`,
+  which averages the two middle values for an even count; `8.0` applies only
+  when the filtered `heights` list is empty.
+- The line test compares the word center with the running mean of the
+  **current last line as it stood before this word was appended**. The mean is
+  then recomputed as the arithmetic mean of all word centers in the extended
+  line, in line order, using ordinary float addition — never an incremental
+  average and never a different summation order.
+- A new line's center is exactly that word's own center.
+- The within-line sort key is `x0` alone, not `(x0, word_id)`; ties keep the
+  line's insertion order. Words are joined by one ASCII space and lines by
+  `\n`; the single `.strip()` applies to the whole result, not per line.
+- An empty word list returns `""`. Duplicate entries are rendered once each
+  and are never de-duplicated here; a duplicated `word_id` is a partition
+  error (§5.6 item 5), not something this function repairs.
+- The input order is the stored assignment order. The parser builds it by
+  appending in `layout.words` order (`structure.py:315-329`), so a re-render
+  from `word_ids` must resolve the ids and pass them in that same order;
+  otherwise words with equal `(center, x0)` keys could render differently.
 
 `word_ids` and each assignment's `word_ids` are stored in this reading order.
 A split cell's text is therefore a re-rendering of its word subset, never a
@@ -1026,6 +1260,8 @@ column_projection: tuple[ColumnProjection, ...] = ()
 logical_columns_detail: tuple[LogicalColumn, ...] = ()
 logical_cells: tuple[LogicalCell, ...] = ()
 logical_boundary_decisions: tuple[LogicalBoundaryDecision, ...] = ()  # diagnostic
+grid_ys: tuple[float, ...] = ()                          # D6; grid.ys copied verbatim
+n_rows: int = 0                                          # D6; grid.n_rows
 ```
 
 `logical_boundaries` and `logical_boundary_detail` are ordered identically:
@@ -1035,6 +1271,12 @@ validator enforces the parallel order and rejects a length mismatch.
 
 `logical_boundary_decisions` is the only diagnostic payload retained on an
 `unresolved` table; all accepted logical payloads stay empty (§10).
+
+`grid_ys` and `n_rows` are physical structure, not logical payload: they stay
+populated on an `unresolved` table and are never recomputed from `rows`.
+`grid_ys` is `tuple(grid.ys)` as stored by the builder, strictly ascending,
+with `len(grid_ys) == n_rows + 1` whenever `n_rows > 0`. An old artifact with
+no `grid_ys` loads with the legacy defaults `()` and `0` (invariant 16).
 
 `DetectedCell` / domain `Cell` gain only derived caches:
 
@@ -1076,7 +1318,7 @@ keys (`config.py:78-82`). The frozen v1 SHA is
 (`docs/S2A_FREEZE.md`).
 
 The v1 field set is exactly the 20 fields currently declared
-(`config.py:23-49`):
+(`config.py:25-49`):
 
 ```text
 cell_gap_pt, row_gap_factor, column_tolerance, header_min_hits,
@@ -1087,24 +1329,107 @@ merge_extent_tol_pt, merge_min_x_overlap_ratio, visual_min_rule_span_pt,
 visual_boundary_tol_pt, visual_full_height_coverage
 ```
 
+**Field names verified (R10-N8FIELDS).** The r9 delivery showed
+`merge_column_tol_ptl` inside the decoded §5.8 excerpt. The string is not in
+the repository: `config.py:40` declares `merge_column_tol_pt`, the frozen v1
+snapshot in `docs/S2A_FREEZE.md` hashes a `params` object containing
+`merge_column_tol_pt`, and the 20-name block above carries that name and no
+other spelling of it. The defect
+was in the delivered message, whose base64 was retyped instead of copied;
+§16.6 records it. The 20 names below are copied from `config.py:25-49` in
+declaration order, together with the Pydantic bound and the code default of
+each field. This table is the field-set authority, not the prose above it.
+
+| Field | Declared | Accepted JSON | Bound | Default |
+| --- | --- | --- | --- | --- |
+| `cell_gap_pt` | float | number | `gt 0` | 8.0 |
+| `row_gap_factor` | float | number | `gt 0` | 2.5 |
+| `column_tolerance` | int | integer | `ge 0` | 2 |
+| `header_min_hits` | int | integer | `ge 1` | 2 |
+| `max_title_chars` | int | integer | `ge 1` | 120 |
+| `max_cell_chars` | int | integer | `ge 1` | 80 |
+| `min_numeric_cells` | int | integer | `ge 0` | 2 |
+| `rule_min_width_pt` | float | number | `gt 0` | 70.0 |
+| `rule_min_height_pt` | float | number | `gt 0` | 15.0 |
+| `alignment_min_rows` | int | integer | `ge 2` | 3 |
+| `merge_min_gap_pt` | float | number | `ge 0` | 2.0 |
+| `merge_max_gap_pt` | float | number | `gt 0` | 24.0 |
+| `merge_column_tol_pt` | float | number | `gt 0` | 2.5 |
+| `merge_min_shared_columns` | int | integer | `ge 1` | 2 |
+| `merge_shared_ratio` | float | number | `gt 0`, `le 1` | 0.6 |
+| `merge_extent_tol_pt` | float | number | `ge 0` | 3.0 |
+| `merge_min_x_overlap_ratio` | float | number | `gt 0`, `le 1` | 0.6 |
+| `visual_min_rule_span_pt` | float | number | `gt 0` | 4.0 |
+| `visual_boundary_tol_pt` | float | number | `gt 0` | 2.5 |
+| `visual_full_height_coverage` | float | number | `gt 0`, `le 1` | 0.85 |
+
+**Per-field JSON type rules (R10-N8FIELDS).** These run on the stored JSON,
+before any `TableParams(**params)` construction:
+
+1. A declared `int` field accepts only a JSON integer. `true` and `false` are
+   rejected even though Python's `bool` is a subclass of `int`; the test is
+   `type(value) is int`, never `isinstance(value, int)`.
+2. A declared `float` field accepts a JSON integer or a JSON float. Integer and
+   float JSON types are validated without coercing the stored parsed value. A
+   stored `8` stays the integer 8 in the parsed document and a stored `8.0`
+   stays the float; neither is rewritten before the canonical hash. Bounds are
+   compared numerically, so `8` and `8.0` are equally valid for a float field,
+   but they are distinct documents with distinct canonical JSON.
+3. `null`, strings, arrays and objects are rejected for both declared types.
+4. A non-finite value is rejected; canonical JSON cannot represent `NaN` or
+   `Infinity`, and the writer must call `json.dumps(..., allow_nan=False)`.
+5. The bound in the table is re-checked on the stored value, so a snapshot that
+   satisfies the type rule but violates `gt 0`, `ge 0` or `le 1` is
+   `table_params_snapshot_schema_invalid`.
+
+**Hash semantics (R11-N8LOAD-2).** The canonical snapshot hash is SHA-256 over
+the canonical JSON serialization of the stored snapshot object, with sorted
+keys and no insignificant whitespace, computed by the unchanged
+`snapshot_sha256()` at `config.py:78-82`. It is not a hash of the original raw
+byte sequence. Whitespace, key order and JSON number spelling in the artifact
+file therefore do not by themselves change the hash; only the parsed document
+does. The validator hashes `document` exactly as the loader parsed it, without a
+`TableParams` round-trip and without an int-to-float rewrite, so the frozen v1
+SHA `82d4df4d...` is reproduced as before. Switching this document to
+raw-byte hashing would break every existing v1 artifact and is not proposed.
+`TableParams(**params)` is constructed only after the hash comparison, and its
+dump is never hashed.
+
 **Version-dispatched serialization.** S2b must not change what a v1 snapshot
 means. Proposed API:
 
 ```text
 TABLE_PARAMS_SNAPSHOT_VERSION = "table-params/v2"
 SUPPORTED_TABLE_PARAMS_SNAPSHOT_VERSIONS = ("table-params/v1", "table-params/v2")
-V1_FIELDS = (the 20 names above)
-V2_FIELDS = V1_FIELDS + (the seven logical_* names)
+V1_FIELDS = (the 20 names in the field table)
+V2_FIELDS = V1_FIELDS + (the seven logical_ names)
 
-table_params_snapshot(params, *, version=TABLE_PARAMS_SNAPSHOT_VERSION) -> dict
+class UnsupportedTableParamsSnapshotVersion(ValueError)
+
+_table_params_fields(version) returns tuple of str
+    if version == "table-params/v1":
+        return V1_FIELDS
+    if version == "table-params/v2":
+        return V2_FIELDS
+    raise UnsupportedTableParamsSnapshotVersion(version)
+
+table_params_snapshot(params, version=TABLE_PARAMS_SNAPSHOT_VERSION) returns dict
+    fields = _table_params_fields(version)      # raises; there is no fallback
     dump = params.model_dump(mode="json")
-    fields = V1_FIELDS if version == "table-params/v1" else V2_FIELDS
     return {"snapshot_version": version,
             "params": {name: dump[name] for name in fields}}
 
-table_params_sha256(params, *, version=...) -> str
+table_params_sha256(params, version=TABLE_PARAMS_SNAPSHOT_VERSION) returns str
     return snapshot_sha256(table_params_snapshot(params, version=version))
 ```
+
+`version` is keyword-only in both entry points. There is no `else` branch. The
+r9 review correctly observed that
+`fields = V1_FIELDS if version == "table-params/v1" else V2_FIELDS` would label
+any unknown version as v2 while keeping its caller-supplied version string,
+producing a snapshot whose `snapshot_version` and field set disagree.
+`table_params_sha256` routes through `table_params_snapshot`, so it inherits the
+same refusal and cannot hash an unknown version.
 
 `snapshot_sha256()` itself is unchanged. It hashes the stored snapshot object,
 not a freshly dumped model, so replaying an old artifact is stable without
@@ -1113,63 +1438,150 @@ and `:118-119`) passes the current version explicitly; consumers
 (`audit_visual_primitives.py:414`, `validate_evidence.py:316`) hash the stored
 snapshot and never re-dump the model.
 
-**Strict snapshot validation (N8).** A computable SHA does not make a snapshot
-legal. Add:
+**Strict snapshot validation (N8, R11-N8LOAD-1).** A computable SHA does not
+make a snapshot legal. The validator takes raw bytes and calls the loader
+itself, so a caller cannot supply a hand-built document that skipped duplicate
+key detection:
 
 ```text
-validate_table_params_snapshot(snapshot: dict, *, expected_version: str) -> list[str]
+class DuplicateTableParamsSnapshotKey(ValueError)
+
+class TableParamsSnapshotParseError(ValueError)
+
+class LoadedTableParamsSnapshot
+    raw: bytes       # the exact bytes that were decoded
+    document: dict   # {"snapshot_version": str, "params": dict}
+
+_reject_duplicate_keys(pairs) returns dict
+    seen = set()
+    for key, _ in pairs:
+        if key in seen:
+            raise DuplicateTableParamsSnapshotKey(key)
+        seen.add(key)
+    return dict(pairs)
+
+load_table_params_snapshot(raw: bytes) returns LoadedTableParamsSnapshot
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise TableParamsSnapshotParseError(str(exc))
+    try:
+        document = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+    except json.JSONDecodeError as exc:
+        raise TableParamsSnapshotParseError(str(exc))
+    return LoadedTableParamsSnapshot(raw=raw, document=document)
+
+validate_table_params_snapshot(raw: bytes,
+                               expected_version: str,
+                               expected_sha256: str) returns list of str
+    try:
+        doc = load_table_params_snapshot(raw)
+    except DuplicateTableParamsSnapshotKey:
+        return ["table_params_snapshot_duplicate_key"]
+    except TableParamsSnapshotParseError:
+        return ["table_params_snapshot_parse_error"]
+    document = doc.document
+    if type(document) is not dict:
+        return ["table_params_snapshot_schema_invalid"]
+    if set(document) != {"snapshot_version", "params"}:
+        return ["table_params_snapshot_schema_invalid"]
+    if type(document["params"]) is not dict:
+        return ["table_params_snapshot_schema_invalid"]
+    # version, per-field type and bound checks, then hash comparison follow
 ```
 
-It rejects, in order:
+`expected_version` and `expected_sha256` are keyword-only. The validator is the
+only public validation entry point, and its only input is raw bytes. It has no
+parameter that accepts a `dict` or a pre-loaded `LoadedTableParamsSnapshot`, so
+a hand-built document cannot be validated and a duplicate key cannot be
+collapsed before the check. `load_table_params_snapshot` may be imported for
+diagnostics, but its return value is not an approval token: a caller that needs
+validation passes the same bytes to the validator, which loads them again.
+There is no `table_params_snapshot_untrusted_source` code, because no entry
+point can receive an untrusted object any more.
 
-1. top-level keys not exactly `{"snapshot_version", "params"}`;
-2. `snapshot_version` different from `expected_version` read from the manifest
-   or `run_config`;
-3. `params` keys not exactly the field set of that version;
-4. a missing, extra, unknown or duplicate key; duplicate JSON object keys are
-   rejected at load time (`object_pairs_hook`) before hashing;
-5. a value with the wrong JSON type or a non-finite number;
-6. only after 1–5 pass is `snapshot_sha256(snapshot)` compared with the stored
-   hash.
+Every consumer reads the artifact bytes and calls the validator. A
+`json.loads(...)` call followed by a separate check remains forbidden: once a
+plain `dict` exists, a duplicate key has already been collapsed by the parser
+and no validator downstream can detect it. The duplicate-key exception is
+raised inside `json.loads` by the object hook; it is not a `JSONDecodeError`, so
+the loader's parse-error wrapper does not catch it and it reaches the
+validator's first `except` branch unchanged.
 
-A snapshot that fails 1–5 is `table_params_snapshot_schema_invalid` even if its
-SHA matches itself. A stored version different from the manifest/run_config
-version is `table_params_snapshot_version_mismatch`.
+The read path rejects, in order:
+
+1. a UTF-8 decode failure, empty input or a JSON syntax error:
+   `table_params_snapshot_parse_error`;
+2. a duplicate JSON object key at any depth, as raised by the
+   `object_pairs_hook`: `table_params_snapshot_duplicate_key` with the
+   offending key name;
+3. a root value that is not a JSON object — an array, string, number or `null`
+   parses successfully but is not a snapshot: `table_params_snapshot_schema_invalid`;
+4. top-level keys not exactly `{"snapshot_version", "params"}`:
+   `table_params_snapshot_schema_invalid`;
+5. a `snapshot_version` outside `SUPPORTED_TABLE_PARAMS_SNAPSHOT_VERSIONS`
+   (`unsupported_table_params_snapshot_version`), or a supported version that
+   differs from `expected_version` read from the manifest or `run_config`
+   (`table_params_snapshot_version_mismatch`);
+6. `params` that is not a JSON object — including an array, string, number or
+   `null`: `table_params_snapshot_schema_invalid`;
+7. `params` keys not exactly `_table_params_fields(snapshot_version)`;
+8. any missing, extra or unknown key, and any value that violates the per-field
+   type rules or the table bound: `table_params_snapshot_schema_invalid`;
+9. only after 1–8 pass is `snapshot_sha256(doc.document)` compared with
+   `expected_sha256`; a difference is `table_params_snapshot_sha_mismatch`.
+
+A snapshot that fails 3–8 is `table_params_snapshot_schema_invalid` even if its
+SHA matches itself. The three failure codes are disjoint: `parse_error` means
+the bytes are not a UTF-8 JSON document, `duplicate_key` means they are a JSON
+document with a repeated object key, and `schema_invalid` means a well-formed
+JSON document whose root, `params` member, structure or values are not an
+allowed snapshot. A non-object root or `params` is a structure failure, never a
+parse failure.
 
 Compatibility rules:
 
-1. New runs use `table-params/v2`; the snapshot contains exactly
-   `V2_FIELDS` (the 20 v1 names plus the seven `logical_*` names).
+1. New runs use `table-params/v2`; the snapshot contains exactly `V2_FIELDS`
+   (the 20 v1 names plus the seven logical names).
 2. A replayed `table-params/v1` snapshot contains exactly `V1_FIELDS` and
-   re-hashes to `82d4df4d...`; no `logical_*` key is added during replay.
-3. `run_config.json` and `run_manifest.json` store `snapshot_version`. Audit and
-   validation read that stored version and dispatch; they never call
-   `table_params_snapshot(params)` without it.
+   re-hashes to `82d4df4d...`; no logical key is added during replay.
+3. `run_config.json` and `run_manifest.json` store `snapshot_version` and the
+   snapshot hash. Audit and validation read that stored version, pass it as
+   `expected_version` together with the stored hash as `expected_sha256`, and
+   dispatch; they never call `table_params_snapshot(params)` without it. The
+   stored version is what the validator is asked to accept, so a v1 artifact is
+   never validated against the v2 field set.
 4. `TableParams(**stored_v1_params)` remains valid because the new fields have
    defaults, but the reconstructed object is never re-dumped as v1.
-5. An unsupported or missing version is refused with
-   `unsupported_table_params_snapshot_version`; it is not guessed as v1 or v2.
-   A version mismatch between the snapshot and the manifest/run_config is
-   `table_params_snapshot_version_mismatch`.
+5. An unknown version passed to the serializer raises
+   `UnsupportedTableParamsSnapshotVersion` and is never guessed as v1 or v2;
+   an artifact that stores an unknown version is rejected by the validator with
+   `unsupported_table_params_snapshot_version`.
+   `table_params_snapshot` and `table_params_sha256` refuse through the same
+   `_table_params_fields` dispatch, so neither can emit or hash a snapshot
+   labelled with an unknown version. A version mismatch between the snapshot
+   and the manifest/run_config is `table_params_snapshot_version_mismatch`.
 6. `configs/parser.yaml` is not edited. If the Reviewer later wants these
    defaults in YAML, that changes `parser_config_sha256` and requires a new run
    baseline; it is outside S2b.
 7. `tools/audit_visual_primitives.py` still hashes the stored snapshot
-   (`verify_identity`, `snapshot_sha256(snapshot)`), still checks
-   `rule_primitives.py` and `GRID_TOL`, and still accepts
-   `TableParams(**snapshot["params"])`. Adding fields to `config.py` does not
+   (`verify_identity`, `snapshot_sha256` over the loaded `document`), still
+   checks `rule_primitives.py` and `GRID_TOL`, and still accepts
+   `TableParams(**document["params"])`. Adding fields to `config.py` does not
    change `rule_primitives.py`, so the S2a identity gate is unchanged.
 8. `tools/validate_evidence.py` recomputes the hash from the stored snapshot
-   (`validate_evidence.py:316-324`), so old runs keep passing. It also reads
-   visual parameters from the stored `params`; new logical keys do not affect
-   that path.
+   (`validate_evidence.py:316-324`), so old runs keep passing. It passes the
+   raw artifact bytes to `validate_table_params_snapshot`, which loads them and
+   recomputes the hash from the parsed document without a `TableParams`
+   round-trip, and it reads visual parameters from the stored `params`; new
+   logical keys do not affect that path.
 
 **S2b-Schema edit boundary (N8).** "Do not modify S1/S2a" is refined into an
 explicit allowlist so the implementing agent does not decide case by case:
 
 | File | Allowed S2b-Schema change | Forbidden |
 | --- | --- | --- |
-| `src/icpdf/parser/config.py` | add the seven defaults; bump the version constant; add `V1_FIELDS` / `V2_FIELDS`, version-aware helpers and the strict validator | changing existing defaults or the v1 field list |
+| `src/icpdf/parser/config.py` | add the seven defaults; bump the version constant; add `V1_FIELDS` / `V2_FIELDS`, the two-branch version dispatch, the raw-bytes loader with its value object, and the strict validator | changing existing defaults or the v1 field list |
 | `src/icpdf/parser/pipeline.py` | pass the version explicitly to snapshot/helpers | changing detection, extraction or run layout |
 | `tools/audit_visual_primitives.py` | add read-only version dispatch and snapshot-schema validation | changing `verify_identity`, primitive/segment reconstruction, `GRID_TOL` binding or boundary checks |
 | `tools/validate_evidence.py` | add the same read-only dispatch | changing existing checks or tolerances |
@@ -1184,10 +1596,23 @@ gate and visual evidence checks stay byte-for-byte equivalent on old artifacts.
 Required compatibility tests (S2b-Schema):
 
 - replay a stored v1 snapshot and reproduce `82d4df4d...`;
-- assert the v1 replay has no `logical_*` key;
-- assert a v2 snapshot contains the seven new keys;
-- delete one v2 key, add one unknown key, and duplicate a JSON key: each must
-  be refused although a SHA can still be computed;
+- assert the v1 replay has no logical key;
+- assert a v2 snapshot contains the seven logical keys;
+- delete one v2 key and add one unknown key: each is refused although a SHA can
+  still be computed;
+- write a raw snapshot with a duplicate JSON key: `validate_table_params_snapshot`
+  returns `table_params_snapshot_duplicate_key`; there is no entry point that
+  accepts a plain `dict`, so the duplicate cannot be collapsed first;
+- feed invalid UTF-8 bytes and a truncated JSON document: both return
+  `table_params_snapshot_parse_error`, distinct from the duplicate-key code;
+- feed a JSON array as the root, and a snapshot whose `params` is a string:
+  both return `table_params_snapshot_schema_invalid`, never `parse_error`;
+- call `table_params_snapshot` and `table_params_sha256` with `"table-params/v3"`:
+  both raise `UnsupportedTableParamsSnapshotVersion`; neither falls back to v2;
+- store `true` for `column_tolerance` and for `merge_shared_ratio`: both are
+  refused even though `bool` is a subclass of `int`; store `1` for
+  `merge_shared_ratio`: accepted as a JSON number and hashed as the canonical
+  integer 1 without an int-to-float rewrite;
 - a snapshot version that disagrees with the manifest is refused;
 - run the S2a primitive audit on an old artifact and confirm zero identity
   errors;
@@ -1301,7 +1726,10 @@ The promotion test is the approved S2 rule, with the ratio defined exactly:
    `DetectedCell` whose bbox contains `x` (`bbox[0] <= x <= bbox[2]`) and whose
    row coverage includes that band. Zero source cells means no label candidate
    in that band; more than one is `subrule_source_cell_ambiguous` and the
-   candidate is `unresolved`;
+   candidate is `unresolved`. Both endpoints are closed deliberately: `x` on a
+   shared cell edge yields two cells and a fail-closed rejection. That outcome
+   is intended and must not be "fixed" with a half-open interval, an epsilon or
+   a tie-break by cell index;
 2. inside the source cell take the words whose center is strictly right of x,
    sort them by `(x0, word_id)`, and start a new run whenever the gap to the
    previous word exceeds `cell_gap_pt` (`structure.py:551-553`);
@@ -1309,8 +1737,10 @@ The promotion test is the approved S2 rule, with the ratio defined exactly:
    at most `1e-6` are a tie (`subrule_run_tie`) and the candidate is
    `unresolved`; never pick a run by word count or text;
 4. classify the selected run with §6.3.1; only `short_label` counts;
-5. `nonempty_bands` = bands with at least one word center strictly right of x
-   anywhere inside the table, computed before classification;
+5. `nonempty_bands` = the number of bands **in `rule_bands`** with at least one
+   word center strictly right of x inside the table, computed before
+   classification. A band with an ambiguous or missing source cell still counts;
+   the denominator is never "bands that produced a source cell";
 6. `short_label_bands` = `len(label_assignments)`;
 7. `short_label_ratio = short_label_bands / nonempty_bands` with
    `nonempty_bands > 0`; bands with no right-side word are excluded from both
@@ -1328,16 +1758,209 @@ The promotion test is the approved S2 rule, with the ratio defined exactly:
 Normalization: strip, collapse internal whitespace, and casefold only for
 keyword matching; the stored label keeps its original text.
 
-| Class | Test (checked in this order) |
+**Tokenization (N5-1).** A run is split on whitespace, then each fragment is
+split by a left-to-right longest-match scan over four frozen token classes:
+
+| Priority | Class | Tokens |
+| --- | --- | --- |
+| 1 | two-character operators | `>=`, `<=`, `..` |
+| 2 | one-character operators and separators | `<`, `>`, `=`, `≈`, `≤`, `≥`, `–`, `—`, `±`, `%`, `(`, `)`, `,`, `.` |
+| 3 | number | optional sign, digits, optional `.` plus digits, optional exponent |
+| 4 | word | maximal run of Unicode letters, digits, `°`, `_`, `/`, plus `-` only under the asymmetric rule below |
+
+Scanning is left to right. At each position the classes are tried in priority
+order and the first class that matches wins; within a class the match is greedy.
+This makes `>=` one token (class 1 before the class-2 `>`), turns `5..10` into
+`5`, `..`, `10` (class-1 `..` before the class-2 `.`), and splits `0.8V` and
+`10k` at the digit→letter boundary because class 3 is tried before class 4. A
+letter→digit boundary does not split, so `CLK1` stays one token. `–` (en dash)
+and `—` (em dash) are range dashes. Any character in no class is emitted as a
+single `other` token, which no content class accepts. Markers are detected on
+this token sequence, never by substring search of the normalized string.
+
+**Word-run hyphen rule (R7).** A word run starts at a word-class character and
+continues while the next character is a word-class character, or is `-` that
+satisfies **both** conditions:
+
+- the character immediately before the `-` is a Unicode letter, `_`, `°` or `/`
+  — never a digit;
+- the character immediately after the `-` is a word-class character (Unicode
+  letter, digit, `°`, `_` or `/`).
+
+The left condition is deliberately narrower than the word class. Digits are
+word-class characters, so a symmetric "flanked by word characters" rule would
+also absorb the hyphen of `5-10`, contradicting the required split; the rule
+must not rely on that symmetry.
+
+`+` and `-` that are not absorbed as above are tried as signs: a sign belongs
+to a number token only at the start of a fragment or directly after an operator
+token, and only when a digit or `.` follows. In every other position a `-` is an
+`other` token; a `+` is then also `other`. A word run never starts with `-`.
+
+**Operand grammar (N5-2).** Three productions are defined on the token
+sequence:
+
+- `value_phrase`: an optional unary `±` or `≈`, one number token, an optional
+  multiplier token from `{k, M, G, m, µ, u, n, p}`, and an optional token from
+  `LOGICAL_UNIT_TOKENS`, in that order — `5`, `5 V`, `10 kΩ`, `±0.5 %`;
+- `operand`: a `value_phrase`, or exactly one word token (`A`, `VCC`, `CLK1`);
+- `value_bearing`: a `value_phrase` only.
+
+1. **range**: `value_bearing RC value_bearing`, `RC` in `{to, .., –, —,
+   through}`; `to` and `through` are matched casefolded.
+2. **symbol binding**: `SYM OP value_phrase`, `SYM` in the frozen
+   `LOGICAL_SYMBOL_TOKENS` set below and `OP` one of the binary operators. The
+   right side must be value-bearing, so `VCC = VDD` is not a symbol binding.
+3. **binary comparison**: `operand OP operand`, `OP` in `{<, <=, >, >=, =, ≈,
+   ≤, ≥}`, both operands non-empty. The sides need not be numeric, which is why
+   `A=B` and `A>=B` are conditions.
+
+**The relational marker is tested first, before any content class.** A run that
+matches one of these productions is `condition_expression` and no later class
+may claim it. Without this order a short, letter-bearing, digit-free run such
+as `A=B` would be captured by `short_label` even though it states a relation.
+Productions are tried in the order above; all three yield the same class, and
+the order only fixes which description is recorded.
+
+A run that matches none of the three productions — whether or not it contains
+an operator token — is **not** condition-like: it is classified by the content
+classes if one accepts the run, otherwise it is `unclassified`, contributes no
+`short_label` and no condition signal. Unknown connectors, unknown symbols and
+unclassifiable characters are never guessed; the candidate falls through to
+`demote_no_evidence`.
+A **unary** `±` or `≈` directly before a number is a tolerance, not a marker,
+and a marker whose only operand sits inside the same parentheses does not make
+the surrounding run a condition. No lexical outcome is `unresolved`:
+`unresolved` is reserved for the geometric ambiguities of §6.3
+(`subrule_source_cell_ambiguous`, `subrule_run_tie`) and the §6.2 conflict
+rows; a lexically unrecognised run demotes, it does not block.
+
+After the marker test, the content classes are applied in this order; the
+first match wins:
+
+| Class | Test |
 | --- | --- |
-| `numeric` | every token parses as a number with optional sign, decimal point, exponent or `%`; no letter outside `%` |
-| `value_with_unit` | one numeric token followed only by tokens from `LOGICAL_UNIT_TOKENS`, with no relational marker, e.g. `5 V`, `10 kΩ`, `±0.5 %`. This is data, not a condition |
-| `unit_only` | one token (optionally with a digit prefix such as `10k`) whose alphabetic part is in the frozen `LOGICAL_UNIT_TOKENS` set |
+| `condition_expression` | a relational marker above was found; decided before this table, listed here for completeness |
+| `numeric` | an optional unary `±`/`≈` followed by exactly one number token, nothing else |
+| `value_with_unit` | a `value_phrase` that contains a `LOGICAL_UNIT_TOKENS` token and no marker, e.g. `5 V`, `10 kΩ`, `±0.5 %`. This is data, not a condition |
+| `unit_only` | exactly one `LOGICAL_UNIT_TOKENS` token, or one number followed by one multiplier token (`10k`, `100n`) |
 | `identifier` | one token matching `[A-Za-z][A-Za-z0-9_/-]*` that contains a digit or `_`/`/`, with no whitespace |
-| `short_label` | at most `logical_short_label_max_words` words and `logical_short_label_max_chars` characters, at least one letter, no digit, and not `unit_only` |
-| `condition_expression` | contains at least one relational marker: a comparison operator (`<`, `<=`, `>`, `>=`, `=`, `±`, `≈`, `≤`, `≥`); a range connector (`to`, `..`, `–`, `—`, `through`) between two value-with-unit phrases; or a supply/temperature symbol bound by one of those operators (`TA = 25 °C`, `VCC = 5 V`, `VIL < 0.8 V`) |
-| `field_name` | a plain noun phrase with no marker above, e.g. `Output Voltage`, `Clock Source`, `Data Format`, `Input Range`, `Operating Mode` |
-| `prose` | more than six words or sentence punctuation; condition-like only if a relational marker above is present |
+| `short_label` | at most `logical_short_label_max_words` tokens and `logical_short_label_max_chars` characters, at least one letter token, no number token, and not `unit_only` |
+| `field_name` | a plain noun phrase with no marker, no operator token and no number token, e.g. `Output Voltage`, `Clock Source`, `Data Format`, `Input Range`, `Operating Mode` |
+| `prose` | more than six tokens or sentence punctuation, and no marker |
+
+Worked examples, decided by this grammar alone:
+
+| Run | Tokens | Production | Class |
+| --- | --- | --- | --- |
+| `A=B` | `A` `=` `B` | binary comparison | `condition_expression` |
+| `A>=B` | `A` `>=` `B` | binary comparison, `>=` matched whole | `condition_expression` |
+| `VCC=5V` | `VCC` `=` `5` `V` | symbol binding | `condition_expression` |
+| `VIL<0.8V` | `VIL` `<` `0.8` `V` | binary comparison | `condition_expression` |
+| `5V–10V` | `5` `V` `–` `10` `V` | range | `condition_expression` |
+| `5..10 V` | `5` `..` `10` `V` | range, `..` matched whole | `condition_expression` |
+| `5 V to 10 V` | `5` `V` `to` `10` `V` | range | `condition_expression` |
+| `TA = 25 °C` | `TA` `=` `25` `°C` | symbol binding | `condition_expression` |
+| `±0.5 %` | `±` `0.5` `%` | none, unary tolerance | `value_with_unit` |
+| `10k` | `10` `k` | none | `unit_only` |
+| `VIN = 5 V` | `VIN` `=` `5` `V` | binary comparison | `condition_expression` |
+| `A ~ B` | `A` `~` `B` | none, unknown operator | `unclassified`, demotes |
+| `V-10V` | `V-10V` | none, one token | `identifier`, demotes |
+| `5V-10V` | `5` `V-10V` | none, two tokens | `unclassified`, demotes |
+
+`VIN = 5 V` is a condition by the generic binary rule only. It receives no
+supply or temperature semantics, and it is not a symbol binding.
+
+**Tokenizer test vectors (N5-1).** These are normative; an implementation must
+produce exactly these token sequences:
+
+| Fragment | Tokens | Rule exercised |
+| --- | --- | --- |
+| `>=` | `>=` | class 1 beats the class-2 `>` |
+| `<=` | `<=` | class 1 beats the class-2 `<` |
+| `5..10` | `5` `..` `10` | class-1 `..` beats the class-2 `.` |
+| `5.5..6.5` | `5.5` `..` `6.5` | decimal point stays inside the number token |
+| `-5` | `-5` | sign at fragment start, digit follows |
+| `2>=-5` | `2` `>=` `-5` | sign directly after an operator token |
+| `5-10` | `5` `other(-)` `10` | left neighbour is a digit, so the hyphen is not absorbed |
+| `CLK-1` | `CLK-1` | left neighbour is a letter, right neighbour a digit |
+| `CLK-ABC` | `CLK-ABC` | letters on both sides |
+| `CLK-` | `CLK` `other(-)` | no right neighbour, so no absorption |
+| `5V-10V` | `5` `V-10V` | left neighbour `V` is a letter, right neighbour `1` is a digit |
+| `5 V -10 V` | `5` `V` `-10` `V` | whitespace first; `-10` is a signed number at fragment start |
+| `10k` | `10` `k` | digit→letter split, standalone multiplier |
+| `10 kΩ` | `10` `kΩ` | unit token stays intact |
+| `10kΩ` | `10` `kΩ` | `kΩ` is one unit token; no multiplier is extracted from it |
+| `0.8V` | `0.8` `V` | number class before word class |
+| `±0.5 %` | `±` `0.5` `%` | unary tolerance tokens |
+
+Two consequences are normative and not defects:
+
+- `5V-10V` yields `5`, `V-10V`, not a split value. ASCII `-` is not a range
+  connector, so the run is **not** a range. It is also **not** `identifier`:
+  the run has two tokens and `identifier` accepts only a one-token run (§6.3.1
+  below). No content class accepts the two-token run, so the run is
+  `unclassified` and the candidate demotes with no evidence.
+- `5 V -10 V` yields `5`, `V`, `-10`, `V`. There is no connector token, so no
+  production matches, and the run is `unclassified` and demotes. A range needs
+  an explicit connector (`to`, `through`, `..`, `–`, `—`); juxtaposition of two
+  values is never inferred as a range.
+
+**`identifier` is a single-token class (R8).** Every content class is tested
+against the **whole run's token sequence**, never against one token lifted out
+of a run. `identifier` accepts a run only when all three conditions hold:
+
+- the run consists of exactly one token;
+- that token matches `[A-Za-z][A-Za-z0-9_/-]*`;
+- the token contains a digit, `_` or `/`.
+
+A `-` inside a word run can therefore create an identifier-shaped *token*
+without making the containing *run* an identifier. The outcomes are exhaustive:
+
+| Run | Tokens | Class | Why |
+| --- | --- | --- | --- |
+| `V-10V` | `V-10V` | `identifier` | one token, regex match, contains a digit |
+| `CLK-1` | `CLK-1` | `identifier` | one token, regex match, contains a digit |
+| `CLK-ABC` | `CLK-ABC` | `short_label` | one token but no digit, `_` or `/` |
+| `5V-10V` | `5`, `V-10V` | `unclassified` | two tokens, so `identifier` cannot accept the run; `short_label` and `field_name` reject a number token; two tokens are not `prose` |
+| `5 V -10 V` | `5`, `V`, `-10`, `V` | `unclassified` | no production matches and no class accepts four tokens with numbers |
+
+The token `V-10V` is identifier-shaped, but class membership is a property of
+the run, not of a token. This is not a new rule; it is the "one token … with
+no whitespace" wording of the class table applied to the run.
+
+`identifier` is terminal and has exactly these downstream effects:
+
+| Effect | Value |
+| --- | --- |
+| counts in `label_assignments` | no; only `short_label` does (§6.3 step 4), so `identifier` never raises `short_label_ratio` and never contributes to promotion |
+| condition signal | none; `identifier` is not condition-like (§6.5), so it can never produce `demote_condition_path` |
+| S2c output | none; a lexical class emits no `ConditionBand`, no `ConditionContext` and no text |
+| boundary outcome when the run is the right-side evidence | the candidate reaches the no-evidence branch: `demote_no_evidence`, reason `boundary_no_evidence` |
+| override of the ratio branch | never; the order of §6.5 stands, and a class never overrides promote/ambiguous |
+| `unresolved` | never; a determinate class rejection is not an ambiguity |
+
+**Class disjointness (N5-2).** `numeric`, `value_with_unit` and `unit_only` are
+disjoint by token count, so the class table order only makes precedence
+explicit:
+
+- `numeric` is exactly one number token, optionally preceded by a unary
+  `±`/`≈`;
+- `value_with_unit` is a `value_phrase` that contains a `LOGICAL_UNIT_TOKENS`
+  token;
+- `unit_only` is exactly one `LOGICAL_UNIT_TOKENS` token, or one number followed
+  by one multiplier token.
+
+The multiplier tokens `{k, M, G, m, µ, u, n, p}` are frozen and are never
+physical units: `10k` carries no unit, and `10 kΩ` is a complete
+`value_phrase`. A multiplier counts only as a **standalone token**. A token
+already in `LOGICAL_UNIT_TOKENS` is never re-split to extract a multiplier:
+`kΩ` stays one unit token and its leading `k` is not a multiplier, so `10kΩ`
+is `10`, `kΩ` and is `value_with_unit`, while `10k` is `10`, `k` and is
+`unit_only`.
+
+`unit_only` is a lexical content class, not a physical-quantity judgement; it
+states only that the run carries no standalone value usable as a parameter.
 
 `LOGICAL_UNIT_TOKENS` is a frozen code constant, not a YAML entry. Its initial
 closed set is:
@@ -1351,6 +1974,19 @@ LSB, ppm, V/V, A/A, °, rad, S, mS, µS
 
 The set may be extended only with a new design review; it may not be tuned
 after seeing S2b results.
+
+`LOGICAL_SYMBOL_TOKENS` is likewise a frozen code constant, not a YAML entry,
+and its closed set is exactly:
+
+```text
+VCC, VDD, VIL, VIH, TA, TJ
+```
+
+Matching is casefolded. No other token is a symbol binding: `VIN`, `VOUT`,
+`VEE`, `VSS`, `TEMP`, `CLK` and `EN` are deliberately excluded, so a run such
+as `VIN = 5 V` is an ordinary binary comparison with no supply or temperature
+semantics attached. Extending this set requires a new design review; it may not
+be tuned after seeing S2b results.
 
 **Only `condition_expression` is condition-like.** `field_name` and marker-free
 `prose` are never demoted to `condition_path` merely because they contain
@@ -1487,17 +2123,29 @@ extent.
 ### 7.3 Cell projection and word assignment
 
 1. For each row and logical column, find physical cells whose bbox has a
-   positive-width intersection with the logical interval.
+   positive-width intersection with the logical interval. "Row" means the
+   logical row index `0 .. n_rows - 1` of the persisted `grid_ys` lattice
+   (D6), never a position in the sparse `rows` list; `DetectedRow.grid_row`
+   already carries that index.
 2. Assign each `TextWord` by its exact center x:
-   `cx = (bbox[0] + bbox[2]) / 2`. Every logical column uses the left-open,
+   `cx = (bbox[0] + bbox[2]) / 2`. Two preconditions precede every interval
+   test. A non-finite center is `mapping_word_not_assigned` and the table is
+   unresolved. A center outside the closed outer extent, `cx < b[0]` or
+   `cx > b[-1]`, is `mapping_word_outside_logical_extent` and the table is
+   unresolved; there is **no clamp, snap, tolerance or boundary widening**.
+   This case is reachable: `_assign_words` accepts a word when its center is
+   within `0.8` pt of a cell edge (`structure.py:326`), so a word can belong
+   to a physical cell while its center lies just outside the outermost logical
+   boundary; the two decisions are independent and the mapping one fails
+   closed. Inside the extent every logical column uses the left-open,
    right-closed interval `(b[i], b[i + 1]]`; the single point `cx == b[0]` on
    the left outer edge is assigned to column 0. A center exactly on an internal
    boundary (`cx == b[i]`) therefore belongs to the left column `i - 1`. There
    is **no epsilon and no rounding**: coordinates are
-   compared as stored floats. A non-finite center is `mapping_word_not_assigned`
-   and the table is unresolved. Every exact-boundary hit is counted in the
-   diagnostics as `word_boundary_tie`, but the assignment is still the one
-   above.
+   compared as stored floats. Every exact-boundary hit increments the
+   `word_boundary_tie` diagnostic count once for that word, but the assignment
+   is still the one above; the count is neither a reason code nor a persisted
+   assignment field, and it never makes a table unresolved (§10.2).
 3. Decompose physical cells into logical cells by §5.6: one logical cell per
    (physical cell, maximal consecutive run of word-bearing logical columns),
    merged only when `(row_start, row_end, logical_column,
@@ -1506,6 +2154,31 @@ extent.
    `PhysicalCellRef` and disjoint word subsets; no word is duplicated.
 4. `word_ids` across all logical cells are a disjoint partition of the word
    universe defined in §5.6, item 5.
+
+**D4 verifier (implemented, not yet wired).** `assign_words_to_logical_columns`
+(`structure.py:381`) is item 2 as a pure function. It requires at least two
+boundaries and rejects a non-strict lattice with `ValueError`. Per word it
+raises `LogicalMappingError` carrying one of three codes and the `word_id`:
+`mapping_word_not_assigned` for a non-finite center,
+`mapping_word_outside_logical_extent` for a center outside the closed outer
+extent, and `mapping_word_partition_mismatch` for a duplicate id. Otherwise it
+returns `WordColumnAssignment`, whose `columns` map `word_id -> column` and
+whose `boundary_ties` tuple lists every word whose center equals any boundary
+exactly once. `detect_tables` does not call it in this slice because logical
+boundaries are derived in S2b-2; the function is the frozen contract that
+integration must call instead of re-implementing the interval test.
+
+**D6 row lattice (implemented, additive).** `detect_tables` copies
+`grid.ys` verbatim into `DetectedTable.grid_ys` and `grid.n_rows` into
+`DetectedTable.n_rows` (`table_detector.py:192-193`); `build_table` copies both
+to the domain `Table` (`table_rebuilder.py:79-80`). `rows` stays sparse:
+`detect_tables` skips a grid row with no non-empty cell
+(`table_detector.py:152-153`), so `len(rows) <= n_rows` and `len(rows)` is
+**not** the row count. `DetectedRow.grid_row` is the logical row index, not
+the sparse position. The domain validator enforces that `grid_ys` is strictly
+ascending and that `len(grid_ys) == n_rows + 1` whenever `grid_ys` is present
+(`domain/table.py:146-153`); "non-decreasing" is not acceptable because the
+closed D3 lattice is strictly ascending.
 
 The per-cell assignment is the R7/P1-1 fix. A `LogicalCell` cannot be
 reconstructed from `physical_cell_refs` plus a flat `word_ids` list, because
@@ -1628,19 +2301,24 @@ The read-only audit re-resolves every reference against a fresh parse:
 - `header_cell_refs`: resolve by `(level, source_row, source_column, column)`
   to exactly one `DetectedHeaderCell`; text and bbox must match; `level <
   header_rows`; the cell belongs to this table. For `header_canopy`, every left
-  ref satisfies `bbox[2] <= x + tol`, every right ref `bbox[0] >= x - tol`, the
-  anchors satisfy the `boundary_edge` rule of §5.3, and `left_label` /
-  `right_label` equal the anchors' normalized text.
+  ref satisfies `bbox[2] <= x + tol`, every right ref `bbox[0] >= x - tol`, each
+  anchor is the head of its nearest-first list, the anchors satisfy the
+  `boundary_edge` rule of §5.3, and `left_label` / `right_label` equal the
+  anchors' normalized text.
 - `subrule label_assignments`: `grid_row`s are unique and inside `rule_bands`;
   each `physical_cell_ref` resolves; each word id is in that cell and strictly
   right of x; `selected_run_bbox` equals the word union; `nonempty_bands` and
   `short_label_ratio` recompute from the fresh parse.
 - `table_bbox`: `page_number` and `table_bbox` equal the fresh `DetectedTable`
   exactly; a mismatch is stale, not a warning.
-- `region_extent`: `implied_outer_evidence_index` selects a fresh
-  `TableRegion.evidence[kind="implied_outer"]`; `implied_outer_values`,
-  `extent_left/right`, `region_component_ids`, `boundary_source` and
-  `page_number` match that record.
+- `region_extent`: the region is resolved first, by component-id equality with
+  `set(table.region_components)` over the fresh `detect_table_regions` output.
+  Zero matches is `boundary_evidence_missing_ref`; more than one is
+  `region_lattice_inconsistent`; `source`, `boundary_source` or page mismatch is
+  `boundary_evidence_stale`. Only then does `implied_outer_evidence_index`
+  select `TableRegion.evidence[kind="implied_outer"]` inside that region, and
+  `implied_outer_values`, `extent_left/right`, `region_component_ids`,
+  `boundary_source` and `page_number` must match that record.
 - `grid_rows`: in `[header_rows, n_rows)`; each row is a real band; no row is
   repeated.
 - `word_ids`: each id exists exactly once on the page; its center is inside the
@@ -1651,8 +2329,10 @@ The read-only audit re-resolves every reference against a fresh parse:
   sets; the union over the table equals the recomputed word universe of §5.6.
 - `physical_cell_edge_refs`: `(grid_row, cell_index)` resolves to a real
   `DetectedCell`; `column_index` matches; the edge x is within tolerance of the
-  logical boundary; refs are unique and sorted, and at least two distinct
-  `grid_row` values remain.
+  logical boundary; refs are sorted and unique per `(grid_row, cell_index,
+  edge)`; refs sharing `(grid_row, edge)` form one group whose span
+  `max(edge_xs) - min(edge_xs)` is within `visual_boundary_tol_pt`; at least two
+  distinct `grid_row` values remain across groups.
 - `physical_column`, `physical_left`, `physical_right`: `physical_column` is a
   valid interval index; `physical_left == grid.xs[i]` and `physical_right ==
   grid.xs[i + 1]`; the canonical bands of one logical column partition
@@ -1736,7 +2416,6 @@ boundary_evidence_stale
 boundary_evidence_duplicate_ref
 subrule_run_tie
 subrule_source_cell_ambiguous
-word_boundary_tie
 mapping_physical_overlap_missing
 mapping_lattice_index_mismatch
 mapping_row_band_not_canonical
@@ -1744,6 +2423,7 @@ mapping_row_band_overlap
 mapping_visual_interval_mismatch
 mapping_row_overlap
 mapping_word_not_assigned
+mapping_word_outside_logical_extent
 mapping_word_partition_mismatch
 logical_cell_kind_boundary
 logical_cell_id_collision
@@ -1757,10 +2437,18 @@ table_params_snapshot_version_mismatch
 ```
 
 A table may carry several codes. Codes are evidence for review, not an
-alternative decision mechanism. `word_boundary_tie` is diagnostic only: it
-records an exact center-on-boundary hit whose assignment is still the
-deterministic left-column rule of §7.3, so it does not make a table
-`unresolved`.
+alternative decision mechanism.
+
+`word_boundary_tie` is **not** a reason code and is **not** persisted on a
+table, a logical cell, a `PhysicalCellAssignment` or a word. It is a
+runtime/validator **diagnostic count**: one increment for each `TextWord`
+whose center x equals any logical boundary exactly (float equality, no
+tolerance), counted at most once per word because the accepted lattice is
+sorted and unique. A tie keeps the deterministic left-column assignment of
+§7.3, never changes `logical_mapping_status`, and never adds a reason code. An
+unresolved table may report no count at all and a resolved table may report a
+positive count; the number is reported by the validator alongside the table,
+not stored in the parsed artifact.
 
 ### 10.3 No guessing
 
@@ -1806,11 +2494,18 @@ validator):
    §5.4; the tuple is empty iff `visual_columns is None`.
 8. Every kept boundary's evidence resolves per §5.3/§9.2; a missing reference
    is an error, not a warning. The evidence kind must match the declared
-   source. `header_canopy` is directed: both anchors resolve, left/right lists
-   are on the correct side, labels equal the anchor text, and the
-   `boundary_edge` position rule holds. `subrule_promoted` has unique in-band
-   assignments and a recomputable ratio. `table_bbox` and `region_extent` match
-   the fresh parse; self-consistency alone is not accepted.
+   source. `header_canopy` is directed: both anchors resolve, each anchor is the
+   head of its nearest-first ref list, left/right lists are on the correct
+   side, labels equal the anchor text, and the `boundary_edge` position rule
+   holds. `subrule_promoted` has one unique source cell per band or is
+   `unresolved`, unique in-band assignments, and a recomputable ratio.
+   `table_bbox` matches the fresh `DetectedTable` exactly. `region_extent`
+   resolves its region by `region_components` equality before matching the
+   record; equal extents alone are never accepted. `structural` refs are unique
+   per `(grid_row, cell_index, edge)`, refs for one `(grid_row, edge)` form a
+   single group that keeps every ref and satisfies
+   `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt` with no chain
+   membership, and band counting uses distinct `grid_row` values.
 9. Candidate decisions obey fixed-anchor grouping: `anchor_x` is a member of
    `source_xs`; every `abs(x - anchor_x) <= visual_boundary_tol_pt`; group
    ranges do not overlap (`max(source_xs) < next_anchor_x`); no source x is
@@ -1818,7 +2513,11 @@ validator):
 10. `LogicalCell.physical_cells` is non-empty; every `PhysicalCellRef` resolves;
     each assignment's `word_ids` is non-empty; assignment word ids are pairwise
     disjoint and their union equals `LogicalCell.word_ids`; across the table
-    the union equals the word universe of §5.6, item 5.
+    the union equals the word universe of §5.6, item 5. On a fresh parse,
+    `DetectedCell.word_ids` must equal `grid.cell_words[flat_index]` for the
+    cell reached by enumerating `grid.cells` with `cell.row == grid_row` and
+    non-empty text; the comparison is against the grid builder's capture
+    (§7.3), never against a row-local rank.
 11. `LogicalCell.bbox` equals the union of its assigned word bboxes;
     `LogicalCell.text` equals `_words_to_text` over those words; `word_ids` is
     in that reading order; it is not an unmodified copy of a shared physical
@@ -1839,11 +2538,40 @@ validator):
 15. Candidate ids and counts are unchanged; candidate logical refs are empty on
     unresolved tables.
 16. Old run artifacts without logical fields still load and are treated as
-    `unresolved`, not as a parse failure.
+    `unresolved`, not as a parse failure. This classification happens **before**
+    invariants 18 and 19: an artifact whose `grid_ys` is `()` and whose
+    `n_rows` is `0` loads with the legacy defaults, is unresolved, and is never
+    audited against a logical lattice. A missing `grid_ys` is not by itself a
+    parse failure; a present but malformed `grid_ys` is (§5.7).
 17. A replayed `table-params/v1` snapshot reproduces the frozen v1 SHA and
-    contains no `logical_*` key; a v2 snapshot contains exactly `V2_FIELDS`
-    (the 20 v1 names plus the seven `logical_*` names). Both pass strict key,
-    type and version validation (§5.8), not only a hash comparison.
+    contains no logical key; a v2 snapshot contains exactly `V2_FIELDS`
+    (the 20 v1 names plus the seven logical names). Both are validated from
+    raw bytes by `validate_table_params_snapshot`, which loads them itself and
+    applies strict root, key, per-field type, bound, version and hash checks
+    (§5.8), not only a hash comparison. Duplicate object keys, UTF-8 or JSON
+    syntax failure and schema violation carry distinct codes; a non-object root
+    or non-object `params` is a schema violation, not a parse failure; and an
+    unknown version is refused by the serializer and by the validator. The hash
+    is computed over canonical JSON of the parsed document, never over raw
+    bytes.
+18. **Resolved-table lattice audit (artifact-only).** On a table whose
+    `logical_mapping_status` is resolved, `grid_ys` is present, strictly
+    ascending, and satisfies `len(grid_ys) == n_rows + 1`; `n_rows` is positive
+    and every logical row index in the accepted payload is inside
+    `[0, n_rows - 1]`. `rows` may be shorter than `n_rows` because empty grid
+    rows are skipped; a validator must never derive `n_rows` from `len(rows)`
+    or require `len(rows) == n_rows`. This invariant reads persisted fields
+    only and applies to resolved tables only; old artifacts were classified
+    unresolved in invariant 16 and are out of scope. A violation is
+    `mapping_lattice_index_mismatch`.
+19. **Fresh-parse lattice audit (separate replay).** A read-only replay that
+    re-parses the same PDF must find `tuple(detected.grid_ys) == tuple(grid.ys)`
+    and `detected.n_rows == grid.n_rows`, element for element and float for
+    float; `grid_ys` is copied verbatim (`table_detector.py:192-193`), never
+    recomputed or normalized. A mismatch is `mapping_lattice_index_mismatch`
+    and makes the artifact stale. Invariant 18 cannot detect this because it
+    sees only the artifact; invariant 19 cannot run without a fresh parse.
+    `grid.xs` and `grid.ys` themselves are never modified by S2b.
 
 ## 12. Evaluation set and metrics
 
@@ -1896,6 +2624,100 @@ manifest, `annotation_version`, `VERSION.json` and SHA. Gold v2 is never edited.
 The negative set asserts `logical_mapping_status == "unresolved"` and that
 physical/S2a/candidate fields are untouched. It must not assert a made-up
 logical count.
+
+**D. Manifest identity and merge checks (R10-N7SET, R11-N7).** The totals in
+A–C are reproduced by enumerating the manifests, never by asserting an
+arithmetic total. The evaluator checks the three manifests read-only before any
+metric runs.
+
+The merged pool is Gold v1 plus Gold v2: those are the two sets combined in A,
+and 46 / 19 / 21 / 8 are their enumerated counts. The `gold/s2b/` set is a
+separate evaluation set with its own ground truth; §12.1 B deliberately seeds
+it from v2 tables, so a v2 item and an s2b item may describe the same physical
+table. That reuse is legal only through an explicit `derived_from_item_id`; an
+undeclared shared identity fails. `derived_from_item_id` is a provenance
+reference, not an `item_id`: it does not join the id namespace and it never
+substitutes for the s2b item's own id. A non-derived s2b positive is an
+ordinary new identity and collides with neither v1 nor v2, so the declared
+v2-to-s2b relation is the only permitted cross-set physical reuse.
+
+Identity of a positive item is `(pdf_sha256, page, table_index)`. `page` is the
+manifest's `page` field. `table_index` is the 1-based ordinal in the `-T`
+segment of `item_id` (`LM358-P04-T01` is page 4, table 1), and the `page` field
+must agree with the `-P` segment. A positive triple is unique inside each
+manifest and does not occur in both Gold v1 and Gold v2. A negative item
+(`kind: "negative"`) has no table in the manifest and is identified by
+`item_id` alone; all 19 + 8 current negatives have that shape.
+
+| Check | Scope | Rule | Code |
+| --- | --- | --- | --- |
+| within-manifest id | each manifest | every `item_id` occurs exactly once | `eval_manifest_duplicate_item_id` |
+| global id | all three manifests | each manifest is read into an `item_id` index; a second occurrence in the same or another manifest is reported with the id, both manifest names and both line numbers; the union-size equality is a redundant post-condition, not the rejection test | `eval_manifest_item_id_collision` |
+| polarity | all three | an `item_id` is never positive in one manifest and negative in another | `eval_manifest_polarity_conflict` |
+| cross-manifest physical identity | v1 and v2 positives | no `(pdf_sha256, page, table_index)` occurs in both sets; a repeated triple is one physical table counted twice; this version has no exception, and different pages or different table indices are unaffected | `eval_manifest_cross_manifest_identity_collision` |
+| within-set physical identity | v1 positives, v2 positives, s2b positives | inside one set, two positives may share a PDF SHA only when their `(page, table_index)` differs; a missing or contradictory `-P`/`-T` segment fails | `eval_manifest_identity_ambiguous` |
+| s2b cross-set physical identity | s2b positives against v1 and v2 positives | a non-derived s2b positive shares no `(pdf_sha256, page, table_index)` with any v1 or v2 positive; a derived s2b positive may share only with the single v2 positive it names, and that source is not a v1 positive | `eval_manifest_s2b_identity_collision` |
+| derivation | v2 positive to s2b | `derived_from_item_id` resolves uniquely to one v2 positive, never to a negative; the s2b item's `(pdf_sha256, page, table_index)` equals the source's; its own `item_id` differs from the source `item_id`; no two s2b items declare the same source | `eval_manifest_derived_identity_mismatch` |
+| counts | each manifest | positive and negative totals equal the enumerated items | `eval_manifest_count_mismatch` |
+
+How the checks are applied:
+
+1. De-duplication is by `item_id`, and the namespace is global across the three
+   manifests: an id occurs exactly once in its own manifest and in no other
+   manifest. `derived_from_item_id` does not participate in this check. It is a
+   separate provenance field, it is not an `item_id`, and it cannot replace or
+   excuse the s2b item's own id. An s2b item carries its own id plus an optional
+   `derived_from_item_id` that resolves to a v2 item. Detection is by index
+   lookup at read time: every manifest is inserted into a map keyed by
+   `item_id`, and a second insertion reports the id, both manifest names and
+   both line numbers. The union-size equality is a redundant post-condition and
+   never the only failure output.
+2. A PDF SHA is provenance, not an id. One document supplies up to 20 annotated
+   tables in Gold v1, and a document may in principle appear in both Gold sets.
+   What may not repeat across Gold v1 and Gold v2 is the positive triple
+   `(pdf_sha256, page, table_index)`: the same physical table in both sets would
+   be counted twice. Different pages or different table indices under one SHA
+   are unrelated identities and are unaffected. This version has no exception
+   to the cross-manifest rule; v2-to-s2b reuse is handled by derivation inside
+   the s2b manifest, not by relaxing v1 against v2.
+3. The current frozen manifests satisfy the stronger rule. v1 has 65 items
+   (46 + 19) with 65 unique ids; v2 has 29 (21 + 8) with 29 unique ids; the two
+   id sets are disjoint; the two PDF SHA sets are disjoint (three documents
+   each, zero overlap); no positive triple repeats inside either set or between
+   them; and every positive `page` field agrees with its `-P` segment. These are
+   enumerated facts of the files, not assumptions. A future manifest that adds
+   a shared document is still checked by the triple rule above.
+4. A positive and a negative on the same page are not an identity conflict: the
+   negative asserts that its annotated region is not a table and carries no
+   `table_index` to collide with.
+5. An s2b positive may reference a v2 table only when it carries
+   `derived_from_item_id` pointing at a v2 positive item. The reference resolves
+   uniquely, never points at a negative, and the derived item's
+   `(sha256, page, table_index)` equals the source's exactly. The s2b item keeps
+   its own `item_id`, which must differ from the source `item_id`, and at most
+   one s2b item may declare a given `derived_from_item_id`, so one physical
+   table cannot be counted through several s2b ids. A derived item never
+   changes the source PDF identity. A non-derived s2b positive must not share a
+   positive triple with any v1 or v2 positive. A derived s2b positive may share
+   a triple only with the single v2 positive it names; derivation never targets
+   v1, and naming a v2 source cannot excuse a collision with a v1 positive, so
+   the exception cannot be used to bypass the v1 boundary. The only permitted
+   cross-set physical reuse among the three manifests is the declared
+   v2-to-s2b relation; any other shared positive triple fails.
+6. Within the s2b set, positives that are not derived follow the same within-set
+   rule as v1 and v2: no repeated id and no repeated positive triple. Rule 5
+   additionally bars every non-derived collision with v1 or v2.
+7. Counts are produced per manifest by enumeration after checks 1–6 pass. The
+   hand-written 46 / 19 / 21 / 8 are expected values for the two regression
+   manifests; the s2b total is whatever its manifest enumerates and is reported
+   separately.
+8. Every `item_id` in `gold/s2b/ambiguity_manifest.json` must resolve in its
+   declared `gold_set`; overlay entries are not eval items, so they add no
+   positive or negative count.
+9. The checks are read-only. They open manifests, build index maps and report;
+   they never rewrite, reorder or normalize a manifest, and never touch Gold.
+10. A failing check stops metric computation for the affected category and is
+    reported in the failure list of §12.3. It is never downgraded to a warning.
 
 ### 12.2 Gold annotation state and ambiguity overlay (P1-5, N7)
 
@@ -2089,10 +2911,13 @@ authorized by S2a freeze or by this design.
 as allowed in §5.8. In particular it may add the version argument and strict
 `V1_FIELDS`/`V2_FIELDS` validation in `config.py`, thread the snapshot version
 through `pipeline.py`, add read-only version dispatch to the audit/validate
-tools, and add optional logical fields plus an `_assign_words` return value.
+tools, and add optional logical fields, the additive `TableGrid.cell_words`
+capture, and the `grid_ys` / `n_rows` copy.
 It may not alter primitive collection, `GRID_TOL`, S2a visual derivation, the
-evidence predicates, `grid.xs`/`grid.ys`, physical cell bbox/text, Candidate
-IDs, or any Gold file. Read-only version detection in an existing audit
+evidence predicates, `grid.xs`/`grid.ys` values or their derivation, physical
+cell bbox/text, Candidate IDs, or any Gold file. `grid.ys` is **copied
+verbatim** to the additive persisted field `grid_ys` (D6); that copy is not an
+alteration of the lattice. Read-only version detection in an existing audit
 consumer is a compatibility exception, not permission to change S2a behaviour.
 If a required change falls outside the allowlist, the stage stops and returns
 to review.
@@ -2140,6 +2965,39 @@ to review.
 16. Approve strict snapshot schema validation (`table_params_snapshot_schema_invalid`,
     `table_params_snapshot_version_mismatch`) and the §13 edit boundary for
     S2b-Schema.
+17. Confirm that the closed `x` containment for the sub-rule source cell is a
+    deliberate fail-closed rule (§5.3/§6.3), so an `x` on a shared cell edge
+    yields `subrule_source_cell_ambiguous` rather than a silent tie-break.
+18. Approve region identity by `region_components` equality (§5.3/§9.2),
+    including `region_lattice_inconsistent` for multiple matches.
+19. Approve the marker-first lexical order, the longest-match tokenization rule
+    (including `..` and the multi-character operators), the operand grammar, the
+    frozen `LOGICAL_SYMBOL_TOKENS` set and the unary `±` exception in §6.3.1.
+20. Approve the structural source-group rule (§5.3/§9.2/§11): refs are unique
+    per `(grid_row, cell_index, edge)`, refs for one `(grid_row, edge)` form one
+    group that keeps every ref and satisfies
+    `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt`, and bands are
+    counted by distinct `grid_row`.
+21. Approve the conservative non-recognition policy in §6.3.1: a run that
+    carries an operator but matches no production is `unclassified` and
+    demotes; no lexical outcome is `unresolved` and no unknown symbol or
+    connector is guessed.
+22. Confirm the identity rule of §12.1 D, including four constraints on the
+    v2-to-s2b exception and its closure boundary. First,
+    `derived_from_item_id` resolves uniquely to a v2 positive item and never
+    points at a negative. Second, the derived s2b item and its source carry
+    fully equal `(pdf_sha256, page, table_index)`. Third, a derived item does
+    not change the source PDF identity, and one physical table is never counted
+    through multiple s2b `item_id`s: at most one s2b item may declare a given
+    `derived_from_item_id`, so the exception cannot become a bypass of identity
+    uniqueness. Fourth, a non-derived s2b positive shares no positive triple
+    with any v1 or v2 positive; naming a v2 source never excuses a v1
+    collision. Thus the declared v2-to-s2b relation is the only permitted
+    cross-set physical reuse. Outside that exception, the merged pool is v1
+    union v2, an s2b item keeps its own `item_id` (which must differ from its
+    v2 source), and an undeclared shared `(sha256, page, table_index)` fails.
+    Strict disjointness across all three manifests would forbid the v2 seeding
+    that §12.1 B allows.
 
 ## 15. Acceptance checklist for the design gate
 
@@ -2167,9 +3025,493 @@ to review.
       edit boundary is explicit.
 - [ ] S1–S3 are closed: role-ref contradiction, projection/visual geometry and
       structural/tie-break edge cases.
+- [ ] r4/N2 is closed: the closed-interval source-cell rule and the
+      `rule_bands`-only denominator are both stated as intentional.
+- [ ] r4/N3 is closed: `region_extent` resolves its region by
+      `region_components` equality before validating the record.
+- [ ] r4/N5 is closed: the relational marker is tested before every content
+      class, and tokenization plus the unary `±` exception are explicit.
+- [ ] r4/S3 is closed: structural refs are unique per
+      `(grid_row, cell_index, edge)`, agreeing refs form one group, and bands
+      are counted by distinct `grid_row`.
+- [ ] r5/N5-1 is closed: tokenization is a longest-match scan over frozen token
+      classes, and `..` plus `>=`/`<=` are explicit separators.
+- [ ] r5/N5-2 is closed: the operand grammar separates `operand`,
+      `value_phrase` and `value_bearing`, with worked examples for `A=B`,
+      `A>=B`, `VCC=5V`, `5V–10V` and `5..10 V`.
+- [ ] r5/N5-3 is closed: `LOGICAL_SYMBOL_TOKENS` is a closed six-token set and
+      `VIN`, `TEMP`, `CLK` are excluded by name.
+- [ ] r5/S3-span is closed: a structural source group is bounded by
+      `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt`, never by
+      consecutive-neighbour agreement.
+- [ ] r6/N6-text is closed: §5.6 item 3 states the exact `_words_to_text`
+      algorithm, including the running-mean update order, the `median`/`8.0`
+      fallback, tie order, joiners and the empty-input result.
+- [ ] r6/N5-token is closed: §6.3.1 carries normative tokenizer test vectors
+      and the three numeric content classes are disjoint.
+- [ ] r6/N7-N8 is closed: §16 records the full-document comparison with the
+      r3 text the Reviewer already accepted for N7 and N8.
+- [ ] r7/N5-hyphen is closed: the word-run hyphen rule is asymmetric (the left
+      neighbour is never a digit), and `CLK-1`, `CLK-ABC`, `CLK-`, `5-10`,
+      `5V-10V` and `5 V -10 V` are normative vectors.
+- [ ] r7/N5-mult is closed: multipliers count only as standalone tokens, and
+      `10kΩ` is `10`, `kΩ` with class `value_with_unit`.
+- [ ] r7/N6-verify is closed: §5.6 item 3 is delivered in full and matches
+      `structure.py:335-351` operation for operation.
+- [ ] r7/N7-N8 is closed: §16 records both input digests, unique heading
+      anchors, excerpt sizes and digests, exit codes and the 17-invariant
+      result.
+- [ ] r8/R8-CLASS is closed: content classes are run-level, `identifier` is
+      single-token, `5V-10V` is `unclassified` and `V-10V` alone is
+      `identifier`, and `identifier`'s downstream effect is tabulated.
+- [ ] r8/R8-LOSS is closed: §5.6 item 3 and §16.3 are carried both as readable
+      text and, out-of-band, as base64 with SHA-256 (§16.6), so the reviewed
+      bytes can be rebuilt.
+- [ ] r8/R8-ANCHOR is closed: §16 matches whole heading lines with `$0==s`, and
+      a missing or duplicated anchor aborts with exit 3.
+- [ ] r9/R9-KIND is closed: `kind` is `header` iff `row_end ≤ header_rows - 1`,
+      `data` iff `row_start ≥ header_rows`, and a crossing cell is
+      `logical_cell_kind_boundary` with the table unresolved; six boundary
+      rows are normative.
+- [ ] r9/R9-WORD is closed: the no-logical-cell rule is stated for a physical
+      cell whose words land in no logical column.
+- [ ] r9/R9-LOSS2 is closed: §5.6 and §16 are delivered out-of-band as base64
+      with SHA-256, and §16.6 explains why §16 cannot carry itself.
+- [ ] r9/R9-ORDER is closed: the script rejects an end heading that precedes
+      its start heading with exit 4.
+- [ ] r11/R11-N7-1 is closed: §12.1 D makes
+      `(pdf_sha256, page, table_index)` unique across Gold v1 and Gold v2
+      positives, with `eval_manifest_cross_manifest_identity_collision` and no
+      exception in this version.
+- [ ] r11/R11-N7-2 is closed: `item_id` is globally unique across all three
+      manifests, and `derived_from_item_id` is a separate provenance reference
+      that neither joins the id namespace nor substitutes for the s2b item's
+      own id, which must differ from its v2 source. A non-derived s2b positive
+      shares no positive triple with v1 or v2; a derived one shares only with
+      its unique declared v2 source. Collisions are reported from the id and
+      identity indexes with both locations, not only as a set-size mismatch.
+- [ ] r11/R11-N8LOAD-1 is closed: `validate_table_params_snapshot` takes raw
+      bytes, calls `load_table_params_snapshot` itself, and maps duplicate key,
+      UTF-8/JSON parse error and schema violation to three distinct codes; no
+      entry point accepts a `dict` or a pre-loaded object. A non-object JSON
+      root or a non-object `params` member returns
+      `table_params_snapshot_schema_invalid`, never `parse_error`.
+- [ ] r11/R11-N8LOAD-2 is closed: §5.8 states that the hash is canonical JSON
+      over the parsed document, not raw bytes, and that stored integer/float
+      types are not coerced before hashing.
+- [ ] r11/R11-22 is closed: §14 item 22 constrains the derivation to a unique
+      v2 positive source, fully equal identities, and at most one s2b id per
+      physical table, and bars a non-derived s2b positive from sharing identity
+      with any v1 or v2 positive.
+- [ ] r10/R10-N8VER is closed: §5.8 dispatches v1/v2 with two explicit branches
+      and raises for any other version; `table_params_sha256` shares that
+      dispatch.
+- [ ] r10/R10-N8FIELDS is closed: §5.8 tabulates the 20 v1 names as declared in
+      `config.py:25-49`, and the per-field rules reject `true`/`false` for an
+      integer field.
 - [ ] Hard constraints in §4 are accepted.
 - [ ] Proposed parameters and the v1/v2 snapshot dispatch are approved or
       amended.
 - [ ] S2b evaluation set, ambiguity overlay, metrics and anti-overfitting rules
       are approved.
 - [ ] No implementation is authorized until this design gate passes.
+
+## 16. Full-document verification of N7/N8 and §11 (r9)
+
+The r5 review correctly noted that a no-touch diff proves only that a section
+was not edited, the r6 review added that this section's own script is audit
+evidence, and the r7 and r8 reviews added that the script, the §5.6 pseudocode
+and this section itself must survive delivery without character loss. This
+section therefore records both inputs' identity, the heading anchors, their
+uniqueness and their required order, extracted line and byte counts, excerpt
+digests, exit codes, an itemized result for §11, and the delivery channel for
+the two sections whose bytes the text renderer damaged.
+
+### 16.1 Inputs
+
+| Input | Identity |
+| --- | --- |
+| r3 text, the N7/N8 reference | `tmp/PHASE1_4_S2B_DESIGN_r3.md`; 2,175 lines, 109,767 bytes; SHA-256 `974e49749d1b79f00a9d2f07179caefa2895328b3ceb63283b3e136946fe7811` |
+| r9 text, this document | working tree `docs/PHASE1_4_S2B_DESIGN.md`; digest reported in the delivery message |
+| comparison script | `tmp/verify_sections.sh`; 93 lines, 2,432 bytes; SHA-256 `129c84174f45889c89c8f85207344ff701f4eec4a2751a2e60e9882237246825`; byte-exact copy in the delivery message (§16.6) |
+| §5.6 pseudocode | the fenced block in §5.6 item 3; 16 lines, 710 bytes; SHA-256 `dc3d986339dc377dac1acf6ec9d694043ba58527febb587b2aeca87c3c7825d1`; byte-exact copy in the delivery message (§16.6) |
+
+The r3 text was never committed: it existed only as an uncommitted working-tree
+revision of this file on top of `6f3e58d`, and it was archived verbatim before
+the r4 edits began. The archive, not a git object, is the reference.
+
+A document cannot contain its own SHA-256: writing the digest into the file
+changes the file, so any recorded value would already be stale. The r9 digest is
+therefore reported in the delivery message and is reproducible from the file:
+
+```text
+sha256sum docs/PHASE1_4_S2B_DESIGN.md
+```
+
+The same holds for the delta artifact; its digest is reported alongside it. The
+two artifacts in §16.6 are not this document, so their digests can and do appear
+here.
+
+### 16.2 Method
+
+Sections are delimited by headings, never by line numbers. An anchor is a
+**whole heading line**, compared with `$0==s` (exact equality), and the extractor
+stops at the first later line with `$0==e`.
+
+Exact equality replaced the earlier prefix test `index($0,s)==1`, which the r7
+review correctly rejected: with `s = "## 12."`, a line `## 12.2 Gold annotation`
+matches at column 0, so a document could satisfy a prefix anchor without
+containing the intended section, and prefix uniqueness says nothing about
+section uniqueness. Newlines cannot occur inside a line, so `$0==s` also cannot
+be satisfied by a heading that merely starts the same way.
+
+Before extracting, both the start and the end heading must occur exactly once
+in each input, and the end heading must occur **after** the start heading;
+otherwise the script aborts, with exit 3 for a missing or duplicated anchor and
+exit 4 for an invalid order. The failure modes covered are:
+
+- missing anchor: the exact count is 0. Removing `## 12. Evaluation set and
+  metrics` from a copy of the r3 archive produced
+  `heading not unique (0 occurrences)` and exit 3;
+- duplicated title: the exact count is 2 or more, and the run aborts the same
+  way;
+- reversed order: moving `## 11. Invariants and validator checks` to the end
+  of a copy of this document produced `heading order invalid` and exit 4,
+  because its end anchor then precedes it. Without this check the extractor
+  would have emitted an empty or nonsensical range instead of failing.
+
+The full anchors are therefore spelled out, including the trailing parenthetical
+of §5.8 and the inline code of §5.9, so no anchor can be satisfied by a
+different heading.
+
+### 16.3 Script
+
+```sh
+#!/bin/sh
+# Compare heading-delimited excerpts of the r3 archive and the current draft.
+# Exact Markdown heading match: a heading is a whole line, compared with ==.
+# Usage: sh verify_sections.sh <r3.md> <current.md>
+# Exit 0: every anchor was unique, in order, and every comparison ran.
+# Exit 2: temporary directory failed. Exit 3: an anchor was missing/duplicated.
+# Exit 4: an end heading does not occur after its start heading.
+set -u
+
+r3=$1
+cur=$2
+work=$(mktemp -d) || exit 2
+trap 'rm -rf "$work"' EXIT
+
+count_exact() {
+  awk -v h="$1" '$0==h{c++} END{print c+0}' "$2"
+}
+
+line_of() {
+  awk -v h="$1" '$0==h{print NR; exit}' "$2"
+}
+
+require_unique() {
+  n=$(count_exact "$1" "$2")
+  if [ "$n" -ne 1 ]; then
+    printf 'heading not unique (%s occurrences): %s in %s\n' "$n" "$1" "$2" >&2
+    exit 3
+  fi
+}
+
+extract() {
+  awk -v s="$1" -v e="$2" '
+    $0==s {on=1}
+    on    {print}
+    on && $0==e {exit}
+  ' "$3"
+}
+
+check() {
+  label=$1
+  start=$2
+  end=$3
+  require_unique "$start" "$r3"
+  require_unique "$start" "$cur"
+  require_unique "$end"   "$r3"
+  require_unique "$end"   "$cur"
+  s3=$(line_of "$start" "$r3")
+  e3=$(line_of "$end" "$r3")
+  sc=$(line_of "$start" "$cur")
+  ec=$(line_of "$end" "$cur")
+  if [ "$e3" -le "$s3" ] || [ "$ec" -le "$sc" ]; then
+    printf 'heading order invalid: end %s does not follow start %s\n' \
+      "$end" "$start" >&2
+    exit 4
+  fi
+  extract "$start" "$end" "$r3"  > "$work/a.txt"
+  extract "$start" "$end" "$cur" > "$work/b.txt"
+  if diff -q "$work/a.txt" "$work/b.txt" >/dev/null; then
+    rc=0
+  else
+    rc=1
+  fi
+  printf '%s lines %s/%s bytes %s/%s sha %s/%s rc=%s\n' \
+    "$label" \
+    "$(wc -l < "$work/a.txt" | tr -d ' ')" \
+    "$(wc -l < "$work/b.txt" | tr -d ' ')" \
+    "$(wc -c < "$work/a.txt" | tr -d ' ')" \
+    "$(wc -c < "$work/b.txt" | tr -d ' ')" \
+    "$(sha256sum < "$work/a.txt" | cut -c1-16)" \
+    "$(sha256sum < "$work/b.txt" | cut -c1-16)" \
+    "$rc"
+  if [ "$rc" -ne 0 ]; then
+    diff -u "$work/a.txt" "$work/b.txt"
+  fi
+}
+
+check 5.8 \
+  '### 5.8 Parameters and snapshot compatibility (R6, P0-4)' \
+  '### 5.9 Interface comparison with `PHASE1_4_S2.md`'
+
+check 12 \
+  '## 12. Evaluation set and metrics' \
+  '## 13. Staged delivery and review gates'
+
+check 13 \
+  '## 13. Staged delivery and review gates' \
+  '## 14. Open decisions for Reviewer'
+
+check 11 \
+  '## 11. Invariants and validator checks' \
+  '## 12. Evaluation set and metrics'
+
+exit 0
+```
+
+Invocation, with the archive digest checked first:
+
+```text
+sha256sum tmp/PHASE1_4_S2B_DESIGN_r3.md
+# 974e49749d1b79f00a9d2f07179caefa2895328b3ceb63283b3e136946fe7811
+sh tmp/verify_sections.sh tmp/PHASE1_4_S2B_DESIGN_r3.md \
+   icpdf-extractor/docs/PHASE1_4_S2B_DESIGN.md
+```
+
+The script ends with `exit 0`, so its status is a liveness signal — every anchor
+was unique and every comparison ran — while the per-section `rc=` field carries
+the comparison result. Exit 3 remains reserved for a missing or duplicated
+anchor; that abort happens before the affected extraction.
+
+### 16.4 Result
+
+```text
+974e49749d1b79f00a9d2f07179caefa2895328b3ceb63283b3e136946fe7811 *tmp/PHASE1_4_S2B_DESIGN_r3.md
+5.8 lines 148/148 bytes 7934/7934 sha ef1a652297ae1a55/ef1a652297ae1a55 rc=0
+12 lines 229/229 bytes 11153/11153 sha dc8c36250a540881/dc8c36250a540881 rc=0
+13 lines 25/25 bytes 1770/1770 sha c469afcedd97e2ba/c469afcedd97e2ba rc=0
+11 lines 73/80 bytes 4662/5172 sha 204c19409dceea40/2cfe42e8eae5e722 rc=1
+@@ -31,11 +31,18 @@
+    §5.4; the tuple is empty iff `visual_columns is None`.
+ 8. Every kept boundary's evidence resolves per §5.3/§9.2; a missing reference
+    is an error, not a warning. The evidence kind must match the declared
+-   source. `header_canopy` is directed: both anchors resolve, left/right lists
+-   are on the correct side, labels equal the anchor text, and the
+-   `boundary_edge` position rule holds. `subrule_promoted` has unique in-band
+-   assignments and a recomputable ratio. `table_bbox` and `region_extent` match
+-   the fresh parse; self-consistency alone is not accepted.
++   source. `header_canopy` is directed: both anchors resolve, each anchor is the
++   head of its nearest-first ref list, left/right lists are on the correct
++   side, labels equal the anchor text, and the `boundary_edge` position rule
++   holds. `subrule_promoted` has one unique source cell per band or is
++   `unresolved`, unique in-band assignments, and a recomputable ratio.
++   `table_bbox` matches the fresh `DetectedTable` exactly. `region_extent`
++   resolves its region by `region_components` equality before matching the
++   record; equal extents alone are never accepted. `structural` refs are unique
++   per `(grid_row, cell_index, edge)`, refs for one `(grid_row, edge)` form a
++   single group that keeps every ref and satisfies
++   `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt` with no chain
++   membership, and band counting uses distinct `grid_row` values.
+ 9. Candidate decisions obey fixed-anchor grouping: `anchor_x` is a member of
+    `source_xs`; every `abs(x - anchor_x) <= visual_boundary_tol_pt`; group
+    ranges do not overlap (`max(source_xs) < next_anchor_x`); no source x is
+```
+
+`rc=0` means the two excerpts are byte-identical. Every per-section count and
+digest in this run equals the corresponding value in the r7 run, so tightening
+the anchor test from prefix to exact equality changed no excerpt.
+
+The only non-zero comparison is §11, whose unified diff has exactly one hunk,
+`@@ -31,11 +31,18 @@`, reproduced above. That hunk begins inside invariant 8 and
+ends before invariant 9, so invariants 1–7 and 9–17 are identical by the
+construction of the diff, not by inspection. The two `---`/`+++` header lines
+that `diff -u` prints are omitted here because they name a fresh temporary
+directory on every run; nothing else is omitted.
+
+The script's own exit status is 0: every anchor was unique, in the required
+order, and every comparison ran. A heading that is missing or duplicated aborts
+the run with status 3, and an end heading that does not follow its start aborts
+it with status 4, both before the affected extraction. The four result lines and
+the clean exit together attest that every anchor used above was unique and
+correctly ordered in both inputs. Both abort paths were exercised: deleting one
+anchor from a copy of the r3 archive produced `heading not unique (0
+occurrences)` and exit 3, and moving `## 11.` to the end of a copy of this
+document produced `heading order invalid` and exit 4.
+
+| Section | What the identity establishes |
+| --- | --- |
+| §5.8 (N8) | unchanged since r3 in the r9 run above; r10 extends it, see the scope table below |
+| §12 (N7) | unchanged since r3 in the r9 run above; r10 adds part D to §12.1 |
+| §13 (N8 gates) | unchanged since r3, and still `rc=0` on the r10 text |
+| §11 | only invariant 8 differed in the r9 run; r10 also updates invariant 17 |
+
+**Scope after r10.** The result block above is the r9 measurement and is kept as
+taken; it does not describe the current file. The same script on the r10
+working tree reports:
+
+| Section | r10 lines | r10 bytes | r10 sha, first 16 | rc |
+| --- | --- | --- | --- | --- |
+| §5.8 | 264 | 14452 | `a7cd3b403bb5d265` | 1 |
+| §12 | 286 | 14958 | `b07feadf669b5149` | 1 |
+| §13 | 25 | 1770 | `c469afcedd97e2ba` | 0 |
+| §11 | 82 | 5306 | `03fcc1db65221af7` | 1 |
+
+§5.8 and §12 differ because r10 edits exactly those two sections, and only
+within the four review items: the §5.8 field table, type rules, two-branch
+dispatch and raw-bytes loader, and §12.1 part D. §13 is still byte-identical.
+§11 gains a second hunk, in invariant 17, which now names
+`load_table_params_snapshot` and the per-field validation; invariants 1–16 are
+unchanged from the r9 run and invariant 8 is unchanged between r9 and r10. The
+r9-to-r10 delta artifact reported in the delivery message shows the changed
+hunks; it does not replace this table.
+
+**Scope after r11.** The r10 table above is kept as taken. The r11 working tree
+changes §1, §5.8, §11, §12.1, §14, §15 and this subsection, and no other
+section. The same script reports:
+
+| Section | r11 lines | r11 bytes | r11 sha, first 16 | rc |
+| --- | --- | --- | --- | --- |
+| §5.8 | 312 | 17384 | `23a122353ed0ca7b` | 1 |
+| §12 | 311 | 17418 | `7b52ea6732b3372f` | 1 |
+| §13 | 25 | 1770 | `c469afcedd97e2ba` | 0 |
+| §11 | 85 | 5556 | `7a516b2cc29694c2` | 1 |
+
+§13 remains byte-identical across r3, r9, r10 and r11. §5.8 and §12 grow only
+inside the r11 items, and §11 changes only invariant 17. The r10-to-r11 delta
+artifact reported in the delivery message shows the changed hunks; it does not
+replace this table.
+
+**Scope after r12.** The r11 table above is kept as taken. r12 changes §1,
+§5.8, §11, §12.1, §14, §15 and this subsection. The same script reports:
+
+| Section | r12 lines | r12 bytes | r12 sha, first 16 | rc |
+| --- | --- | --- | --- | --- |
+| §5.8 | 331 | 18548 | `a995dc7594c2af7c` | 1 |
+| §12 | 323 | 18768 | `6016d0b2150a01df` | 1 |
+| §13 | 25 | 1770 | `c469afcedd97e2ba` | 0 |
+| §11 | 87 | 5655 | `f6a2f674f5f33a4f` | 1 |
+
+§13 is still byte-identical. §5.8 changes only the root and `params` structure
+checks, the loader exception note and one test; §12 changes only the s2b
+cross-set row and rules 1, 5 and 6; §11 changes only invariant 17. The
+r11-to-r12 delta artifact reported in the delivery message shows the changed
+hunks; it does not replace this table.
+
+### 16.5 §11 item by item
+
+| # | Subject | Result |
+| --- | --- | --- |
+| 1 | null columns iff unresolved | identical |
+| 2 | boundary tuple shape, order, containment | identical |
+| 3 | `logical_columns` count | identical |
+| 4 | `column_projection` authoritative | identical |
+| 5 | physical column overlap and canonical bands | identical |
+| 6 | overlap recomputation within `1e-6` | identical |
+| 7 | visual column invariants | identical |
+| 8 | evidence resolution per §5.3/§9.2 | extended by r4/r5, see below |
+| 9 | fixed-anchor grouping | identical |
+| 10 | cell and assignment word partition | identical |
+| 11 | cell bbox, text and reading order | identical |
+| 12 | row/column coordinates and id reproduction | identical |
+| 13 | header reference and role matrix | identical |
+| 14 | physical and S2a fields unchanged | identical |
+| 15 | candidate ids and counts unchanged | identical |
+| 16 | old artifacts load as unresolved | identical |
+| 17 | v1/v2 snapshot replay and validation | identical in the r9 run; extended by r10, r11 and r12 in the working tree |
+
+The invariant-8 extension is exactly five additions from r4 and r5: (a) the
+header anchor is the head of its nearest-first ref list; (b) `subrule_promoted`
+has one unique source cell per band or is `unresolved`; (c) `table_bbox` equals
+the fresh `DetectedTable` exactly; (d) `region_extent` resolves its region by
+`region_components` equality before matching the record; (e) `structural` refs
+are unique per `(grid_row, cell_index, edge)`, refs for one `(grid_row, edge)`
+form one group whose span `max(edge_xs) - min(edge_xs)` is within
+`visual_boundary_tol_pt` with no chain membership, and bands are counted by
+distinct `grid_row`. These are the closed answers to N2, N3, S3 and S3-span. No
+other invariant text changed between r3 and r9.
+
+Content check against the list the r5 review required:
+
+| Required by the r5 review | Where | Present |
+| --- | --- | --- |
+| Gold annotation and ambiguity as two axes | §12.2 | yes |
+| Cross-product table and metric denominators | §12.2, §12.3 | yes |
+| Strict v1/v2 schema | §5.8 | yes |
+| Duplicate JSON key rejection at load | §5.8 raw-bytes validator, read-path item 2 | yes (r12) |
+| S2b-Schema edit allowlist | §5.8 table | yes |
+| S1/S2a read-only compatibility boundary | §5.8 rules 7–8 and table | yes |
+
+This is a working-tree comparison, not a substitute for the Reviewer's own
+full-document read; it removes the "no hunk in the diff" inference from the
+argument.
+
+### 16.6 Delivery channel for the audited bytes
+
+Two rounds of text rendering damaged this evidence. In r7 the `*` of `line_tol`,
+the `<=` of the line test and part of the `printf`/`wc`/`diff` calls did not
+arrive. In r8 the `<` of `row_end < header_rows` was dropped, so a correct rule
+read as `row_end = header_rows`, and the §16.3 fence merged into its heading.
+Those are transport defects, not design changes, but they made the evidence
+unverifiable, which is the same thing for a review.
+
+A document cannot contain its own bytes: a copy of §16 inside §16 would change
+§16. §5.6 is not self-referential, but embedding it would only move the same
+transport risk inside this section. Both sections are therefore delivered
+out-of-band, with the SHA-256 of each decoded file reported there:
+
+| Section | Extent | Delivery |
+| --- | --- | --- |
+| §5.6 | the heading `### 5.6` through the line before `### 5.7` | base64 in the delivery message |
+| §16 | the heading `## 16.` through the last line of §16.6 | base64 in the delivery message |
+
+Decoding is the check:
+
+```text
+base64 -d section_5_6.b64 > section_5_6.md
+base64 -d section_16.b64  > section_16.md
+sha256sum section_5_6.md section_16.md
+```
+
+The delivery message carries each section as base64 with line breaks; if a
+renderer re-wraps or joins the lines, stripping spaces and line breaks before
+decoding restores the stream. On a system without `base64 -d`, `-D` is the
+equivalent.
+
+The decoded files are the authority. The readable text in this document is the
+same text, and where a renderer drops a character the decoded file is correct
+and the display is not.
+
+**r9 delivery defect (R10-N8FIELDS).** §5.8 was carried as base64 for the first
+time in the r9 message. The Reviewer decoded it and read
+`merge_column_tol_ptl`. The string is not in the file: `config.py:40` declares
+`merge_column_tol_pt`, and the §5.8 20-name block carries that name and no
+other spelling of it. The extra character entered when the base64 was retyped
+into the message rather than copied from the file. The same failure class as
+the r7 and r8 drops applies in the other direction: a hand-carried channel can
+corrupt bytes even when the file is correct. For r10 the four changed items are
+therefore delivered as readable text, and §5.8 states each of the 20 names next
+to its `config.py` declaration so a name can be checked against the source and
+not against a transcript.
+
+§5.6 additionally no longer depends on a bare `<` in its normative sentence:
+the `kind` rule is stated with `≤` and `≥` plus a six-row decision table, so the
+character that caused the r8 misreading is gone from the rule itself.
+
+**r11 delivery scope.** The base64 table above records the r9 delivery of §5.6
+and §16. r11 edits §16.4 and §16.5 only, apart from this paragraph. Those
+edited blocks, the five §5.8/§11/§12/§14 changes and the §15 checklist are
+delivered as readable text in the r11 message; the r9 base64 remains the record
+of the r9 text, not of the current file.
