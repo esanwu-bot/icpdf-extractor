@@ -527,3 +527,5 @@ pushed to Codeup.
 - **Artifacts.** `docs/PHASE1_4_S2A.md`;
   `runs/phase14_s2a/{generalization_report,phase12_report,s1_*_control,
   physical_diff,gold_item_diff}.{json,md,csv}` (runs/ is gitignored).
+- **Implementation commit.** `e6cba6bac51d8e3f5d4091b98ded46409042276e`
+  (`feat(parser): Phase 1.4 S2a visual boundary lattice`), local only.
