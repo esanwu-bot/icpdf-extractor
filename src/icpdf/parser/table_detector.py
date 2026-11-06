@@ -12,10 +12,14 @@ output.  Decisions live in:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from icpdf.domain.common import BBox
-from icpdf.domain.table import ReconstructionStatus, TableType
+from icpdf.domain.table import (
+    ReconstructionStatus,
+    TableType,
+    validate_grid_ys,
+)
 from icpdf.domain.visual import VisualBoundary
 from icpdf.parser.config import TableParams
 from icpdf.parser.header_semantics import assess_region, infer_semantics
@@ -33,6 +37,7 @@ class DetectedCell(BaseModel):
     column_index: int = Field(ge=0)
     row_span: int = Field(default=1, ge=1)
     column_span: int = Field(default=1, ge=1)
+    word_ids: tuple[str, ...] = ()
 
 
 class DetectedRow(BaseModel):
@@ -77,6 +82,14 @@ class DetectedTable(BaseModel):
     visual_columns: int | None = None
     partial_boundaries: tuple[float, ...] = ()
     visual_boundary_evidence: tuple[VisualBoundary, ...] = ()
+    # Phase 1.4 S2b - the physical row lattice, copied verbatim from TableGrid.
+    grid_ys: tuple[float, ...] = ()
+    n_rows: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def _check_row_lattice(self) -> "DetectedTable":
+        validate_grid_ys(self.grid_ys, self.n_rows)
+        return self
 
 
 def _ragged_rows(grid: TableGrid, header_rows: int) -> list[int]:
@@ -141,7 +154,9 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
                 column_index=cell.column,
                 row_span=cell.row_span,
                 column_span=cell.column_span,
-            ) for cell in grid.cells
+                word_ids=tuple(word.word_id for word
+                               in grid.cell_words.get(cell_index, ())),
+            ) for cell_index, cell in enumerate(grid.cells)
                 if cell.row == row_index and cell.text.strip()]
             if not cells:
                 continue
@@ -183,5 +198,7 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
             visual_columns=visual.visual_columns,
             partial_boundaries=visual.partial_boundaries,
             visual_boundary_evidence=visual.boundaries,
+            grid_ys=tuple(grid.ys),
+            n_rows=grid.n_rows,
         ))
     return detected

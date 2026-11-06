@@ -13,6 +13,8 @@ paths are supported:
 
 from __future__ import annotations
 
+import math
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from statistics import median
 
@@ -71,6 +73,9 @@ class TableGrid:
     ys: list[float]
     cells: list[GridCell] = field(default_factory=list)
     unassigned_words: list[TextWord] = field(default_factory=list)
+    # Flat ``cells`` index -> the words assigned to that cell, in the order
+    # ``_assign_words`` saw them.  Derived cache; physical fields are unchanged.
+    cell_words: dict[int, tuple[TextWord, ...]] = field(default_factory=dict)
     source: str = "rule_lattice"
 
     @property
@@ -330,6 +335,7 @@ def _assign_words(layout: PageLayout, grid: TableGrid) -> None:
     for index, words in by_cell.items():
         grid.cells[index].text = _words_to_text(words)
         grid.cells[index].word_count = len(words)
+    grid.cell_words = {index: tuple(words) for index, words in by_cell.items()}
 
 
 def _words_to_text(words: list[TextWord]) -> str:
@@ -349,6 +355,72 @@ def _words_to_text(words: list[TextWord]) -> str:
     rendered = [" ".join(w.text for w in sorted(line, key=lambda w: w.bbox[0]))
                 for line in lines]
     return "\n".join(rendered).strip()
+
+
+LOGICAL_MAPPING_WORD_NOT_ASSIGNED = "mapping_word_not_assigned"
+LOGICAL_MAPPING_WORD_OUTSIDE_EXTENT = "mapping_word_outside_logical_extent"
+LOGICAL_MAPPING_WORD_PARTITION_MISMATCH = "mapping_word_partition_mismatch"
+
+
+class LogicalMappingError(ValueError):
+    """A word cannot be placed on the logical column lattice."""
+
+    def __init__(self, reason_code: str, word_id: str | None = None) -> None:
+        self.reason_code = reason_code
+        self.word_id = word_id
+        message = reason_code if word_id is None else f"{reason_code}:{word_id}"
+        super().__init__(message)
+
+
+@dataclass(frozen=True)
+class WordColumnAssignment:
+    columns: dict[str, int]
+    boundary_ties: tuple[str, ...]
+
+
+def assign_words_to_logical_columns(
+        words: Iterable[TextWord],
+        logical_boundaries: Sequence[float]) -> WordColumnAssignment:
+    """D4 verifier: attribute word centers to logical columns.
+
+    Left-open, right-closed intervals, with ``b[0]`` assigned to column 0.
+    A finite center outside the outer extent is never clamped; it raises
+    ``mapping_word_outside_logical_extent``.  This is a pure verifier and is
+    not yet called by ``detect_tables`` because logical boundaries are derived
+    in S2b-2.
+    """
+    boundaries = tuple(logical_boundaries)
+    if len(boundaries) < 2:
+        raise ValueError("logical_boundaries needs at least two positions")
+    if any(not math.isfinite(value) for value in boundaries):
+        raise ValueError("logical_boundaries must be finite")
+    if any(right <= left for left, right in zip(boundaries, boundaries[1:])):
+        raise ValueError("logical_boundaries must be strictly ascending")
+    columns: dict[str, int] = {}
+    ties: list[str] = []
+    for word in words:
+        cx = (word.bbox[0] + word.bbox[2]) / 2.0
+        if not math.isfinite(cx):
+            raise LogicalMappingError(LOGICAL_MAPPING_WORD_NOT_ASSIGNED,
+                                      word.word_id)
+        if cx < boundaries[0] or cx > boundaries[-1]:
+            raise LogicalMappingError(LOGICAL_MAPPING_WORD_OUTSIDE_EXTENT,
+                                      word.word_id)
+        if word.word_id in columns:
+            raise LogicalMappingError(LOGICAL_MAPPING_WORD_PARTITION_MISMATCH,
+                                      word.word_id)
+        if cx == boundaries[0]:
+            column = 0
+        else:
+            column = len(boundaries) - 2
+            for index in range(len(boundaries) - 1):
+                if boundaries[index] < cx <= boundaries[index + 1]:
+                    column = index
+                    break
+        columns[word.word_id] = column
+        if any(cx == boundary for boundary in boundaries):
+            ties.append(word.word_id)
+    return WordColumnAssignment(columns=columns, boundary_ties=tuple(ties))
 
 
 def _member_ys(member: RuleComponent) -> list[float]:
@@ -544,6 +616,7 @@ def _alignment_grid(layout: PageLayout, region: TableRegion,
     ys.append(region.bbox[3])
 
     cells: list[GridCell] = []
+    cell_words: dict[int, tuple[TextWord, ...]] = {}
     for row_index, row in enumerate(rows):
         row_sorted = sorted(row, key=lambda w: w.bbox[0])
         groups: list[list[TextWord]] = []
@@ -559,9 +632,11 @@ def _alignment_grid(layout: PageLayout, region: TableRegion,
             column = min(range(len(centers)), key=lambda idx: abs(centers[idx] - center))
             bbox = (left, min(w.bbox[1] for w in group), right,
                     max(w.bbox[3] for w in group))
+            cell_words[len(cells)] = tuple(group)
             cells.append(GridCell(row_index, column, 1, 1, bbox, _words_to_text(group),
                                   len(group)))
-    return TableGrid(region.bbox, xs, ys, cells, source=region.source)
+    return TableGrid(region.bbox, xs, ys, cells, cell_words=cell_words,
+                     source=region.source)
 
 
 def recognize_structure(layout: PageLayout, region: TableRegion,

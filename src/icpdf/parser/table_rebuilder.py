@@ -36,6 +36,7 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
                 page_number=detected.page_number,
                 extraction_method=ExtractionMethod.TABLE_DETECTOR,
                 raw_tokens=cell.text.split(),
+                word_ids=tuple(cell.word_ids),
             ))
         rows.append(TableRow(row_id=row_id, cells=cells, bbox=detected_row.bbox))
     header_cells: list[HeaderCell] = []
@@ -75,4 +76,6 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
         visual_columns=detected.visual_columns,
         partial_boundaries=list(detected.partial_boundaries),
         visual_boundary_evidence=list(detected.visual_boundary_evidence),
+        grid_ys=tuple(detected.grid_ys),
+        n_rows=detected.n_rows,
     )

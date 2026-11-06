@@ -2,12 +2,32 @@
 
 from __future__ import annotations
 
+import math
+from collections.abc import Sequence
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .common import BBox, NonEmptyStr
 from .visual import VISUAL_BOUNDARY_STATUSES, VisualBoundary
+
+
+def validate_grid_ys(grid_ys: Sequence[float], n_rows: int) -> None:
+    """Physical row lattice rule shared by the parser and domain models."""
+    if not grid_ys:
+        if n_rows:
+            raise ValueError("n_rows requires grid_ys")
+        return
+    if len(grid_ys) < 2:
+        raise ValueError("grid_ys needs at least two coordinates")
+    if not all(math.isfinite(value) for value in grid_ys):
+        raise ValueError("grid_ys must be finite")
+    if n_rows < 1:
+        raise ValueError("grid_ys requires n_rows >= 1")
+    if len(grid_ys) != n_rows + 1:
+        raise ValueError("grid_ys length must equal n_rows + 1")
+    if any(right <= left for left, right in zip(grid_ys, grid_ys[1:])):
+        raise ValueError("grid_ys must be strictly ascending")
 
 
 class TableType(str, Enum):
@@ -51,6 +71,7 @@ class Cell(BaseModel):
     page_number: int = Field(ge=1)
     extraction_method: ExtractionMethod = ExtractionMethod.UNKNOWN
     raw_tokens: list[str] = Field(default_factory=list)
+    word_ids: tuple[str, ...] = ()
 
 
 class TableRow(BaseModel):
@@ -134,11 +155,15 @@ class Table(BaseModel):
     visual_columns: int | None = Field(default=None, ge=0)
     partial_boundaries: list[float] = Field(default_factory=list)
     visual_boundary_evidence: list[VisualBoundary] = Field(default_factory=list)
+    # Physical row lattice copied from TableGrid; empty on legacy artifacts.
+    grid_ys: tuple[float, ...] = ()
+    n_rows: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
     def _check_table(self) -> "Table":
         if self.page_end is not None and self.page_end < self.page_number:
             raise ValueError("page_end must be >= page_number")
+        validate_grid_ys(self.grid_ys, self.n_rows)
         last_page = self.page_end or self.page_number
         row_ids: set[str] = set()
         cell_ids: set[str] = set()
