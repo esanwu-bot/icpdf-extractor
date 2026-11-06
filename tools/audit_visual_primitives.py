@@ -19,6 +19,7 @@ Exit status is 1 when any issue is found.
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import sys
 from dataclasses import asdict, dataclass
@@ -26,7 +27,9 @@ from pathlib import Path
 
 import pymupdf as fitz
 
+import icpdf.parser.rule_primitives as rule_primitives_module
 from icpdf.parser.config import TableParams, snapshot_sha256
+from icpdf.parser.layout import rule_components
 from icpdf.parser.pdf_loader import file_sha256, load_pdf
 from icpdf.parser.rule_primitives import (
     GRID_TOL,
@@ -37,6 +40,8 @@ from icpdf.parser.rule_primitives import (
 )
 
 STATUSES = ("printed", "partial", "implied_outer", "not_printed")
+REQUIRED_ARTIFACTS = ("document.json", "pages/geometry.json",
+                      "tables.json", "run_config.json")
 
 
 @dataclass(frozen=True)
@@ -296,14 +301,9 @@ def _close(left: float, right: float, tol: float = 1e-6) -> bool:
     return abs(float(left) - float(right)) <= tol
 
 
-def _artifact_digest(run: Path, manifest: dict, name: str,
+def _artifact_digest(run: Path, entry: dict, name: str,
                      errors: list[str]) -> str | None:
-    entry = next((artifact for artifact in manifest.get("artifacts", ())
-                  if artifact.get("name") == name), None)
     path = run / name
-    if entry is None:
-        errors.append(f"manifest does not record artifact {name}")
-        return None
     if not path.is_file():
         errors.append(f"missing artifact {name}")
         return None
@@ -311,6 +311,30 @@ def _artifact_digest(run: Path, manifest: dict, name: str,
     if digest != entry.get("sha256"):
         errors.append(f"artifact {name} sha256 {digest} != manifest {entry.get('sha256')}")
     return digest
+
+
+def grid_tol_binding() -> dict:
+    """Record where the component-rebuild tolerance comes from.
+
+    ``GRID_TOL`` is an S1 code constant, not a ``TableParams`` field, so it is
+    not covered by the parameter snapshot hash.  The audit therefore imports the
+    same symbol the S1 chain uses and verifies that both
+    ``build_components`` and ``rule_components`` still default to it.
+    """
+    source = Path(rule_primitives_module.__file__)
+    build_default = inspect.signature(build_components).parameters["tol"].default
+    region_default = inspect.signature(rule_components).parameters["tol"].default
+    return {
+        "symbol": "icpdf.parser.rule_primitives.GRID_TOL",
+        "value": GRID_TOL,
+        "source_file": str(source),
+        "source_sha256": file_sha256(source),
+        "build_components_default": build_default,
+        "rule_components_default": region_default,
+        "s1_defaults_match": build_default == GRID_TOL and region_default == GRID_TOL,
+        "in_table_params": "grid_tol" in TableParams.model_fields,
+        "covered_by_table_params_sha256": False,
+    }
 
 
 def verify_identity(run: Path) -> dict:
@@ -334,9 +358,12 @@ def verify_identity(run: Path) -> dict:
         raise AuditIdentityError(["pages/geometry.json is not a page list"])
     errors: list[str] = []
 
-    digests = {name: _artifact_digest(run, manifest, name, errors)
-               for name in ("document.json", "pages/geometry.json",
-                            "tables.json", "run_config.json")}
+    entries = {artifact.get("name"): artifact
+               for artifact in manifest.get("artifacts") or ()}
+    missing = [name for name in REQUIRED_ARTIFACTS if name not in entries]
+    errors.extend(f"manifest does not record artifact {name}" for name in missing)
+    digests = {name: _artifact_digest(run, entries[name], name, errors)
+               for name in REQUIRED_ARTIFACTS if name in entries}
 
     source = run / "source.pdf"
     source_sha = file_sha256(source) if source.is_file() else None
@@ -409,6 +436,14 @@ def verify_identity(run: Path) -> dict:
             if not _close(recorded.get("dpi"), fresh.dpi):
                 errors.append(f"page {index + 1} dpi differs from the fresh PDF")
 
+    grid_tol = grid_tol_binding()
+    if not grid_tol["s1_defaults_match"]:
+        errors.append(
+            "GRID_TOL does not match the S1 component defaults: "
+            f"constant={grid_tol['value']}, "
+            f"build_components={grid_tol['build_components_default']}, "
+            f"rule_components={grid_tol['rule_components_default']}")
+
     if errors:
         raise AuditIdentityError(errors)
     assert loaded is not None
@@ -420,6 +455,7 @@ def verify_identity(run: Path) -> dict:
         "parser_config_sha256": manifest.get("parser_config_sha256"),
         "table_params": snapshot.get("params", {}),
         "artifacts": digests,
+        "grid_tol": grid_tol,
         "pdf": loaded,
     }
 

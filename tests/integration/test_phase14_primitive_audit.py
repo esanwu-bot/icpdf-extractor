@@ -297,6 +297,35 @@ def test_run_identity_matches_spec_and_manifest():
         assert identity["table_params_sha256"]
         assert identity["parser_config_sha256"]
 
+    grid_tol = identity["grid_tol"]
+    assert grid_tol["value"] == GRID_TOL
+    assert grid_tol["build_components_default"] == GRID_TOL
+    assert grid_tol["rule_components_default"] == GRID_TOL
+    assert grid_tol["s1_defaults_match"] is True
+    assert grid_tol["in_table_params"] is False
+
+
+def test_manifest_missing_required_artifact_is_refused(tmp_path):
+    source_run = _run_for("micrf103")
+    staged = tmp_path / "run"
+    (staged / "pages").mkdir(parents=True)
+    manifest = json.loads((source_run / "run_manifest.json")
+                          .read_text(encoding="utf-8"))
+    manifest["artifacts"] = [artifact for artifact in manifest["artifacts"]
+                             if artifact["name"] != "tables.json"]
+    (staged / "run_manifest.json").write_text(
+        json.dumps(manifest), encoding="utf-8", newline="\n")
+    for name in ("run_config.json", "document.json", "tables.json"):
+        shutil.copy2(source_run / name, staged / name)
+    shutil.copy2(source_run / "pages" / "geometry.json",
+                 staged / "pages" / "geometry.json")
+    shutil.copy2(source_run / "source.pdf", staged / "source.pdf")
+
+    with pytest.raises(AuditIdentityError) as raised:
+        verify_identity(staged)
+    assert any("does not record artifact tables.json" in error
+               for error in raised.value.errors)
+
 
 def test_wrong_version_pdf_is_refused(tmp_path):
     source_run = _run_for("micrf103")

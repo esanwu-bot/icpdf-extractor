@@ -69,7 +69,7 @@ SHA `ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c`.
 | `tools/audit_visual_primitives.py` | **new (r2)**; read-only audit of persisted visual evidence against a fresh `collect_primitives()` run |
 | `tests/unit/test_visual_structure.py` | **new**, 21 tests |
 | `tests/integration/test_phase14_s2.py` | **new**, 11 tests (skipped when the PDFs are absent) |
-| `tests/integration/test_phase14_primitive_audit.py` | **new (r2)**, 11 audit/identity/negative tests (skipped when the PDFs are absent) |
+| `tests/integration/test_phase14_primitive_audit.py` | **new (r2)**, 12 audit/identity/negative tests (skipped when the PDFs are absent) |
 | `tests/unit/test_evidence_validation.py` | extended to 40 tests, including one negative case per visual validator code |
 | `docs/PHASE1_4_S2A.md` | this report |
 
@@ -292,8 +292,10 @@ stages.
 directory against its own record and refuses with `AuditIdentityError` (CLI exit
 status 2) on any mismatch:
 
-* artifact SHA-256 for `document.json`, `pages/geometry.json`, `tables.json`
-  and `run_config.json` equals the manifest `artifacts` list;
+* the manifest `artifacts` list must contain every required artifact
+  (`document.json`, `pages/geometry.json`, `tables.json`, `run_config.json`);
+  a missing entry is a refusal, never a skipped file;
+* each required artifact's SHA-256 equals its manifest entry;
 * `source.pdf` SHA-256 equals both `run_manifest.json:document_sha256` and
   `document.json:sha256` (a wrong-version PDF of the same product is refused);
 * `page_count`, `dpi`, page sizes and rotations agree between the manifest,
@@ -307,6 +309,17 @@ status 2) on any mismatch:
 
 The audit then builds `TableParams(**snapshot["params"])` and uses those values
 for every clip/coverage/threshold decision — no visual parameter is hard-coded.
+
+**Component-rebuild tolerance (P4-1).** `GRID_TOL = 2.5` is an S1 code constant
+in `src/icpdf/parser/rule_primitives.py`, not a `TableParams` field, so it is not
+covered by `table_params_sha256`.  The audit does not define its own tolerance:
+it imports that symbol and passes it to `build_components(tol=GRID_TOL)`, and it
+verifies that both `build_components` and `rule_components` still default to the
+same value.  The `identity.grid_tol` block records the symbol, value, source file
+of the S1 module, its SHA-256, both defaults, and
+`in_table_params = false` / `covered_by_table_params_sha256 = false`, so a
+reviewer can see exactly what is and is not snapshot-bound.  A drift between the
+constant and the S1 defaults refuses the audit.
 
 **Independent rebuild (P2).** It re-opens the page and re-runs the S1 chain
 `collect_primitives(page, page_number, geometry)` →
@@ -363,12 +376,12 @@ counts), per-boundary `recomputed_coverage`, and per-segment
 
 ```text
 python -m pytest
-157 passed, 2 xfailed in 11.09s
+158 passed, 2 xfailed in 12.07s
 ```
 
 Per-file counts: `tests/unit/test_visual_structure.py` (21),
 `tests/integration/test_phase14_s2.py` (11),
-`tests/integration/test_phase14_primitive_audit.py` (11), and
+`tests/integration/test_phase14_primitive_audit.py` (12), and
 `tests/unit/test_evidence_validation.py` (40, one negative case per validator
 code).  The other 74 tests are unchanged.
 
@@ -598,6 +611,8 @@ Minor coordinate note: CY29FCT520-P06-T01 partial boundary x = 290.2 vs gold
 | r2-P2 component rebuild | Fresh `build_components()` is the only accepted component set; bbox, vertical ruling and primitive ownership checked against it | `verify_identity` + `build_components()` call, `COMPONENT_*` codes | 3 sample audits + `test_cross_component_primitive_reference_fails_the_audit` | §5.2 rebuild block in every `audit_*.json` |
 | r2-P3 strict segment rebuild | `y0 = min(clipped starts)`, `y1 = max(clipped ends)`, coverage from raw primitive union; duplicate/cross-component references rejected | `audit_table`, `_segment_spans` | `test_tampered_segment_span_fails_the_audit`, `test_duplicate_primitive_in_one_boundary_fails_the_audit` | §7.4 zero deltas; per-segment recomputed values |
 | r2-P4 snapshot binding | Thresholds come from `manifest.table_params`; snapshot SHA recomputed with `snapshot_sha256()`; no visual-threshold literal in the audit tool | `verify_identity`, `TableParams(**snapshot["params"])` | identity tests | §5.2 gate; `identity.table_params_sha256` |
+| r2-P4-1 `GRID_TOL` | 2.5 from `rule_primitives.GRID_TOL`; not in `TableParams` / snapshot (recorded as false); audit imports the S1 symbol, checks both S1 defaults still equal it, and records source file SHA-256 | `grid_tol_binding`, component rebuild call | identity test asserts value/defaults/`in_table_params` | §5.2; `identity.grid_tol` |
+| r2-P4-2 artifact completeness | Required set is checked before hashing; a manifest that omits any required artifact is refused, not skipped | `REQUIRED_ARTIFACTS`, `verify_identity` | `test_manifest_missing_required_artifact_is_refused` | §5.2; error `manifest does not record artifact …` |
 | DS10CP152-P03-T01 | Kept as reported known limitation; thresholds untouched | – | – | §9 |
 | Scope boundaries | Gold v1/v2, S1 physical rules, thresholds, S2b/S2c all untouched; no Codeup push | – | – | §10 |
 
