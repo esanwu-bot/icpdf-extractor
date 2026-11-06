@@ -1,0 +1,811 @@
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 589cf1c..46533cd 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -379,3 +379,21 @@ and S2/S3/S4 remain frozen.
+ - **Left over.** S3 drawing gate (4 negative FPs), S2 visual/logical columns
+   and `condition_path`, S4 roles, fill-only quad outlines, cross-page regions.
+ - Not pushed to Codeup.
++
++### S1 review follow-up (2026-11-06)
++
++- **S1 commit:** `003311fa8ee24ef68254fa3852329a9a9f1d762a`; follow-up changes
++  are a separate local commit.
++- **Files.** `table_regions.py` caption block now matches caption text
++  (`Table`/`Tabelle`/`Tabla`/`表`/`Figure`/…), not font size;
++  `config.py` drops `merge_caption_scale` (YAML/config SHA unchanged);
++  `header_semantics.py` `_is_label_grid` also requires a description cell
++  (≥3 words/≥15 chars) beside the short key.
++- **Tests.** `tests/unit/test_table_regions.py` adds larger-heading merge,
++  body-size caption split, independent-tables split, section-local column
++  mapping; new `tests/unit/test_label_grid.py` (7 negative/positive cases).
++  Full suite `89 passed, 2 xfailed`.
++- **Reruns.** `runs/phase14_s1/review_rerun/` six runs, evidence 0/0;
++  Gold v2 and Phase 1.2 per-item diffs are empty (`changed_items=[]`).
++- **Review artifacts.** `docs/reviews/phase14_s1/` (response, components/grid
++  JSON + images, per-item diff JSON, commit patches).
+diff --git a/docs/PHASE1_4_S1.md b/docs/PHASE1_4_S1.md
+index 9cb1a2e..e27feaa 100644
+--- a/docs/PHASE1_4_S1.md
++++ b/docs/PHASE1_4_S1.md
+@@ -99,8 +99,10 @@ Merge test (all must hold):
+ 2. vertical gap between 2pt and 24pt;
+ 3. shared internal column rules ≥ 2 and ≥ 60% of each component's columns;
+ 4. widest horizontal-rule extents align within 3pt;
+-5. no span in the gap is larger than 1.15× the median body size (a larger
+-   label is a new table caption, a same-size bold band stays in the table).
++5. the gap contains no table/figure caption label ("Table 6-27.", "Tabelle
++   6.28", "表 3", ...).  The label text is the signal; font size is
++   deliberately ignored, because an in-table section band may be bold or
++   larger and some templates set captions at the body size.
+ 
+ Absorbed components are not emitted separately: one cluster produces one
+ region whose `components` lists every member.  Multi-component regions expand
+@@ -114,7 +116,7 @@ need no change and validate these runs with 0 errors.
+ 
+ ```bash
+ python -m pytest -o addopts="" -q
+-# 78 passed, 2 xfailed in 8.20s
++# 89 passed, 2 xfailed in 8.29s
+ ```
+ 
+ The two xfails are the CY29FCT520 block diagram (P02) and package drawing
+@@ -122,15 +124,23 @@ The two xfails are the CY29FCT520 block diagram (P02) and package drawing
+ 
+ ```bash
+ python -m pytest tests/unit/test_rule_primitives.py tests/unit/test_table_regions.py \
+-                 tests/integration/test_phase14_s1.py -o addopts="" -q
+-# 15 passed, 2 xfailed
++                 tests/unit/test_label_grid.py tests/integration/test_phase14_s1.py \
++                 -o addopts="" -q
++# 26 passed, 2 xfailed
+ ```
+ 
+ Unit coverage: line/thin-rect/quad provenance; diagonal quad ignored; thick
+ quad ignored; collinear merge keeps both sources; quad grid → one component;
+ stacked-lattice merge → one region; absorbed component recorded once; caption
+-blocks a merge; different lattice and zero gap stay separate; single component
+-keeps `ruled`.
++text blocks a merge (body-size caption included); a larger section heading in
++the gap still merges; two independent tables sharing a lattice do not merge;
++section-local columns merge cells in the other sections; different lattice and
++zero gap stay separate; single component keeps `ruled`.
++
++`tests/unit/test_label_grid.py` covers the headerless exception: the tape
++key/description grid is accepted; prose rows, sparse drawing bands,
++text-alignment grids, two-short-label diagrams, a missing column-0 key, a
++merged leading cell and two-row grids are rejected.
+ 
+ Integration coverage (PDFs from `gold/generalization/spec.yaml`, skipped if
+ absent):
+@@ -256,3 +266,41 @@ python -m tools.render_detection_crops \
+   --run runs/phase14_s1/final_generalization/20261106T010114Z-5cc138 \
+   --page 13 --out docs/evidence/phase14_s1/ds10cp152_p13_detected.png
+ ```
++
++## 8. Reviewer follow-up (2026-11-06)
++
++S1 commit for review: `003311fa8ee24ef68254fa3852329a9a9f1d762a`
++(`feat(parser): Phase 1.4 S1 - ruling primitives, components, table regions`).
++The follow-up changes below are in a separate commit so the original S1 slice
++stays a rollback point.
++
++Two points from the review were implemented, not only documented:
++
++1. **Caption blocking no longer uses font size.** `_gap_has_caption` now
++   matches a caption label by text (`Table`, `Tab.`, `Tabelle`, `Tabla`,
++   `Tableau`, `Tabela`, `Таблица`, `表`, `표`, `Figure`, `Fig.`, `图`).  A
++   synthetic test sets a 12pt section heading in the gap and still merges; a
++   second test uses a body-size `Table 12. ...` caption between two tables
++   that share columns and asserts they stay separate.  The font-size field
++   `merge_caption_scale` was removed (the YAML config and its SHA are
++   untouched).
++2. **`_is_label_grid` is narrower.** In addition to the previous conditions,
++   every populated row must contain a description/value cell (≥3 words or
++   ≥15 characters) beside the short column-0 key.  A fully ruled 3×2 grid of
++   two short labels per row (block-diagram shape) is now rejected; prose,
++   sparse bands, text-alignment grids, merged leading cells and two-row grids
++   have explicit negative tests in `tests/unit/test_label_grid.py`.
++
++The review reruns are in `runs/phase14_s1/review_rerun/`; the per-item diff
++against the S1 final runs is in `docs/reviews/phase14_s1/`:
++
++* Gold v2: unchanged 21/4/0, P 0.8400, R 1.0, F1 0.9130; `changed_items=[]`.
++* Phase 1.2: unchanged 46/0/0, P/R/F1 1.0; `changed_items=[]`.
++* Evidence Validator: 6/6 runs `errors=0 warnings=0`.
++* Unit/integration: `89 passed, 2 xfailed`.
++
++Review artifacts: `docs/reviews/phase14_s1/REVIEW_RESPONSE.md`,
++`micrf103_p03_components_vs_region.png`, `micrf103_p03_grid.json`,
++`micrf103_p03_grid_rows.png`, `ds10cp152_p13_grid.json`,
++`ds10cp152_p13_grid_cells.png`, `gold_v2_per_item_diff.json`,
++`phase12_per_item_diff.json`, plus the full commit patches.
+diff --git a/src/icpdf/parser/config.py b/src/icpdf/parser/config.py
+index 79957d9..62d7b37 100644
+--- a/src/icpdf/parser/config.py
++++ b/src/icpdf/parser/config.py
+@@ -40,7 +40,6 @@ class TableParams(BaseModel):
+     merge_shared_ratio: float = Field(default=0.6, gt=0, le=1)
+     merge_extent_tol_pt: float = Field(default=3.0, ge=0)
+     merge_min_x_overlap_ratio: float = Field(default=0.6, gt=0, le=1)
+-    merge_caption_scale: float = Field(default=1.15, gt=1)
+ 
+ 
+ class ParserConfig(BaseModel):
+diff --git a/src/icpdf/parser/header_semantics.py b/src/icpdf/parser/header_semantics.py
+index bd35c1d..5c98656 100644
+--- a/src/icpdf/parser/header_semantics.py
++++ b/src/icpdf/parser/header_semantics.py
+@@ -153,10 +153,22 @@ def _is_short_label(text: str) -> bool:
+     return len(token.split()) <= 2 and not any(ch in token for ch in _LABEL_PUNCTUATION)
+ 
+ 
++def _has_description(cells: list[GridCell], leading: GridCell) -> bool:
++    """A key grid pairs a short code with prose, not two short diagram labels."""
++    return any(cell is not leading
++               and (len(cell.text.split()) >= 3
++                    or len(cell.text.strip()) >= 15)
++               for cell in cells)
++
++
+ def _is_label_grid(grid: TableGrid) -> bool:
+     """A fully ruled key/description grid (e.g. tape dimension codes) is a
+-    table without a header row or numeric values.  Drawings and prose fail
+-    because their rows are sparse or their leading cell is a sentence."""
++    table without a header row or numeric values.
++
++    This is deliberately narrow: every populated row is a short code in
++    column 0 followed by a description.  Prose, sparse drawing bands, merged
++    leading cells and two-short-label diagrams fail.
++    """
+     if grid.source != "rule_lattice" or grid.n_rows < 3 or grid.n_columns < 2:
+         return False
+     populated: list[list[GridCell]] = []
+@@ -174,6 +186,8 @@ def _is_label_grid(grid: TableGrid) -> bool:
+             return False
+         if not _is_short_label(leading.text):
+             return False
++        if not _has_description(cells, leading):
++            return False
+         if len(_nonempty(_row_cells(grid, leading.row))) < 2:
+             return False
+     return True
+diff --git a/src/icpdf/parser/table_regions.py b/src/icpdf/parser/table_regions.py
+index 935829e..88c97ea 100644
+--- a/src/icpdf/parser/table_regions.py
++++ b/src/icpdf/parser/table_regions.py
+@@ -17,6 +17,7 @@ the Phase 1.1 over-detection.
+ 
+ from __future__ import annotations
+ 
++import re
+ import statistics
+ from dataclasses import dataclass, field
+ 
+@@ -112,44 +113,37 @@ def _horizontal_extent(component: RuleComponent) -> tuple[float, float] | None:
+     return (widest.a, widest.b)
+ 
+ 
+-def _body_font_size(layout: PageLayout,
+-                    components: list[RuleComponent]) -> float | None:
+-    sizes: list[float] = []
+-    for block in layout.blocks:
+-        for span in block.spans:
+-            if span.size is None or not span.text.strip():
+-                continue
+-            cx = (span.bbox[0] + span.bbox[2]) / 2.0
+-            cy = (span.bbox[1] + span.bbox[3]) / 2.0
+-            if any(component.bbox[0] - 1.0 <= cx <= component.bbox[2] + 1.0
+-                   and component.bbox[1] - 1.0 <= cy <= component.bbox[3] + 1.0
+-                   for component in components):
+-                sizes.append(span.size)
+-    return statistics.median(sizes) if sizes else None
++# A caption label starts a new table.  The signal is the document convention
++# ("Table 6-28.", "Tabelle 6.28", "表 3"), not the font size: an in-table
++# section band may be set at any size, and a caption may inherit the body size.
++_CAPTION = re.compile(
++    r"^\s*(?:table|tab\.?|tabelle|tabla|tableau|tabela|tabel|таблица|表|표"
++    r"|figure|fig\.?|图)\b",
++    re.IGNORECASE,
++)
+ 
+ 
+ def _gap_has_caption(layout: PageLayout, y0: float, y1: float,
+-                     x0: float, x1: float, body_size: float | None,
+-                     params: TableParams) -> bool:
+-    """A larger-than-body label in the gap is a new table caption, not a row.
++                     x0: float, x1: float) -> bool:
++    """A caption label in the gap starts a new table, so do not merge.
+ 
+-    Datasheets separate stacked tables with a bold caption ("Table 6-28. ...")
+-    set at a larger size than the table body, while an in-table section band
+-    ("Power Supply") uses the body size.  Only the typographic signal is used.
++    Only the label text is used.  Font size is deliberately ignored: section
++    bands inside one table can be bold or larger, and captions in some
++    templates are set at the body size.
+     """
+-    if body_size is None or y1 - y0 <= 0:
++    if y1 - y0 <= 0:
+         return False
+-    limit = body_size * params.merge_caption_scale
+     for block in layout.blocks:
+         for span in block.spans:
+-            if span.size is None or not span.text.strip():
++            text = span.text.strip()
++            if not text:
+                 continue
+             if not (y0 - 1.0 <= span.bbox[1] and span.bbox[3] <= y1 + 1.0):
+                 continue
+             cx = (span.bbox[0] + span.bbox[2]) / 2.0
+             if not (x0 <= cx <= x1):
+                 continue
+-            if span.size > limit:
++            if _CAPTION.match(text):
+                 return True
+     return False
+ 
+@@ -196,10 +190,9 @@ def _merge_pair(layout: PageLayout, upper: RuleComponent, lower: RuleComponent,
+                  upper_extent[0], lower_extent[0])
+     gap_x1 = max(upper.bbox[2], lower.bbox[2],
+                  upper_extent[1], lower_extent[1])
+-    body_size = _body_font_size(layout, [upper, lower])
+     if _gap_has_caption(layout, upper.bbox[3], lower.bbox[1],
+-                        gap_x0, gap_x1, body_size, params):
+-        return False, None, "gap contains a caption-sized label"
++                        gap_x0, gap_x1):
++        return False, None, "gap contains a table/figure caption"
+     evidence = {
+         "shared": tuple(shared),
+         "gap": gap,
+diff --git a/tests/unit/test_label_grid.py b/tests/unit/test_label_grid.py
+new file mode 100644
+index 0000000..3847b46
+--- /dev/null
++++ b/tests/unit/test_label_grid.py
+@@ -0,0 +1,84 @@
++# -*- coding: utf-8 -*-
++"""Negative and positive cases for the headerless label-grid exception."""
++
++from __future__ import annotations
++
++from icpdf.parser.header_semantics import _is_label_grid
++from icpdf.parser.structure import GridCell, TableGrid
++
++
++def _grid(rows: list[list[str | tuple[str, int, int]]],
++          source: str = "rule_lattice") -> TableGrid:
++    n_columns = max(len(row) for row in rows)
++    xs = [float(index * 100) for index in range(n_columns + 1)]
++    ys = [float(index * 10) for index in range(len(rows) + 1)]
++    cells: list[GridCell] = []
++    for row_index, row in enumerate(rows):
++        for column_index, entry in enumerate(row):
++            text, row_span, column_span = (
++                entry if isinstance(entry, tuple) else (entry, 1, 1))
++            cells.append(GridCell(row_index, column_index, row_span,
++                                  column_span,
++                                  (xs[column_index], ys[row_index],
++                                   xs[column_index + 1], ys[row_index + 1]),
++                                  text))
++    return TableGrid((0.0, 0.0, xs[-1], ys[-1]), xs, ys, cells,
++                     source=source)
++
++
++_DESCRIPTIONS = [
++    ["A0", "Dimension designed to accommodate the component width"],
++    ["B0", "Dimension designed to accommodate the component length"],
++    ["K0", "Dimension designed to accommodate the component thickness"],
++    ["W", "Overall width of the carrier tape"],
++    ["P1", "Pitch of the component pockets"],
++]
++
++
++def test_taped_dimension_grid_is_a_label_grid():
++    assert _is_label_grid(_grid(_DESCRIPTIONS)) is True
++
++
++def test_prose_rows_are_not_a_label_grid():
++    rows = [["This is a sentence about the package drawing", "view"],
++            ["Another long sentence that is not a code", "view"],
++            ["A third sentence describing the figure", "view"]]
++    assert _is_label_grid(_grid(rows)) is False
++
++
++def test_sparse_drawing_bands_are_not_a_label_grid():
++    rows = [["VDD", ""],
++            ["GND", "IN"],
++            ["OUT", "CLK"],
++            ["CLK", "RESET"]]
++    assert _is_label_grid(_grid(rows)) is False
++
++
++def test_text_alignment_grids_are_not_label_grids():
++    assert _is_label_grid(_grid(_DESCRIPTIONS, source="text_alignment")) is False
++
++
++def test_two_short_label_diagram_is_not_a_label_grid():
++    """A block diagram of short box labels has no description column."""
++    rows = [["VDD", "GND"],
++            ["IN", "OUT"],
++            ["CLK", "RESET"]]
++    assert _is_label_grid(_grid(rows)) is False
++
++
++def test_leading_cell_must_start_at_column_zero():
++    rows = [["", "value", "description text here"],
++            ["", "value", "another description"],
++            ["", "value", "third description"]]
++    assert _is_label_grid(_grid(rows)) is False
++
++
++def test_merged_leading_cell_is_not_a_label_grid():
++    rows = [[("A0", 1, 2), "description text"],
++            [("B0", 1, 2), "description text"],
++            [("K0", 1, 2), "description text"]]
++    assert _is_label_grid(_grid(rows)) is False
++
++
++def test_two_row_grid_is_not_a_label_grid():
++    assert _is_label_grid(_grid(_DESCRIPTIONS[:2])) is False
+diff --git a/tests/unit/test_table_regions.py b/tests/unit/test_table_regions.py
+index 16cd7aa..9e6fce1 100644
+--- a/tests/unit/test_table_regions.py
++++ b/tests/unit/test_table_regions.py
+@@ -6,8 +6,9 @@ from __future__ import annotations
+ from icpdf.parser.config import TableParams
+ from icpdf.parser.layout import PageLayout
+ from icpdf.parser.rule_primitives import RuleComponent, RuleSegment
++from icpdf.parser.structure import recognize_structure
+ from icpdf.parser.table_regions import detect_table_regions
+-from icpdf.parser.text_blocks import TextBlock, TextSpan
++from icpdf.parser.text_blocks import TextBlock, TextSpan, TextWord
+ 
+ 
+ def _component(component_id: int, x0: float, y0: float, x1: float, y1: float,
+@@ -69,19 +70,52 @@ def test_absorbed_component_is_not_emitted_separately():
+     assert absorbed[0].component_ids == (1,)
+ 
+ 
+-def test_caption_sized_gap_blocks_merge():
++def test_caption_text_blocks_merge_even_at_body_size():
++    """Font size is not the signal: a body-size caption still starts a table."""
+     upper = _component(0, 240.0, 80.0, 400.0, 134.0)
+     lower = _component(1, 240.0, 146.0, 400.0, 200.0)
+     blocks = [
+         _block("body-upper", [_span("s1", "value", (250.0, 90.0, 390.0, 99.0), 8.0)]),
+         _block("body-lower", [_span("s2", "value", (250.0, 160.0, 390.0, 169.0), 8.0)]),
+-        _block("caption", [_span("s3", "Table 6-1", (250.0, 136.0, 390.0, 145.0), 10.0)]),
++        _block("caption", [_span("s3", "Table 6-1. Independent table",
++                                 (250.0, 136.0, 390.0, 145.0), 8.0)]),
+     ]
+     regions = detect_table_regions(_layout([upper, lower], blocks), TableParams())
+     assert len(regions) == 2
+     assert all(not region.evidence for region in regions)
+ 
+ 
++def test_larger_section_heading_in_gap_still_merges():
++    """An in-table section band may be set larger than the body text."""
++    upper = _component(0, 240.0, 80.0, 400.0, 134.0)
++    lower = _component(1, 240.0, 146.0, 400.0, 200.0)
++    blocks = [
++        _block("body-upper", [_span("s1", "value", (250.0, 90.0, 390.0, 99.0), 8.0)]),
++        _block("body-lower", [_span("s2", "value", (250.0, 160.0, 390.0, 169.0), 8.0)]),
++        _block("heading", [_span("s3", "Power Supply",
++                                 (250.0, 136.0, 390.0, 145.0), 12.0)]),
++    ]
++    regions = detect_table_regions(_layout([upper, lower], blocks), TableParams())
++    assert len(regions) == 1
++    assert regions[0].components[0].component_id == 0
++    assert regions[0].components[1].component_id == 1
++
++
++def test_independent_tables_sharing_columns_do_not_merge():
++    """Same lattice, same extent, 12pt gap, but captioned as two tables."""
++    upper = _component(0, 240.0, 80.0, 400.0, 134.0)
++    lower = _component(1, 240.0, 146.0, 400.0, 200.0)
++    blocks = [
++        _block("body-upper", [_span("s1", "value", (250.0, 90.0, 390.0, 99.0), 8.0)]),
++        _block("body-lower", [_span("s2", "value", (250.0, 160.0, 390.0, 169.0), 8.0)]),
++        _block("caption", [_span("s3", "Table 12. Configuration registers",
++                                 (250.0, 136.0, 390.0, 145.0), 10.0)]),
++    ]
++    regions = detect_table_regions(_layout([upper, lower], blocks), TableParams())
++    assert len(regions) == 2
++    assert all(region.boundary_source == "ruled" for region in regions)
++
++
+ def test_dissimilar_column_lattices_stay_separate():
+     upper = _component(0, 240.0, 80.0, 400.0, 134.0)
+     lower = _component(1, 300.0, 146.0, 450.0, 200.0,
+@@ -103,3 +137,36 @@ def test_single_component_keeps_ruled_boundary():
+     assert len(regions) == 1
+     assert regions[0].boundary_source == "ruled"
+     assert regions[0].evidence == ()
++
++
++def test_section_local_column_does_not_split_other_sections():
++    """A rule that exists in one section is a region column, but rows in
++    sections without it merge across it instead of gaining empty cells."""
++    upper = _component(0, 60.0, 80.0, 500.0, 134.0,
++                       inner_xs=(240.0, 320.0, 400.0))
++    lower = _component(1, 60.0, 146.0, 500.0, 200.0,
++                       inner_xs=(240.0, 400.0))
++    words = [
++        TextWord(word_id="w1", text="alpha", bbox=(245.0, 86.0, 310.0, 94.0)),
++        TextWord(word_id="w2", text="beta", bbox=(330.0, 86.0, 395.0, 94.0)),
++        TextWord(word_id="w3", text="wide-value",
++                 bbox=(245.0, 152.0, 395.0, 160.0)),
++    ]
++    layout = PageLayout(page_number=1, rect=(0.0, 0.0, 612.0, 792.0),
++                        blocks=[], words=words, row_bands=[],
++                        components=[upper, lower])
++    regions = detect_table_regions(layout, TableParams())
++    assert len(regions) == 1
++    grid = recognize_structure(layout, regions[0])
++    assert any(abs(x - 320.0) <= 2.5 for x in grid.xs)
++
++    upper_band = [cell for cell in grid.cells if cell.row == 0]
++    assert any(abs(cell.column_span - 1) == 0 and cell.column == 1
++               for cell in upper_band)
++    assert any(cell.column == 2 and cell.column_span == 1
++               for cell in upper_band)
++
++    lower_band = [cell for cell in grid.cells if cell.row == 4]
++    assert not any(cell.column == 2 for cell in lower_band)
++    assert any(cell.column == 1 and cell.column_span == 2
++               for cell in lower_band)
+diff --git a/tools/export_review_evidence.py b/tools/export_review_evidence.py
+new file mode 100644
+index 0000000..d83569d
+--- /dev/null
++++ b/tools/export_review_evidence.py
+@@ -0,0 +1,188 @@
++"""Export review artifacts for Phase 1.4 S1 (components, grids, eval diff).
++
++Read-only: parses a PDF for physical components, reads a run's tables.json for
++one logical table, and compares two evaluate.py JSON files item by item.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++import pymupdf as fitz
++
++from icpdf.parser.layout import rule_components
++from icpdf.parser.pdf_loader import load_pdf
++from icpdf.parser.text_blocks import extract_text_blocks
++
++
++def _write(path: Path, data: object) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(json.dumps(data, ensure_ascii=False, indent=1),
++                    encoding="utf-8")
++
++
++def export_components(pdf: Path, page_number: int, out: Path) -> None:
++    loaded = load_pdf(pdf)
++    with fitz.open(str(pdf)) as doc:
++        page = doc[page_number - 1]
++        geometry = loaded.geometries[page_number - 1]
++        components = sorted(rule_components(page, geometry,
++                                            page_number=page_number),
++                            key=lambda component: component.bbox[1])
++        blocks = extract_text_blocks(page, page_number, geometry)
++
++    entries = []
++    for component in components:
++        entries.append({
++            "component_id": component.component_id,
++            "bbox": [round(value, 2) for value in component.bbox],
++            "horizontal_rules": len(component.horizontal),
++            "vertical_rules": len(component.vertical),
++            "column_xs": [round(value, 2) for value in sorted(
++                {segment.c for segment in component.vertical})],
++            "primitive_count": len(component.primitives),
++            "primitive_kinds": sorted({item.kind for item in component.primitives}),
++            "primitive_indices": list(component.primitive_indices),
++        })
++
++    gaps = []
++    for upper, lower in zip(components, components[1:]):
++        labels = []
++        for block in blocks:
++            for span in block.spans:
++                if not span.text.strip():
++                    continue
++                if not (upper.bbox[3] - 1.0 <= span.bbox[1]
++                        and span.bbox[3] <= lower.bbox[1] + 1.0):
++                    continue
++                if not (min(upper.bbox[0], lower.bbox[0])
++                        <= (span.bbox[0] + span.bbox[2]) / 2.0
++                        <= max(upper.bbox[2], lower.bbox[2])):
++                    continue
++                labels.append({"text": span.text.strip(),
++                               "size": span.size,
++                               "bbox": [round(value, 2) for value in span.bbox]})
++        gaps.append({
++            "upper": upper.component_id,
++            "lower": lower.component_id,
++            "height_pt": round(lower.bbox[1] - upper.bbox[3], 2),
++            "labels": labels,
++        })
++
++    _write(out, {"pdf": str(pdf), "page": page_number,
++                 "components": entries, "gaps": gaps})
++
++
++def export_grid(run: Path, page_number: int, table_id: str, out: Path) -> None:
++    tables = json.loads((run / "tables.json").read_text(encoding="utf-8"))
++    table = next(item for item in tables
++                 if item["page_number"] == page_number
++                 and item["table_id"] == table_id)
++    rows = []
++    column_xs = set()
++    for row_index, row in enumerate(table["rows"]):
++        cells = []
++        for cell in row["cells"]:
++            column_xs.update((round(cell["bbox"][0], 2),
++                              round(cell["bbox"][2], 2)))
++            cells.append({
++                "cell_id": cell["cell_id"],
++                "column_id": cell["column_id"],
++                "bbox": [round(value, 2) for value in cell["bbox"]],
++                "text": cell["text"],
++            })
++        rows.append({
++            "row_index": row_index,
++            "row_id": row["row_id"],
++            "bbox": [round(value, 2) for value in row["bbox"]],
++            "cells": cells,
++        })
++    xs = sorted(column_xs)
++    full_width = [
++        row["row_index"] for row in rows
++        if any(abs(cell["bbox"][0] - table["bbox"][0]) <= 0.5
++               and abs(cell["bbox"][2] - table["bbox"][2]) <= 0.5
++               for cell in row["cells"])
++    ]
++    _write(out, {
++        "run": run.name,
++        "table_id": table_id,
++        "page": page_number,
++        "bbox": [round(value, 2) for value in table["bbox"]],
++        "header_rows": table["header_rows"],
++        "headers": table["headers"],
++        "row_count": len(rows),
++        "column_count": len(xs) - 1,
++        "column_xs": xs,
++        "full_width_rows_detected": full_width,
++        "region_components": table.get("region_components"),
++        "boundary_source": table.get("boundary_source"),
++        "merge_evidence": table.get("merge_evidence"),
++        "rows": rows,
++    })
++
++
++def export_diff(before: Path, after: Path, out: Path) -> None:
++    old = json.loads(before.read_text(encoding="utf-8"))
++    new = json.loads(after.read_text(encoding="utf-8"))
++    old_items = {item["item_id"]: item for item in old["tables"]}
++    new_items = {item["item_id"]: item for item in new["tables"]}
++    fields = ("matched", "iou", "pred_rows", "pred_columns",
++              "pred_table_type", "gold_rows", "gold_columns")
++    entries = []
++    for item_id in sorted(old_items):
++        before_item = old_items[item_id]
++        after_item = new_items[item_id]
++        row = {"item_id": item_id, "page": before_item["page"]}
++        changed = False
++        for field in fields:
++            before_value = before_item.get(field)
++            after_value = after_item.get(field)
++            row[field] = {"before": before_value, "after": after_value}
++            if before_value != after_value:
++                changed = True
++        row["changed"] = changed
++        entries.append(row)
++    _write(out, {
++        "before_label": old["label"],
++        "after_label": new["label"],
++        "overall_before": old["overall"],
++        "overall_after": new["overall"],
++        "changed_items": [item["item_id"] for item in entries if item["changed"]],
++        "items": entries,
++    })
++
++
++def main() -> None:
++    parser = argparse.ArgumentParser()
++    sub = parser.add_subparsers(dest="command", required=True)
++
++    components = sub.add_parser("components")
++    components.add_argument("--pdf", required=True)
++    components.add_argument("--page", type=int, required=True)
++    components.add_argument("--out", required=True)
++
++    grid = sub.add_parser("grid")
++    grid.add_argument("--run", required=True)
++    grid.add_argument("--page", type=int, required=True)
++    grid.add_argument("--table-id", required=True)
++    grid.add_argument("--out", required=True)
++
++    diff = sub.add_parser("diff")
++    diff.add_argument("--before", required=True)
++    diff.add_argument("--after", required=True)
++    diff.add_argument("--out", required=True)
++
++    args = parser.parse_args()
++    if args.command == "components":
++        export_components(Path(args.pdf), args.page, Path(args.out))
++    elif args.command == "grid":
++        export_grid(Path(args.run), args.page, args.table_id, Path(args.out))
++    else:
++        export_diff(Path(args.before), Path(args.after), Path(args.out))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/tools/render_region_evidence.py b/tools/render_region_evidence.py
+new file mode 100644
+index 0000000..caebcda
+--- /dev/null
++++ b/tools/render_region_evidence.py
+@@ -0,0 +1,155 @@
++"""Render S1 review images: physical components vs region, and the cell grid.
++
++Both modes are read-only and never write into a run directory.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++import pymupdf as fitz
++
++from icpdf.parser.layout import rule_components
++from icpdf.parser.pdf_loader import load_pdf
++
++_COLORS = [
++    (0.85, 0.20, 0.20), (0.10, 0.55, 0.25), (0.75, 0.40, 0.10),
++    (0.45, 0.20, 0.70), (0.45, 0.30, 0.10), (0.80, 0.20, 0.60),
++]
++_BLUE = (0.0, 0.15, 0.85)
++
++
++def _render_components(pdf: Path, page_number: int, run: Path | None,
++                       table_id: str | None, out: Path, padding: float,
++                       zoom: float) -> None:
++    loaded = load_pdf(pdf)
++    with fitz.open(str(pdf)) as doc:
++        page = doc[page_number - 1]
++        geometry = loaded.geometries[page_number - 1]
++        components = sorted(rule_components(page, geometry,
++                                            page_number=page_number),
++                            key=lambda component: component.bbox[1])
++        tables = []
++        if run is not None:
++            all_tables = json.loads((run / "tables.json").read_text(
++                encoding="utf-8"))
++            tables = [table for table in all_tables
++                      if table["page_number"] == page_number
++                      and (table_id is None or table["table_id"] == table_id)]
++        boxes = [component.bbox for component in components]
++        boxes += [table["bbox"] for table in tables]
++        if not boxes:
++            raise SystemExit("nothing to draw on this page")
++        clip = fitz.Rect(min(box[0] for box in boxes) - padding,
++                         min(box[1] for box in boxes) - padding,
++                         max(box[2] for box in boxes) + padding,
++                         max(box[3] for box in boxes) + padding)
++
++        for component in components:
++            color = _COLORS[component.component_id % len(_COLORS)]
++            rect = fitz.Rect(component.bbox)
++            page.draw_rect(rect, color=color, width=1.2)
++            label_x = rect.x0 - 30
++            label_y = (rect.y0 + rect.y1) / 2.0 + 2.0
++            page.draw_rect(fitz.Rect(label_x - 1, label_y - 6,
++                                     label_x + 16, label_y + 1),
++                           color=None, fill=(1.0, 1.0, 1.0), width=0)
++            page.insert_text((label_x, label_y),
++                             f"C{component.component_id}", fontsize=6,
++                             color=color)
++        for table in tables:
++            rect = fitz.Rect(table["bbox"])
++            page.draw_rect(rect, color=_BLUE, width=2.0)
++            page.insert_text((rect.x0 + 2, rect.y1 + 10),
++                             f"REGION {table['table_id']}", fontsize=7,
++                             color=_BLUE)
++
++        pixmap = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), clip=clip)
++        out.parent.mkdir(parents=True, exist_ok=True)
++        pixmap.save(str(out))
++
++
++def _render_grid(run: Path, page_number: int, table_id: str, out: Path,
++                 padding: float, zoom: float, labels: str) -> None:
++    doc = fitz.open(str(run / "source.pdf"))
++    try:
++        page = doc[page_number - 1]
++        tables = json.loads((run / "tables.json").read_text(encoding="utf-8"))
++        table = next(item for item in tables
++                     if item["page_number"] == page_number
++                     and item["table_id"] == table_id)
++        bbox = table["bbox"]
++        clip = fitz.Rect(bbox[0] - padding, bbox[1] - padding,
++                         bbox[2] + padding, bbox[3] + padding)
++        page.draw_rect(fitz.Rect(bbox), color=_BLUE, width=1.2)
++
++        xs = sorted({round(cell["bbox"][0], 2) for row in table["rows"]
++                     for cell in row["cells"]}
++                    | {round(cell["bbox"][2], 2) for row in table["rows"]
++                       for cell in row["cells"]})
++        for column, x in enumerate(xs):
++            page.draw_line(fitz.Point(x, bbox[1]), fitz.Point(x, bbox[3]),
++                           color=(0.0, 0.55, 0.55), width=0.4,
++                           dashes="[1 1] 0")
++            page.insert_text((x + 1.5, bbox[1] - 2), str(column),
++                             fontsize=4, color=(0.0, 0.45, 0.45))
++
++        for row_index, row in enumerate(table["rows"]):
++            y = row["bbox"][1]
++            page.draw_line(fitz.Point(bbox[0], y), fitz.Point(bbox[2], y),
++                           color=(0.0, 0.55, 0.55), width=0.4,
++                           dashes="[1 1] 0")
++            page.insert_text((bbox[0] - 13, y + 4), f"r{row_index}",
++                             fontsize=3.6, color=(0.0, 0.45, 0.45))
++            if labels == "cell":
++                for cell in row["cells"]:
++                    cell_box = cell["bbox"]
++                    page.insert_text((cell_box[0] + 1, cell_box[1] + 4),
++                                     f"c{cell['column_id']}", fontsize=3.4,
++                                     color=(0.55, 0.55, 0.55))
++
++        pixmap = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), clip=clip)
++        out.parent.mkdir(parents=True, exist_ok=True)
++        pixmap.save(str(out))
++    finally:
++        doc.close()
++
++
++def main() -> None:
++    parser = argparse.ArgumentParser()
++    sub = parser.add_subparsers(dest="command", required=True)
++
++    components = sub.add_parser("components")
++    components.add_argument("--pdf", required=True)
++    components.add_argument("--page", type=int, required=True)
++    components.add_argument("--run")
++    components.add_argument("--table-id")
++    components.add_argument("--out", required=True)
++    components.add_argument("--padding", type=float, default=20.0)
++    components.add_argument("--zoom", type=float, default=3.0)
++
++    grid = sub.add_parser("grid")
++    grid.add_argument("--run", required=True)
++    grid.add_argument("--page", type=int, required=True)
++    grid.add_argument("--table-id", required=True)
++    grid.add_argument("--out", required=True)
++    grid.add_argument("--padding", type=float, default=10.0)
++    grid.add_argument("--zoom", type=float, default=3.0)
++    grid.add_argument("--labels", choices=("none", "row", "cell"),
++                      default="cell")
++
++    args = parser.parse_args()
++    if args.command == "components":
++        _render_components(Path(args.pdf), args.page,
++                           Path(args.run) if args.run else None,
++                           args.table_id, Path(args.out), args.padding,
++                           args.zoom)
++    else:
++        _render_grid(Path(args.run), args.page, args.table_id, Path(args.out),
++                     args.padding, args.zoom, args.labels)
++
++
++if __name__ == "__main__":
++    main()

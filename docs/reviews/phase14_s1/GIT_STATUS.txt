@@ -1,0 +1,39 @@
+HEAD 3fc45195d8da20d95dd30ef87ef19859d3d2e002
+
+At the moment commit 3fc4519 was created, `git status --porcelain` was empty.
+The three untracked files below are this response bundle, written after the
+code commit; they do not change the code tree.
+
+$ git status --porcelain
+?? docs/reviews/phase14_s1/3fc4519_followup.patch
+?? docs/reviews/phase14_s1/GIT_STATUS.txt
+?? docs/reviews/phase14_s1/REVIEW_RESPONSE.md
+
+$ git log --oneline -3
+3fc4519 fix(parser): S1 review - caption-text gate and narrower label grid
+003311f feat(parser): Phase 1.4 S1 - ruling primitives, components, table regions
+a0b777e Gold v2 spec, independently reviewed generalization set, structure design
+
+$ git show --stat --oneline 3fc4519
+3fc4519 fix(parser): S1 review - caption-text gate and narrower label grid
+ HANDOFF.md                                         |   18 +
+ docs/PHASE1_4_S1.md                                |   62 +-
+ docs/reviews/phase14_s1/003311f_s1.patch           | 5666 ++++++++++++++++++++
+ .../phase14_s1/ds10cp152_p13_components.json       |  460 ++
+ .../ds10cp152_p13_components_vs_region.png         |  Bin 0 -> 245657 bytes
+ docs/reviews/phase14_s1/ds10cp152_p13_grid.json    |  201 +
+ .../phase14_s1/ds10cp152_p13_grid_cells.png        |  Bin 0 -> 49444 bytes
+ docs/reviews/phase14_s1/gold_v2_per_item_diff.json |  728 +++
+ .../phase14_s1/micrf103_p03_components.json        |  208 +
+ .../phase14_s1/micrf103_p03_components_vs_region.png |  Bin 0 -> 253991 bytes
+ docs/reviews/phase14_s1/micrf103_p03_grid.json     | 1612 ++++++
+ docs/reviews/phase14_s1/micrf103_p03_grid_rows.png |  Bin 0 -> 276369 bytes
+ docs/reviews/phase14_s1/phase12_per_item_diff.json | 1553 +++++++
+ src/icpdf/parser/config.py                         |    1 -
+ src/icpdf/parser/header_semantics.py               |   18 +-
+ src/icpdf/parser/table_regions.py                  |   47 +-
+ tests/unit/test_label_grid.py                      |   84 +
+ tests/unit/test_table_regions.py                   |   73 +-
+ tools/export_review_evidence.py                    |  188 +
+ tools/render_region_evidence.py                    |  155 +
+ 20 files changed, 11034 insertions(+), 40 deletions(-)
