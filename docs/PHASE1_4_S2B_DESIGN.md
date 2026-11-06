@@ -1,6 +1,6 @@
 # Phase 1.4 S2b — Logical Boundary Lattice and Projection
 
-**Status:** design proposal only (revision r2, based on `cf59799`). No
+**Status:** design proposal only (revision r3, based on `eac55f4`). No
 implementation, schema change, Gold change or pipeline integration is authorized
 by this document. Implementation starts only after the Reviewer closes the
 items in §1.
@@ -13,8 +13,27 @@ proposal for review, not a replacement of the approved principles.
 ## 1. Review resolution map
 
 This revision answers the seven review items and the P0/P1 findings on
-`cf59799`. Nothing below is an implementation claim; every repository statement
-is backed by a path and line reference in §3.
+`cf59799` (r2), plus the eight blocking findings in the r2 re-review. Nothing
+below is an implementation claim; every repository statement is backed by a
+path and line reference in §3.
+
+**r3 review findings (latest round).**
+
+| Item | Reviewer finding | Answer in |
+| --- | --- | --- |
+| N1 | `HeaderCanopyEvidence` has an undirected ref set; the auditor must re-run the left/right decision | §5.3, §9.2, §11 |
+| N2 | `SubrulePromotedEvidence` lacks per-band, per-cell word attribution; ratio is not independently recomputable | §5.3, §6.3, §11 |
+| N3 | `TableBBoxEvidence` / `RegionExtentEvidence` are only self-consistent, not anchored to a fresh parse | §5.3, §9.2, §11 |
+| N4 | Candidate grouping can chain-merge beyond tolerance; no fixed anchor | §6.1, §11 |
+| N5 | `condition_path` lexical rule is too broad; ratio definition incomplete | §6.5, §6.3 |
+| N6 | `LogicalCell` bbox, id, rowspan/colspan and word-universe reconstruction rules are incomplete | §5.6, §7.3, §9.3, §11 |
+| N7 | Gold annotation type and ambiguity overlay are still collapsed into one status | §12.2 |
+| N8 | v1/v2 snapshot validation is hash-only; S2a audit edit boundary is undefined | §5.8, §13 |
+| S1 | §5.5 "at most one ref" contradicts "both present must agree" | §5.5 |
+| S2 | Projection row bands, visual intervals and overlap recomputation are under-specified | §5.4, §7.2, §11 |
+| S3 | Structural edge de-duplication, header overlap formula, boundary tie-break, cell kind edge cases | §5.3, §7.3, §8.2, §11 |
+
+**r2 findings (kept for traceability).**
 
 | Item | Question | Answer in |
 | --- | --- | --- |
@@ -436,19 +455,37 @@ polluting the accepted lattice.
 
 ```text
 BoundarySupport
-  band_count: int
+  band_count: int              # canonical body bands the candidate intersects
   rule_bands: int              # bands with a printed rule at x
   gutter_bands: int            # bands with a body gutter at x
+  supported_bands: int         # union of rule/gutter bands, each counted once
   crossing_bands: int          # bands where a word run crosses x
   short_label_bands: int       # bands with a right-side short label
   condition_bands: int         # bands with condition-like right-side text
-  nonempty_bands: int
-  support_ratio: float         # rule/gutter support over non-empty bands
+  nonempty_bands: int          # evidence-specific denominator, see below
+  support_ratio: float         # supported_bands / nonempty_bands
 ```
+
+`support_ratio` is diagnostic only and never decides a boundary by itself; the
+decision uses the named thresholds in §6.2. A band that has both a rule and a
+gutter increments `rule_bands` and `gutter_bands` individually but only once in
+`supported_bands`, so the ratio is `<= 1.0` by construction. `band_count` and
+`nonempty_bands` are computed over the canonical bands of §5.4 (body bands for
+`label_aligned`); a candidate that intersects no band has
+`nonempty_bands == 0` and no ratio. The denominator is:
+
+- `subrule_promoted`: bands with at least one word center strictly right of x;
+- `label_aligned`: body bands with at least one word anywhere in the table;
+- other kinds: bands with at least one word anywhere in the table.
+
+Both denominators are restated on the corresponding evidence record, so the
+validator never has to infer which one a decision used.
 
 ```text
 LogicalBoundaryDecision
-  candidate_x: float
+  candidate_x: float                           # group x
+  anchor_x: float                              # fixed anchor of the group
+  source_xs: tuple[float, ...]                 # every member x, sorted, unique
   decision: LogicalBoundaryDecisionKind
   reasons: tuple[str, ...]                     # stable machine-readable codes
   sources: tuple[LogicalBoundarySource, ...]
@@ -479,21 +516,30 @@ PrintedRuleEvidence
   visual_segment_indices: tuple[int, ...]
   coverage: float
 
+SubruleLabelAssignment
+  grid_row: int
+  physical_cell_ref: PhysicalCellRef
+  word_ids: tuple[str, ...]          # non-empty, reading order
+  selected_run_bbox: BBox            # union of the assigned word bboxes
+  classification: "short_label"
+
 SubrulePromotedEvidence
   kind: "subrule_promoted"
   visual_boundary_index: int
   visual_segment_indices: tuple[int, ...]
-  rule_bands: tuple[int, ...]
-  short_label_bands: tuple[int, ...]
-  short_label_word_ids: tuple[str, ...]
+  rule_bands: tuple[int, ...]        # sorted, unique
   nonempty_bands: int
+  label_assignments: tuple[SubruleLabelAssignment, ...]  # one per band at most
   short_label_ratio: float
 
 HeaderCanopyEvidence
   kind: "header_canopy"
-  edge: "left" | "right" | "gap_left" | "gap_right"
   level: int
-  header_cell_refs: tuple[HeaderCellRef, ...]
+  boundary_edge: "left" | "right" | "gap"
+  left_header_cell_refs: tuple[HeaderCellRef, ...]
+  right_header_cell_refs: tuple[HeaderCellRef, ...]
+  left_anchor_ref: HeaderCellRef
+  right_anchor_ref: HeaderCellRef
   left_label: str
   right_label: str
 
@@ -507,22 +553,133 @@ LabelAlignedEvidence
 
 StructuralEdgeEvidence
   kind: "structural"
-  physical_cell_edge_refs: tuple[PhysicalCellEdgeRef, ...]
+  physical_cell_edge_refs: tuple[PhysicalCellEdgeRef, ...]  # sorted, unique
   physical_rule_component_ids: tuple[int, ...]
 
 TableBBoxEvidence
   kind: "table_bbox"
   edge: "left" | "right"
+  page_number: int
   table_bbox: BBox
 
 RegionExtentEvidence
   kind: "region_extent"
   edge: "left" | "right"
+  page_number: int
   region_component_ids: tuple[int, ...]
   extent_left: float
   extent_right: float
   boundary_source: str
+  implied_outer_evidence_index: int
+  implied_outer_values: tuple[float, ...]
 ```
+
+**`HeaderCanopyEvidence` is directed (N1).** The record is self-explanatory:
+the audit does not re-run the canopy decision.
+
+- `boundary_edge` defines x from the anchors:
+  - `left`: x equals `right_anchor_ref.bbox[0]` (within
+    `visual_boundary_tol_pt`);
+  - `right`: x equals `left_anchor_ref.bbox[2]`;
+  - `gap`: x equals
+    `(left_anchor_ref.bbox[2] + right_anchor_ref.bbox[0]) / 2`; the gap width
+    must be positive and no header cell at that level may intersect the open
+    gap.
+- `left_anchor_ref` must appear in `left_header_cell_refs` and
+  `right_anchor_ref` in `right_header_cell_refs`. Anchors are the cells
+  immediately adjacent to x at `level`.
+- `left_header_cell_refs` lists every header cell at `level` whose x-span lies
+  wholly on the left (`bbox[2] <= x + tol`), nearest first; the right list is
+  the mirror image (`bbox[0] >= x - tol`, nearest first). Extra refs are
+  provenance for a multi-cell canopy, not additional anchors.
+- `left_label` / `right_label` are the normalized texts of the anchors
+  (strip, collapse internal whitespace); both non-empty and distinct.
+- If two cells at the same level touch x within tolerance, the candidate is
+  `unresolved` (`header_level_tie`); one anchor per side is mandatory.
+- Every ref has `level == evidence.level` and resolves to exactly one
+  `DetectedHeaderCell` by `(level, source_row, source_column, column)`; its bbox
+  is inside the table bbox.
+
+**`SubrulePromotedEvidence` is per band, per cell, per word (N2).**
+
+- `rule_bands` is sorted and unique, inside `[0, n_rows - 1]`.
+- `nonempty_bands` is the number of bands in `rule_bands` with at least one
+  word center strictly right of x inside the table, counted before
+  classification. It is recomputable and never smaller than
+  `len(label_assignments)`.
+- At most one `SubruleLabelAssignment` per `grid_row`; `grid_row` is unique,
+  sorted, and a member of `rule_bands`.
+- Each assignment's `physical_cell_ref` resolves to a real `DetectedCell`;
+  `word_ids` is non-empty, in reading order, every center strictly right of x
+  and inside that cell (same 0.8pt tolerance as `_assign_words`);
+  `selected_run_bbox` is exactly the union of those word bboxes.
+- The selected run is the nearest word run immediately right of x inside the
+  same physical cell. Run splitting uses the existing `cell_gap_pt` rule from
+  `_alignment_grid` (`structure.py:551-553`). Two runs at equal distance are a
+  tie: `subrule_run_tie`, unresolved.
+- Only runs classified as `short_label` by §6.3 appear. A band with no
+  right-side word is excluded from numerator and denominator.
+- `short_label_ratio = len(label_assignments) / nonempty_bands`, with
+  `nonempty_bands > 0`. Missing, duplicate or out-of-band assignments are
+  errors. The validator recomputes both the count and the ratio.
+
+**`LabelAlignedEvidence` ratio.**
+
+- `grid_rows` is the sorted, unique set of body bands (`header_rows <= r <
+  n_rows`) where a gutter exists at x and no word crosses x; `gutter_bands =
+  len(grid_rows)`.
+- `nonempty_bands` is the number of body bands with at least one word anywhere
+  in the table, recomputed from the fresh parse.
+- `gutter_ratio = gutter_bands / nonempty_bands` with `nonempty_bands > 0`; a
+  stored ratio that does not recompute within `1e-9` is
+  `boundary_evidence_mismatch`.
+- `word_ids` is the reading-order list of words in the gutter bands that do not
+  cross x; each id must resolve and lie inside the table.
+
+**`StructuralEdgeEvidence` de-duplication (S3).**
+
+- Refs are sorted by `(grid_row, cell_index, edge)` and the same tuple appears
+  at most once; a duplicate is `boundary_evidence_duplicate_ref`.
+- At most one ref per `(grid_row, edge)`; two refs for the same row and edge
+  must agree on x within tolerance or the candidate is unresolved.
+- "Repeats in at least two row bands" means at least two distinct `grid_row`
+  values after de-duplication, not two cells in one row.
+- Every ref resolves; its edge x is within `visual_boundary_tol_pt` of the
+  logical x; `physical_rule_component_ids` is a subset of `region_components`.
+
+**`TableBBoxEvidence` is anchored to a fresh parse (N3).**
+
+- `page_number` and `table_bbox` are copied verbatim from the fresh
+  `DetectedTable`; the validator requires exact equality with the fresh parse
+  (integer page, float bbox; no per-evidence bbox is allowed).
+- `edge` selects `table_bbox[0]` (left) or `table_bbox[2]` (right); x must equal
+  that value within `visual_boundary_tol_pt`.
+- A page-number or bbox mismatch is `boundary_evidence_stale`, not a warning.
+  The evidence may not define its own coordinate system.
+- Only outer boundaries may use this kind.
+
+**`RegionExtentEvidence` has a defined encoding (N3).**
+
+The current parser constructs `implied_outer` at
+`table_regions.py:282-288` with `values = (left, right)` and
+`component_ids = tuple(member.component_id for member in members)`; a region
+emits at most one such record. The evidence records that encoding instead of
+relying on positional convention:
+
+- `implied_outer_evidence_index` is the index into the fresh
+  `TableRegion.evidence` tuple where `kind == "implied_outer"`.
+- `implied_outer_values` equals that record's `values` exactly;
+  `extent_left == implied_outer_values[0]` and
+  `extent_right == implied_outer_values[1]`.
+- `region_component_ids` equals that record's `component_ids` as a set, sorted.
+- `boundary_source` equals the fresh `TableRegion.boundary_source` and is one
+  of `implied_horizontal`, `implied_alignment`, `mixed`.
+- `page_number` equals the fresh region page; `edge` selects `extent_left` or
+  `extent_right`, and x must equal it within `visual_boundary_tol_pt`.
+- If the fresh parse has no `implied_outer` record, the evidence is invalid:
+  fail closed with `boundary_evidence_missing_ref`. Never infer the extent from
+  the bbox.
+- Only outer boundaries may use this kind.
 
 `PhysicalCellEdgeRef`:
 
@@ -541,8 +698,8 @@ Source-to-evidence mapping:
 | `LogicalBoundarySource` | Required evidence kind(s) |
 | --- | --- |
 | `printed_rule` | `printed_rule` |
-| `subrule_promoted` | `subrule_promoted` |
-| `header_canopy` | `header_canopy` |
+| `subrule_promoted` | `subrule_promoted`, with `nonempty_bands >= 2` and at least one `label_assignments` entry |
+| `header_canopy` | `header_canopy`, with both anchors |
 | `label_aligned` | `label_aligned` |
 | `structural` | at least one of `structural`, `table_bbox`, `region_extent` |
 
@@ -558,12 +715,12 @@ in §11, stated with their sources:
 | Kind | Required references | Validation / rejection |
 | --- | --- | --- |
 | `printed_rule` | `visual_boundary_index`, non-empty `visual_segment_indices` | index in range; `abs(visual_boundaries[i] - x) <= visual_boundary_tol_pt`; each segment index in range; each `VisualSegment.component_id` in `region_components`; each `y0 < y1` inside table bbox; `coverage >= visual_full_height_coverage`; role must be `internal` for an internal boundary, `outer_*` for an outer one. Missing/invalid -> `boundary_evidence_missing_ref` or `boundary_evidence_mismatch`. |
-| `subrule_promoted` | `visual_boundary_index`, non-empty `rule_bands`, `short_label_bands`, `short_label_word_ids` | same visual checks; coverage `< visual_full_height_coverage`; `rule_bands` inside grid rows; `short_label_bands` a subset of `rule_bands` with at least `logical_subrule_promote_min_bands`; `short_label_ratio >= logical_subrule_promote_min_ratio`; every word id exists, is right of `x`, and is in the same physical cell as its band. |
-| `header_canopy` | non-empty `header_cell_refs`, `level`, `left_label`, `right_label` | at least one header cell on each side of `x` (or a gap between two cells); every ref resolves to a `DetectedHeaderCell` by `(level, source_row, source_column, column)`; `level < header_rows`; bbox inside the table; the referenced edge/gap is within tolerance of `x`; labels non-empty and distinct; the resulting interval is not empty. Missing cell -> `boundary_evidence_missing_ref`; unpaired sides -> `header_missing_for_canopy`. |
-| `label_aligned` | non-empty `grid_rows`, non-empty `word_ids` | rows in `[header_rows, n_rows)`; every word id exists on the page and inside the table; no word crosses `x`; `gutter_ratio >= logical_label_min_band_ratio`; `len(grid_rows) >= logical_label_min_bands`. |
-| `structural` | non-empty `physical_cell_edge_refs` | each ref resolves to a real `DetectedCell`; the referenced edge is within tolerance of `x`; the edge repeats in at least two distinct row bands; no word crosses `x`. `physical_rule_component_ids`, when present, must all be in `region_components`. |
-| `table_bbox` | `edge`, `table_bbox` | only for outer boundaries; `x` equals `table_bbox[0]` (left) or `table_bbox[2]` (right) within tolerance. An internal boundary may not use this kind. |
-| `region_extent` | `edge`, non-empty `region_component_ids`, `extent_left`, `extent_right`, `boundary_source` | only for outer boundaries; every component id in `region_components`; `boundary_source` in `{implied_horizontal, implied_alignment, mixed}`; `x` equals the relevant extent within tolerance; the extent values must match the `TableRegion.evidence[kind="implied_outer"].values` of a fresh parse. If the artifact has no structured extent, fail closed; do not infer it from the bbox alone. |
+| `subrule_promoted` | `visual_boundary_index`, non-empty `rule_bands`, `nonempty_bands > 0`, `label_assignments` | same visual checks; coverage `< visual_full_height_coverage`; `rule_bands` inside grid rows; `grid_row`s unique and inside `rule_bands`; `len(label_assignments) >= logical_subrule_promote_min_bands`; `short_label_ratio` recomputed from the assignments equals the stored value and is `>= logical_subrule_promote_min_ratio`; every word id exists, is right of `x`, and is in its declared physical cell; `selected_run_bbox` is the word union. Missing/duplicate band -> `boundary_evidence_duplicate_ref`; ratio mismatch -> `boundary_evidence_mismatch`; run tie -> `subrule_run_tie`. |
+| `header_canopy` | `level`, `boundary_edge`, both anchor refs, non-empty left/right ref lists, `left_label`, `right_label` | every ref resolves to a `DetectedHeaderCell` by `(level, source_row, source_column, column)`; all refs have `level == evidence.level`; `level < header_rows`; bbox inside the table; the left refs lie at or left of `x`, the right refs at or right; anchors are the nearest cells on their side and satisfy the `boundary_edge` position rule; labels equal the anchors' normalized text and are distinct; two same-level cells touching `x` -> `header_level_tie`; missing side -> `header_missing_for_canopy`. |
+| `label_aligned` | non-empty `grid_rows`, non-empty `word_ids` | rows in `[header_rows, n_rows)`; every word id exists on the page and inside the table; no word crosses `x`; `gutter_ratio` recomputes from `gutter_bands` and `nonempty_bands`; `gutter_ratio >= logical_label_min_band_ratio`; `len(grid_rows) >= logical_label_min_bands`. |
+| `structural` | non-empty `physical_cell_edge_refs` | each ref resolves to a real `DetectedCell`; refs are sorted and unique; at most one per `(grid_row, edge)`; the edge is within tolerance of `x`; at least two distinct `grid_row` values remain after de-duplication; no word crosses `x`. `physical_rule_component_ids`, when present, must all be in `region_components`. Duplicate -> `boundary_evidence_duplicate_ref`. |
+| `table_bbox` | `edge`, `page_number`, `table_bbox` | only for outer boundaries; `page_number` and `table_bbox` equal the fresh `DetectedTable` exactly; `x` equals `table_bbox[0]` (left) or `table_bbox[2]` (right) within tolerance. Stale page/bbox -> `boundary_evidence_stale`. An internal boundary may not use this kind. |
+| `region_extent` | `edge`, `page_number`, non-empty `region_component_ids`, `extent_left`, `extent_right`, `boundary_source`, `implied_outer_evidence_index`, `implied_outer_values` | only for outer boundaries; `implied_outer_evidence_index` selects a fresh `TableRegion.evidence` record of kind `implied_outer`; `implied_outer_values == values`, `extent_left == values[0]`, `extent_right == values[1]`; `region_component_ids` equals that record's `component_ids` set; `boundary_source` equals the fresh region source and is in `{implied_horizontal, implied_alignment, mixed}`; `x` equals the selected extent within tolerance. Missing record -> `boundary_evidence_missing_ref`; mismatch -> `boundary_evidence_stale`. Never infer an extent from the bbox. |
 
 `visual_segment_indices` are indices into `VisualBoundary.segments` for the
 boundary at `visual_boundary_index`. The S2a segment order is deterministic
@@ -606,17 +763,71 @@ column. It is provenance, not a lattice selector; there is no
 `region_local_column` field because no region-local x lattice exists in the
 current repository.
 
-`visual_column_indices` are indices into the S2a **visual interval** grid
-`0 .. visual_columns - 1`, not boundary indices. It is empty when the table's
-`visual_columns` is `None` (`not_printed`). This resolves the old ambiguous
-`visual_columns` field name: the table-level `visual_columns` remains the S2a
-count; the projection field is named `visual_column_indices`.
+**Canonical row bands (S2, N6).** The projection is derived per logical column
+as follows:
+
+1. For each physical row `r` in `[0, n_rows - 1]`, compute the set
+   `S(r)` of physical column indices whose interval has positive width overlap
+   with the logical interval.
+2. Split `[0, n_rows - 1]` at every row where `S(r)` changes. The resulting
+   maximal runs are the rows of the projection; adjacent runs never carry the
+   same `S`.
+3. Emit one `PhysicalColumnOverlap` per (run, physical column in `S`), sorted
+   by `(grid_row_start, physical_column)`.
+4. The runs of one logical column partition `[0, n_rows - 1]` exactly: no gap,
+   no overlap, first `grid_row_start == 0`, last `grid_row_end == n_rows - 1`.
+5. Inside a run, physical columns are unique and ascending.
+
+This is the "complete projection" rule: every logical column is projected over
+every physical row, not only the rows where text happens to exist. A missing
+or non-canonical band is `mapping_row_band_not_canonical`; a gap or overlap is
+`mapping_row_band_overlap`.
+
+**Overlap geometry is recomputable.** For a logical interval `[L, R]` and
+physical interval `[grid.xs[i], grid.xs[i + 1]]`:
+
+```text
+overlap_left  = max(L, grid.xs[i])
+overlap_right = min(R, grid.xs[i + 1])
+overlap_fraction = (overlap_right - overlap_left)
+                   / (grid.xs[i + 1] - grid.xs[i])
+```
+
+The validator recomputes all three from the fresh `grid.xs` and the
+authoritative logical interval. Absolute tolerance `1e-6` for coordinates and
+fraction; a zero or negative overlap is `mapping_physical_overlap_missing`. An
+`overlap_fraction` outside `(0, 1]` is `boundary_evidence_mismatch`.
+
+**Visual intervals are reconstructed, not guessed (S2).**
+
+When `visual_columns is not None`, `visual_boundaries` is sorted and
+
+```text
+len(visual_boundaries) == visual_columns + 1
+visual interval i = [v[i], v[i + 1]]   for every 0 <= i < visual_columns
+```
+
+Membership is decided by positive width, never by point placement, so the
+endpoint convention cannot change the index set:
+
+```text
+logical interval [L, R] overlaps visual interval i iff
+min(R, v[i + 1]) - max(L, v[i]) > 0
+```
+
+Touching at a single x (zero width) is not an overlap, so the half-open/closed
+convention only removes ambiguity for a point and cannot change the index set.
+`visual_column_indices` is the sorted, unique list of intervals with positive
+overlap. It is empty when `visual_columns is None`. A length mismatch between
+`visual_boundaries` and `visual_columns` is
+`mapping_visual_interval_mismatch`.
 
 `ColumnProjection` is the **only authoritative** projection payload. It lives
 once on the table in `column_projection`, ordered by `logical_column`. A
 proposed `LogicalColumn` does not embed a copy. The validator enforces
-one-to-one order and interval equality between `column_projection[i]` and
-`logical_columns_detail[i]`.
+one-to-one order, `column_projection[i].logical_column == i`, and
+`column_projection[i].left == logical_boundaries[i]`,
+`column_projection[i].right == logical_boundaries[i + 1]` for a resolved table.
 
 ### 5.5 `LogicalColumn` and role provenance (P1-3)
 
@@ -653,9 +864,22 @@ reserves `subrule_short_label` for a promoted sub-rule column, so S2b adopts it
 as the fourth documented value rather than hiding it in a separate vocabulary.
 `section_band` is not used in S2b; it belongs to S2c.
 
-`role_header_cell_ref` and `role_header_cell_id` are the parser-level and
-domain-level forms of the same link. The validator accepts at most one per
-record and, when both are present, requires them to resolve to the same cell.
+`role_header_cell_ref` and `role_header_cell_id` are two forms of the same
+link, not alternatives. They may coexist; there is no "at most one" rule. The
+validator enforces this matrix per record:
+
+| `role_source` | `role_header_cell_ref` | `role_header_cell_id` | Additional rule |
+| --- | --- | --- | --- |
+| `header_text` | required at parser level | required after rebuild | both, when present, resolve to the same header cell |
+| `subrule_short_label` | must be null | must be null | `role == condition` |
+| `heuristic` | optional | optional | if present, must resolve; no header claim |
+| `fail_closed` | must be null | must be null | `role == unknown` |
+
+At parser level the domain id does not exist yet, so only the ref is required;
+after rebuild the id is required and the ref is still carried. Both-null is
+valid only for `subrule_short_label`, `fail_closed`, and `heuristic`;
+`header_text` with both null is `header_role_source_invalid`. A ref/id pair
+that resolves to different cells is `boundary_evidence_mismatch`.
 `role_evidence` is a stable code, not free prose.
 
 ### 5.6 Logical cells and word assignments (R7, P1-1)
@@ -701,6 +925,92 @@ readability and must match the referenced cell.
 The physical→logical cell relation is many-to-many and lives on the logical
 side. A reverse cache `logical_cell_ids` on `DetectedCell` is derived, never
 authoritative.
+
+**LogicalCell reconstruction contract (N6).** The following rules are
+normative; an independent reader must be able to rebuild each field.
+
+*1. Rowspan, colspan and cell decomposition.*
+
+- One `DetectedCell` covers rows `grid_row .. grid_row + row_span - 1` and
+  physical columns `column_index .. column_index + column_span - 1`.
+- Assign each of its words to exactly one logical column by center x (§7.3);
+  words with no assigned word produce no logical cell.
+- Take the maximal consecutive runs of logical columns that contain at least
+  one assigned word. Each run yields one logical-cell candidate:
+  `logical_column` = run start, `logical_column_span` = run length, and
+  `word_ids` = the cell's words in those columns.
+- Candidates from different physical cells with the same
+  `(row_start, row_end, logical_column, logical_column_span)` are merged into
+  one `LogicalCell`; `physical_cells` lists one `PhysicalCellAssignment` per
+  source cell. This is the only merge. Adjacent rows are never merged, and
+  cells with different row coverage are never merged.
+- `row_start = grid_row`, `row_end = grid_row + row_span - 1`; the range is
+  contiguous by construction.
+- `logical_column_span` counts the columns that actually carry assigned words;
+  it is not `DetectedCell.column_span`. The physical span remains on the
+  detected cell.
+- Within one logical column, logical-cell row ranges must be disjoint. An
+  intersection is `mapping_row_overlap` and the table is unresolved.
+- `kind = "header"` iff `row_end < header_rows`, `"data"` iff
+  `row_start >= header_rows`; a cell crossing the header boundary is
+  `logical_cell_kind_boundary` and unresolved.
+
+*2. bbox.*
+
+`LogicalCell.bbox` is the union of the bboxes of its assigned words (content
+extent). It is not the physical cell bbox, not the intersection with the
+logical column, and not a synthetic column rectangle. A word whose bbox
+slightly crosses the logical interval is still included because attribution is
+by word center. The validator recomputes the union from `word_ids`.
+
+*3. text and word order.*
+
+`LogicalCell.text` is `_words_to_text(assigned_words)` from
+`structure.py:335-352`, applied to exactly the assigned words:
+
+- sort by `((y0 + y1) / 2, x0)`;
+- group into lines with `line_tol = max(2.0, median(word_height) * 0.55)`;
+- join words inside a line with one ASCII space in x order;
+- join lines with `\n`; strip the result.
+
+`word_ids` and each assignment's `word_ids` are stored in this reading order.
+A split cell's text is therefore a re-rendering of its word subset, never a
+prefix or slice of the physical cell's text.
+
+*4. logical_cell_id.*
+
+`table_id` is the domain id built by `build_table`:
+`f"p{page_number:03d}-t{table_index:02d}"` (`table_rebuilder.py:17`), where
+`table_index` is the 1-based ordinal of the table on its page. The id is:
+
+```text
+logical_cell_id = f"{table_id}-lc-{kind}-r{row_start:02d}-r{row_end:02d}"
+                  f"-c{logical_column:02d}-s{logical_column_span:02d}"
+```
+
+It contains no text, word content, metric, or traversal counter. The S2b
+derivation receives the same `(page_number, table_index)` pair that is later
+passed to `build_table`; the rebuild must reproduce the same ids. Duplicate ids
+within a table are `logical_cell_id_collision`.
+
+*5. Word universe.*
+
+The authoritative universe is the set of words assigned to `grid.cells`,
+excluding `grid.unassigned_words`:
+
+- a word is assigned to the first cell in `grid.cells` enumeration order whose
+  bbox contains its center with the existing 0.8pt inclusive tolerance
+  (`_assign_words`, `structure.py:313-333`);
+- a word inside the table bbox but in no cell goes to `unassigned_words` and is
+  excluded from the partition; its count is reported, not silently dropped;
+- S2b-Schema may extend `_assign_words` to return
+  `cell_index -> tuple[word_id, ...]` in the same pass, but must not change its
+  iteration order, tolerance or cell fields;
+- an independent audit recomputes the universe from a fresh parse with the same
+  page, `layout.words` order, center formula and first-match rule. The union of
+  all logical assignments must equal it; a missing word is
+  `mapping_word_not_assigned`, an extra or duplicated word is
+  `mapping_word_partition_mismatch`.
 
 ### 5.7 Additive table fields
 
@@ -803,6 +1113,29 @@ and `:118-119`) passes the current version explicitly; consumers
 (`audit_visual_primitives.py:414`, `validate_evidence.py:316`) hash the stored
 snapshot and never re-dump the model.
 
+**Strict snapshot validation (N8).** A computable SHA does not make a snapshot
+legal. Add:
+
+```text
+validate_table_params_snapshot(snapshot: dict, *, expected_version: str) -> list[str]
+```
+
+It rejects, in order:
+
+1. top-level keys not exactly `{"snapshot_version", "params"}`;
+2. `snapshot_version` different from `expected_version` read from the manifest
+   or `run_config`;
+3. `params` keys not exactly the field set of that version;
+4. a missing, extra, unknown or duplicate key; duplicate JSON object keys are
+   rejected at load time (`object_pairs_hook`) before hashing;
+5. a value with the wrong JSON type or a non-finite number;
+6. only after 1–5 pass is `snapshot_sha256(snapshot)` compared with the stored
+   hash.
+
+A snapshot that fails 1–5 is `table_params_snapshot_schema_invalid` even if its
+SHA matches itself. A stored version different from the manifest/run_config
+version is `table_params_snapshot_version_mismatch`.
+
 Compatibility rules:
 
 1. New runs use `table-params/v2`; the snapshot contains exactly
@@ -816,6 +1149,8 @@ Compatibility rules:
    defaults, but the reconstructed object is never re-dumped as v1.
 5. An unsupported or missing version is refused with
    `unsupported_table_params_snapshot_version`; it is not guessed as v1 or v2.
+   A version mismatch between the snapshot and the manifest/run_config is
+   `table_params_snapshot_version_mismatch`.
 6. `configs/parser.yaml` is not edited. If the Reviewer later wants these
    defaults in YAML, that changes `parser_config_sha256` and requires a new run
    baseline; it is outside S2b.
@@ -829,11 +1164,31 @@ Compatibility rules:
    visual parameters from the stored `params`; new logical keys do not affect
    that path.
 
+**S2b-Schema edit boundary (N8).** "Do not modify S1/S2a" is refined into an
+explicit allowlist so the implementing agent does not decide case by case:
+
+| File | Allowed S2b-Schema change | Forbidden |
+| --- | --- | --- |
+| `src/icpdf/parser/config.py` | add the seven defaults; bump the version constant; add `V1_FIELDS` / `V2_FIELDS`, version-aware helpers and the strict validator | changing existing defaults or the v1 field list |
+| `src/icpdf/parser/pipeline.py` | pass the version explicitly to snapshot/helpers | changing detection, extraction or run layout |
+| `tools/audit_visual_primitives.py` | add read-only version dispatch and snapshot-schema validation | changing `verify_identity`, primitive/segment reconstruction, `GRID_TOL` binding or boundary checks |
+| `tools/validate_evidence.py` | add the same read-only dispatch | changing existing checks or tolerances |
+| `src/icpdf/parser/table_detector.py`, `structure.py` | additive logical fields; `_assign_words` may return its assignment mapping | changing `grid.xs`/`grid.ys`, cell construction, word assignment order or tolerance |
+| `src/icpdf/parser/table_rebuilder.py` | fill logical ids/fields additively | changing existing table/row/cell/header id formats |
+| `src/icpdf/parser/rule_primitives.py`, `visual_structure.py`, `table_regions.py` | none | any edit |
+| `configs/parser.yaml`, Gold v1/v2, S1/S2a reports | none | any edit |
+
+This is a compatibility layer only. S2a's primitive reconstruction, identity
+gate and visual evidence checks stay byte-for-byte equivalent on old artifacts.
+
 Required compatibility tests (S2b-Schema):
 
 - replay a stored v1 snapshot and reproduce `82d4df4d...`;
 - assert the v1 replay has no `logical_*` key;
 - assert a v2 snapshot contains the seven new keys;
+- delete one v2 key, add one unknown key, and duplicate a JSON key: each must
+  be refused although a SHA can still be computed;
+- a snapshot version that disagrees with the manifest is refused;
 - run the S2a primitive audit on an old artifact and confirm zero identity
   errors;
 - tamper the stored v1 snapshot and confirm the audit refuses;
@@ -882,10 +1237,30 @@ Candidates are the union of:
    `logical_label_min_bands` row bands have a gutter;
 5. the two table bbox edges, always kept as `outer_left` / `outer_right`.
 
-Candidates within `visual_boundary_tol_pt` are grouped into one candidate; the
-group x is the mean, and every source and evidence record remains listed.
-Candidates outside the table bbox or within tolerance of an outer edge are not
-internal boundaries.
+**Fixed-anchor grouping (N4).** Grouping is deterministic and cannot chain:
+
+1. Sort candidates by `(x, source_rank, evidence_id)`, with `source_rank`
+   `outer < grid < visual < header < gutter` and `evidence_id` the stable
+   index/id inside that source. The sort is total; equal keys are impossible
+   after de-duplication.
+2. Take the first ungrouped candidate as the **anchor**. A candidate joins the
+   group iff `abs(x - anchor_x) <= visual_boundary_tol_pt`. Always compare with
+   the anchor, never with the previous member.
+3. When a candidate exceeds the anchor distance, close the group and make that
+   candidate the anchor of the next group.
+4. The internal group x is the arithmetic mean of the member x values, with no
+   rounding. Example: x = 100.0, 102.0, 104.0 with tolerance 2.5 yields
+   `{100.0, 102.0}` and then `{104.0}`, never one chain of three.
+5. `anchor_x` and every member `source_xs` are stored on the decision, sorted
+   and unique. No source x is dropped or rewritten.
+6. An outer boundary is its own group and its x is the table bbox edge, never
+   the mean. A candidate within tolerance of an outer edge is folded into that
+   outer group as extra evidence and is never kept as an internal boundary.
+7. Candidates outside the table bbox are discarded and recorded in the
+   decision diagnostics.
+
+This prevents several weak, non-coincident sources from being chained into one
+strong boundary.
 
 Outer boundaries are kept with `table_bbox` evidence. When
 `boundary_source` is `implied_horizontal` / `implied_alignment`, they also carry
@@ -920,15 +1295,66 @@ proof of a split.
 
 ### 6.3 Sub-rule promotion
 
-The promotion test is the approved S2 rule:
+The promotion test is the approved S2 rule, with the ratio defined exactly:
 
-1. for each row band the rule intersects, find the nearest word run immediately
-   to the right inside the same physical cell;
-2. classify it as a short label when it has at most 2 words and 12 characters,
-   at least one letter, no digit, and is not a unit-only token;
-3. promote when short labels occur in at least 50% of non-empty bands and in at
-   least 2 bands;
-4. ratio in `[0.25, 0.50)` with at least 2 bands is ambiguous, not a demotion.
+1. for each row band the rule intersects, the **source cell** is the unique
+   `DetectedCell` whose bbox contains `x` (`bbox[0] <= x <= bbox[2]`) and whose
+   row coverage includes that band. Zero source cells means no label candidate
+   in that band; more than one is `subrule_source_cell_ambiguous` and the
+   candidate is `unresolved`;
+2. inside the source cell take the words whose center is strictly right of x,
+   sort them by `(x0, word_id)`, and start a new run whenever the gap to the
+   previous word exceeds `cell_gap_pt` (`structure.py:551-553`);
+3. select the run with the smallest left edge; runs whose left edges differ by
+   at most `1e-6` are a tie (`subrule_run_tie`) and the candidate is
+   `unresolved`; never pick a run by word count or text;
+4. classify the selected run with §6.3.1; only `short_label` counts;
+5. `nonempty_bands` = bands with at least one word center strictly right of x
+   anywhere inside the table, computed before classification;
+6. `short_label_bands` = `len(label_assignments)`;
+7. `short_label_ratio = short_label_bands / nonempty_bands` with
+   `nonempty_bands > 0`; bands with no right-side word are excluded from both
+   numerator and denominator and a band is never counted twice;
+8. promote iff `short_label_ratio >= logical_subrule_promote_min_ratio` (0.50)
+   **and** `short_label_bands >= logical_subrule_promote_min_bands` (2);
+9. `logical_subrule_ambiguous_min_ratio <= ratio < 0.50` with at least 2
+   non-empty bands is `unresolved`, not a demotion (lower bound inclusive,
+   upper bound exclusive);
+10. `nonempty_bands == 0` yields no ratio and no promotion; the candidate falls
+    through to the no-evidence branch unless another source supports it.
+
+#### 6.3.1 Lexical classes (N5)
+
+Normalization: strip, collapse internal whitespace, and casefold only for
+keyword matching; the stored label keeps its original text.
+
+| Class | Test (checked in this order) |
+| --- | --- |
+| `numeric` | every token parses as a number with optional sign, decimal point, exponent or `%`; no letter outside `%` |
+| `value_with_unit` | one numeric token followed only by tokens from `LOGICAL_UNIT_TOKENS`, with no relational marker, e.g. `5 V`, `10 kΩ`, `±0.5 %`. This is data, not a condition |
+| `unit_only` | one token (optionally with a digit prefix such as `10k`) whose alphabetic part is in the frozen `LOGICAL_UNIT_TOKENS` set |
+| `identifier` | one token matching `[A-Za-z][A-Za-z0-9_/-]*` that contains a digit or `_`/`/`, with no whitespace |
+| `short_label` | at most `logical_short_label_max_words` words and `logical_short_label_max_chars` characters, at least one letter, no digit, and not `unit_only` |
+| `condition_expression` | contains at least one relational marker: a comparison operator (`<`, `<=`, `>`, `>=`, `=`, `±`, `≈`, `≤`, `≥`); a range connector (`to`, `..`, `–`, `—`, `through`) between two value-with-unit phrases; or a supply/temperature symbol bound by one of those operators (`TA = 25 °C`, `VCC = 5 V`, `VIL < 0.8 V`) |
+| `field_name` | a plain noun phrase with no marker above, e.g. `Output Voltage`, `Clock Source`, `Data Format`, `Input Range`, `Operating Mode` |
+| `prose` | more than six words or sentence punctuation; condition-like only if a relational marker above is present |
+
+`LOGICAL_UNIT_TOKENS` is a frozen code constant, not a YAML entry. Its initial
+closed set is:
+
+```text
+V, mV, µV, uV, kV, A, mA, µA, uA, nA, W, mW, µW, kW,
+Ω, kΩ, MΩ, ohm, Hz, kHz, MHz, GHz, s, ms, µs, us, ns, ps,
+F, pF, nF, µF, uF, mF, H, nH, µH, %, °C, °F, K, dB, dBm,
+LSB, ppm, V/V, A/A, °, rad, S, mS, µS
+```
+
+The set may be extended only with a new design review; it may not be tuned
+after seeing S2b results.
+
+**Only `condition_expression` is condition-like.** `field_name` and marker-free
+`prose` are never demoted to `condition_path` merely because they contain
+letters or are longer than a short label.
 
 Measured examples from the approved design:
 
@@ -986,17 +1412,28 @@ right-side text.
   short-label ratio is below `logical_subrule_ambiguous_min_ratio` (otherwise the
   ambiguous branch already wins); at least one non-empty band has condition-like
   right-side text.
-- "Condition-like" is deterministic: the right-side run contains at least one
-  letter, is not a short label, is not unit-only, and is not purely numeric.
-  This is the only content test in S2b; it does not read a cell's semantic
-  category.
+- "Condition-like" means the right-side run is classified
+  `condition_expression` by §6.3.1 and carries at least one **relational**
+  marker (comparison operator, range connector, or a supply/temperature symbol
+  bound by such an operator). A `field_name` such as `Output Voltage` or
+  `Clock Source`, a marker-free `prose` run, `numeric`, `value_with_unit`,
+  `unit_only` and `identifier` are **not** condition-like; `5 V` alone is a
+  data value. This is the only content test in S2b; it does not read a cell's
+  semantic category.
+- If the lexical class is ambiguous or the run has no explicit marker, the
+  candidate is `demote_no_evidence`; it is never promoted to `condition_path`
+  by default. `condition_path` requires a positive marker, not the absence of a
+  short-label match.
 - `condition_path` is a **path label** for S2c. S2b emits no `ConditionBand`
   and no `ConditionContext`; it only preserves the demoted x, its row bands and
   its support for the later S2c stage.
 
-A boundary that has both printed-rule evidence and no semantic claim remains
-`demote_no_evidence`; a boundary that is condition-like but also ambiguous
-(`[0.25, 0.50)`) remains `unresolved`, not `demote_condition_path`.
+A boundary that has both printed-rule evidence and no explicit condition marker
+remains `demote_no_evidence`; a boundary that is condition-like but also
+ambiguous (`[0.25, 0.50)`) remains `unresolved`, not
+`demote_condition_path`. The order is: promote, then ambiguous, then
+condition-path only with a marker, then no-evidence. A content class never
+overrides the ratio branch.
 
 ## 7. Physical→logical mapping (deliverable 2)
 
@@ -1035,32 +1472,40 @@ does not do this, and no S2b field may be read as a region-local index.
 - a logical column may span several physical columns across row bands within
   the same table.
 
-For each logical column `[left, right]`, compute the overlap with every physical
-column interval `[grid.xs[i], grid.xs[i + 1]]` that intersects it. Record only
-positive overlaps. `overlap_fraction` is the overlap width divided by the
-physical column width; it is informational and does not filter the mapping.
+For each logical column `[left, right]`, the canonical row bands of §5.4 define
+the row ranges; within each band, record the positive overlaps with every
+physical column interval `[grid.xs[i], grid.xs[i + 1]]`. `overlap_fraction` is
+recomputed from `overlap_left/right` and the physical width; a mismatch is an
+error, not a warning. The bands of one logical column partition
+`[0, n_rows - 1]` exactly and adjacent bands never carry the same physical
+column set.
 
 `physical_column` plus `physical_left` / `physical_right` is the locator.
-`grid_row_start` / `grid_row_end` records the row band in which the overlap
-applies. A logical column that spans several row bands may have several
-overlaps with the same physical column, one per disjoint row band.
+`grid_row_start` / `grid_row_end` is the canonical band, not an arbitrary text
+extent.
 
 ### 7.3 Cell projection and word assignment
 
-For each physical row and logical column:
-
-1. find physical cells whose bbox intersects the logical interval;
-2. assign each `TextWord` by its center x to exactly one logical column; a word
-   center exactly on a boundary goes left, deterministically, and the tie is
-   recorded in the decision diagnostics;
-3. if several physical cells fall in one logical column, emit one `LogicalCell`
-   whose `physical_cells` lists all of them and whose text is their
-   reading-order concatenation;
-4. if a physical cell straddles a logical boundary, its words are partitioned
-   across several `PhysicalCellAssignment`s that share the same
-   `PhysicalCellRef`, but no word is duplicated;
-5. `word_ids` across all logical cells form a disjoint partition of the words
-   assigned to the table.
+1. For each row and logical column, find physical cells whose bbox has a
+   positive-width intersection with the logical interval.
+2. Assign each `TextWord` by its exact center x:
+   `cx = (bbox[0] + bbox[2]) / 2`. Every logical column uses the left-open,
+   right-closed interval `(b[i], b[i + 1]]`; the single point `cx == b[0]` on
+   the left outer edge is assigned to column 0. A center exactly on an internal
+   boundary (`cx == b[i]`) therefore belongs to the left column `i - 1`. There
+   is **no epsilon and no rounding**: coordinates are
+   compared as stored floats. A non-finite center is `mapping_word_not_assigned`
+   and the table is unresolved. Every exact-boundary hit is counted in the
+   diagnostics as `word_boundary_tie`, but the assignment is still the one
+   above.
+3. Decompose physical cells into logical cells by §5.6: one logical cell per
+   (physical cell, maximal consecutive run of word-bearing logical columns),
+   merged only when `(row_start, row_end, logical_column,
+   logical_column_span)` is identical. A physical cell straddling a boundary
+   appears in several `PhysicalCellAssignment`s with the same
+   `PhysicalCellRef` and disjoint word subsets; no word is duplicated.
+4. `word_ids` across all logical cells are a disjoint partition of the word
+   universe defined in §5.6, item 5.
 
 The per-cell assignment is the R7/P1-1 fix. A `LogicalCell` cannot be
 reconstructed from `physical_cell_refs` plus a flat `word_ids` list, because
@@ -1105,11 +1550,20 @@ boundary by itself.
 ### 8.2 Multi-level headers
 
 - Header levels are read from the existing `DetectedHeaderCell.level`.
-- For each logical column and each level, select header cells whose bbox overlap
-  with the logical interval is positive; the cell with the largest overlap wins.
-  A tie at the same level is ambiguous.
-- `header_path` is the top-to-bottom list of winning labels. Missing levels are
-  skipped, not filled from neighbours; `header_cell_refs` records exactly which
+- For each logical column `[L, R]` and each level, compute the x-overlap width
+  of every header cell at that level:
+
+  ```text
+  width(cell) = max(0, min(cell.bbox[2], R) - max(cell.bbox[0], L))
+  ```
+
+  Only cells with `width > 0` are candidates. The winner is the maximum width;
+  two candidates whose widths differ by at most `1e-6` are a tie, and the table
+  is `unresolved` (`header_level_tie`). Width, not area or bbox centre, is the
+  only criterion.
+- `header_path` is the top-to-bottom list of winning labels, ordered by
+  `level`. Missing levels are skipped, not filled from neighbours;
+  `header_cell_refs` is parallel to `header_path` and records exactly which
   printed cells supplied each label.
 - A canopy cell may appear at the same level for several logical columns; that
   is intentional and is not a duplicate-header error.
@@ -1125,7 +1579,7 @@ boundary by itself.
   a candidate and cannot create a logical column. If such an x came from a
   speculative `grid.xs` soft split, it is `demote_no_evidence`; a full-height
   printed rule is handled by the first bullet, not by this one.
-- A table with no header at all may still have a decided logical lattice from
+- A table with no header at all may still get a `resolved` logical lattice from
   printed rules and body gutters; header paths are empty and are not a failure.
 
 ## 9. Evidence chain (deliverable 5, R7)
@@ -1173,7 +1627,20 @@ The read-only audit re-resolves every reference against a fresh parse:
   inside the table bbox.
 - `header_cell_refs`: resolve by `(level, source_row, source_column, column)`
   to exactly one `DetectedHeaderCell`; text and bbox must match; `level <
-  header_rows`; the cell belongs to this table.
+  header_rows`; the cell belongs to this table. For `header_canopy`, every left
+  ref satisfies `bbox[2] <= x + tol`, every right ref `bbox[0] >= x - tol`, the
+  anchors satisfy the `boundary_edge` rule of §5.3, and `left_label` /
+  `right_label` equal the anchors' normalized text.
+- `subrule label_assignments`: `grid_row`s are unique and inside `rule_bands`;
+  each `physical_cell_ref` resolves; each word id is in that cell and strictly
+  right of x; `selected_run_bbox` equals the word union; `nonempty_bands` and
+  `short_label_ratio` recompute from the fresh parse.
+- `table_bbox`: `page_number` and `table_bbox` equal the fresh `DetectedTable`
+  exactly; a mismatch is stale, not a warning.
+- `region_extent`: `implied_outer_evidence_index` selects a fresh
+  `TableRegion.evidence[kind="implied_outer"]`; `implied_outer_values`,
+  `extent_left/right`, `region_component_ids`, `boundary_source` and
+  `page_number` match that record.
 - `grid_rows`: in `[header_rows, n_rows)`; each row is a real band; no row is
   repeated.
 - `word_ids`: each id exists exactly once on the page; its center is inside the
@@ -1181,17 +1648,23 @@ The read-only audit re-resolves every reference against a fresh parse:
   inside the logical cell bbox. Across every `PhysicalCellAssignment` of the
   table a word id appears at most once. If one physical cell is referenced by
   more than one logical cell, those assignments must carry disjoint `word_ids`
-  sets; the union over the table is a disjoint partition of the table's
-  assigned words.
+  sets; the union over the table equals the recomputed word universe of §5.6.
 - `physical_cell_edge_refs`: `(grid_row, cell_index)` resolves to a real
   `DetectedCell`; `column_index` matches; the edge x is within tolerance of the
-  logical boundary.
+  logical boundary; refs are unique and sorted, and at least two distinct
+  `grid_row` values remain.
 - `physical_column`, `physical_left`, `physical_right`: `physical_column` is a
   valid interval index; `physical_left == grid.xs[i]` and `physical_right ==
-  grid.xs[i + 1]`; no duplicate interval index in one logical column with the
-  same row band.
+  grid.xs[i + 1]`; the canonical bands of one logical column partition
+  `[0, n_rows - 1]` with no gap, overlap or duplicate band; `overlap_left`,
+  `overlap_right` and `overlap_fraction` recompute from the authoritative
+  logical interval and physical width within `1e-6`.
+- `visual_column_indices`: `len(visual_boundaries) == visual_columns + 1` when
+  not `None`; indices are sorted, unique and in range; each has positive width
+  overlap by the §5.4 rule.
 - `region_component_ids`: every id is in `region_components`; for
-  `region_extent`, the extent values match the fresh `TableRegion` evidence.
+  `region_extent`, the structured fields match the fresh `TableRegion`
+  evidence as above.
 
 ### 9.3 Independent reconstruction of a logical cell
 
@@ -1200,18 +1673,25 @@ running the S2b decision logic:
 
 1. take `physical_cells`; for each `PhysicalCellAssignment`, resolve
    `PhysicalCellRef` to a physical cell and take exactly the listed `word_ids`;
-2. resolve each word id to its `TextWord` (page, block, line, bbox) and check it
-   lies inside both the physical cell and the logical cell bbox;
-3. concatenate the assigned words in reading order; the result must equal
-   `LogicalCell.text`;
-4. take the union of all assignment word ids; it must equal
-   `LogicalCell.word_ids`;
-5. across all logical cells of the table, the assignment word ids must be
-   pairwise disjoint and must cover exactly the words assigned to the table
-   (excluding `unassigned_words`);
-6. the same physical cell may appear in several assignments, but the word
+2. resolve each word id to its `TextWord` (page, block, line, bbox) and check
+   its center lies inside the physical cell and inside the logical cell bbox;
+3. recompute `bbox` as the union of the assigned word bboxes; it must equal
+   `LogicalCell.bbox`;
+4. recompute `text` with `_words_to_text` over the assigned words
+   (`structure.py:335-352`); it must equal `LogicalCell.text`;
+5. take the union of all assignment word ids in stored reading order; it must
+   equal `LogicalCell.word_ids`;
+6. across all logical cells of the table, the assignment word ids must be
+   pairwise disjoint and must cover exactly the word universe of §5.6
+   (`unassigned_words` excluded);
+7. the same physical cell may appear in several assignments, but the word
    subsets must be disjoint. This is the check that a shared physical cell was
-   split, not duplicated.
+   split, not duplicated;
+8. check `row_start/row_end` equal the source cell's grid coverage, the
+   `logical_column/span` equal the word-bearing run, and `kind` follows the
+   `header_rows` rule;
+9. recompute `logical_cell_id` from the §5.6 formula and the same
+   `(page_number, table_index)`; it must equal the stored id.
 
 This is the independently reconstructable chain the Reviewer requested: the
 evidence is per physical cell, per word, and it does not depend on the order in
@@ -1253,19 +1733,34 @@ boundary_partial_rule_not_condition
 boundary_evidence_missing_ref
 boundary_evidence_mismatch
 boundary_evidence_stale
+boundary_evidence_duplicate_ref
+subrule_run_tie
+subrule_source_cell_ambiguous
+word_boundary_tie
 mapping_physical_overlap_missing
 mapping_lattice_index_mismatch
+mapping_row_band_not_canonical
+mapping_row_band_overlap
+mapping_visual_interval_mismatch
+mapping_row_overlap
 mapping_word_not_assigned
 mapping_word_partition_mismatch
+logical_cell_kind_boundary
+logical_cell_id_collision
 header_level_tie
 header_missing_for_canopy
 header_role_source_invalid
 region_lattice_inconsistent
 unsupported_table_params_snapshot_version
+table_params_snapshot_schema_invalid
+table_params_snapshot_version_mismatch
 ```
 
 A table may carry several codes. Codes are evidence for review, not an
-alternative decision mechanism.
+alternative decision mechanism. `word_boundary_tie` is diagnostic only: it
+records an exact center-on-boundary hit whose assignment is still the
+deterministic left-column rule of §7.3, so it does not make a table
+`unresolved`.
 
 ### 10.3 No guessing
 
@@ -1291,42 +1786,64 @@ validator):
    boundary has at least one allowed source.
 3. `logical_columns == len(logical_boundaries) - 1` when resolved.
 4. `column_projection` is the authoritative projection: length equals
-   `logical_columns`, order matches `logical_columns_detail`, and each
-   `ColumnProjection` has a non-empty `physical_columns`.
+   `logical_columns`, `column_projection[i].logical_column == i`, each
+   `ColumnProjection` has a non-empty `physical_columns`, and `left` / `right`
+   equal `logical_boundaries[i]` / `logical_boundaries[i + 1]`.
 5. Every `PhysicalColumnOverlap.physical_column` is a valid index into the
    table's one `grid.xs`; `physical_left == grid.xs[i]`,
    `physical_right == grid.xs[i + 1]`; the overlap is positive; the row band is
-   inside `[0, n_rows - 1]`.
-6. Every logical column overlaps at least one physical column and every
-   physical column overlaps at least one logical column.
-7. On a resolved table, every `visual_column_indices` entry is in
-   `[0, visual_columns - 1]` and has positive overlap; the tuple is empty iff
-   the table's `visual_columns` is `None`.
-8. Every kept boundary's evidence resolves per §5.3/§9.2; a missing reference is
-   an error, not a warning. A source whose evidence kind does not match its
-   declared source is an error.
-9. `LogicalCell.physical_cells` is non-empty; every `PhysicalCellRef` resolves;
-   the assignment word ids are pairwise disjoint and their union equals
-   `LogicalCell.word_ids`; across the table the union is a disjoint partition of
-   the table's words.
-10. `LogicalCell.text` equals the reading-order concatenation of its assigned
-    words; it is not an unmodified copy of a shared physical cell.
-11. Header references exist, belong to the table, and their levels are within
+   inside `[0, n_rows - 1]`. Per logical column, the bands are canonical
+   (§5.4): they partition `[0, n_rows - 1]`, never overlap, never leave a gap,
+   and adjacent bands never carry the same physical column set; within a band
+   physical columns are unique and ascending.
+6. `overlap_left`, `overlap_right` and `overlap_fraction` recompute from the
+   authoritative interval and physical width within `1e-6`; every logical
+   column overlaps at least one physical column and every physical column
+   overlaps at least one logical column.
+7. On a resolved table, `len(visual_boundaries) == visual_columns + 1` when not
+   `None`; every `visual_column_indices` entry is in
+   `[0, visual_columns - 1]`, sorted, unique, and has positive width overlap by
+   §5.4; the tuple is empty iff `visual_columns is None`.
+8. Every kept boundary's evidence resolves per §5.3/§9.2; a missing reference
+   is an error, not a warning. The evidence kind must match the declared
+   source. `header_canopy` is directed: both anchors resolve, left/right lists
+   are on the correct side, labels equal the anchor text, and the
+   `boundary_edge` position rule holds. `subrule_promoted` has unique in-band
+   assignments and a recomputable ratio. `table_bbox` and `region_extent` match
+   the fresh parse; self-consistency alone is not accepted.
+9. Candidate decisions obey fixed-anchor grouping: `anchor_x` is a member of
+   `source_xs`; every `abs(x - anchor_x) <= visual_boundary_tol_pt`; group
+   ranges do not overlap (`max(source_xs) < next_anchor_x`); no source x is
+   dropped; an outer decision's x equals the table bbox edge and is not a mean.
+10. `LogicalCell.physical_cells` is non-empty; every `PhysicalCellRef` resolves;
+    each assignment's `word_ids` is non-empty; assignment word ids are pairwise
+    disjoint and their union equals `LogicalCell.word_ids`; across the table
+    the union equals the word universe of §5.6, item 5.
+11. `LogicalCell.bbox` equals the union of its assigned word bboxes;
+    `LogicalCell.text` equals `_words_to_text` over those words; `word_ids` is
+    in that reading order; it is not an unmodified copy of a shared physical
+    cell.
+12. `LogicalCell.row_start/row_end` equal the source cell's grid coverage,
+    `logical_column/span` equal the word-bearing run, `kind` follows
+    `header_rows`, and `logical_cell_id` reproduces from §5.6. Within one
+    logical column, logical-cell row ranges are disjoint.
+13. Header references exist, belong to the table, and their levels are within
     `header_rows`; `role_source` is one of `header_text`,
-    `subrule_short_label`, `heuristic`, `fail_closed`; `role_header_cell_id`
-    resolves when present; `subrule_short_label` requires `role = condition`
-    and short-label evidence.
-12. Physical and S2a fields are unchanged: `grid.xs`, `grid.ys`, cell bboxes,
+    `subrule_short_label`, `heuristic`, `fail_closed`; the role-source/ref
+    matrix of §5.5 holds; `subrule_short_label` requires `role = condition` and
+    short-label evidence.
+14. Physical and S2a fields are unchanged: `grid.xs`, `grid.ys`, cell bboxes,
     cell text, `column_index`, `row_span`, `column_span`, `visual_boundaries`,
     `visual_boundary_status`, `visual_columns`, `partial_boundaries`,
     `visual_boundary_evidence`.
-13. Candidate ids and counts are unchanged; candidate logical refs are empty on
+15. Candidate ids and counts are unchanged; candidate logical refs are empty on
     unresolved tables.
-14. Old run artifacts without logical fields still load and are treated as
+16. Old run artifacts without logical fields still load and are treated as
     `unresolved`, not as a parse failure.
-15. A replayed `table-params/v1` snapshot reproduces the frozen v1 SHA and
+17. A replayed `table-params/v1` snapshot reproduces the frozen v1 SHA and
     contains no `logical_*` key; a v2 snapshot contains exactly `V2_FIELDS`
-    (the 20 v1 names plus the seven `logical_*` names).
+    (the 20 v1 names plus the seven `logical_*` names). Both pass strict key,
+    type and version validation (§5.8), not only a hash comparison.
 
 ## 12. Evaluation set and metrics
 
@@ -1380,10 +1897,11 @@ The negative set asserts `logical_mapping_status == "unresolved"` and that
 physical/S2a/candidate fields are untouched. It must not assert a made-up
 logical count.
 
-### 12.2 Gold logical status and ambiguity overlay (P1-5)
+### 12.2 Gold annotation state and ambiguity overlay (P1-5, N7)
 
-Gold ambiguity and algorithm uncertainty are two different axes and must be
-stored and evaluated separately.
+Gold annotation state, Gold ambiguity and algorithm uncertainty are three
+separate axes. They are stored separately and are never collapsed into one
+status field with a precedence rule.
 
 **Algorithm axis (on the predicted table):**
 
@@ -1391,32 +1909,60 @@ stored and evaluated separately.
 logical_mapping_status = "resolved" | "unresolved"
 ```
 
-**Gold/evaluation axis (on the evaluation manifest, not on the Gold file):**
+**Gold annotation axis (on the evaluation manifest, not on the Gold file):**
 
 ```text
-gold_logical_status = "decided" | "ambiguous" | "undecided" | "untyped_legacy"
+gold_annotation_state = "typed_decided" | "typed_undecided" | "untyped_legacy"
 ```
 
-- `decided`: the table has a non-null typed `logical_columns` and no open
-  ambiguity overlay. Only these tables enter the logical exact-match,
-  mapping-exact and header/role denominators.
-- `ambiguous`: an open ambiguity overlay entry exists. The table is reported in
-  the ambiguity bucket and is excluded from the decided denominators. It is not
-  an algorithm failure by itself.
-- `undecided`: the table explicitly records `logical_columns: null`; excluded
-  from the decided denominators and reported as `logical_column_excluded_undecided`.
-- `untyped_legacy`: the table has no typed logical field (all v1 tables). It is
-  excluded from logical metrics; it remains in detection, row, cell-text and
-  visual metrics. The evaluator must not use the
+- `typed_decided`: the table carries a non-null typed `logical_columns` in a
+  typed (v2) Gold set.
+- `typed_undecided`: the table explicitly records `logical_columns: null` in a
+  typed (v2) Gold set.
+- `untyped_legacy`: the table has no typed logical field at all (all v1
+  tables). It is excluded from every logical metric; it remains in detection,
+  row, cell-text and visual metrics. The evaluator must not use the
   `gold_table.get("logical_columns", gold_columns)` fallback for S2b logical
   metrics.
 
-Precedence is fixed and checked by the evaluator: an overlay entry makes a
-table `ambiguous` even when it is also v1 and therefore `untyped_legacy` for
-logical exactness. Such a table stays excluded from the logical exact-match
-denominator (it has no typed logical annotation) but still counts in ambiguity
-detection. `decided` is assignable only to a table with typed logical fields
-and no overlay entry; `undecided` requires an explicit typed `null`.
+**Gold ambiguity axis (on the evaluation manifest, not on the Gold file):**
+
+```text
+gold_ambiguity_status = "none" | "open"
+```
+
+`open` means an `s2b-ambiguity/v1` overlay entry with the same `item_id`
+exists. This axis is orthogonal to the annotation state: a v1 table can be
+`untyped_legacy` and still carry an open ambiguity, and a v2 table can be
+`typed_decided` while its logical reading is disputed.
+
+**Cross-product and expected algorithm outcome.** Each manifest item occupies
+exactly one row; no state overrides another:
+
+| `gold_annotation_state` | `gold_ambiguity_status` | Expected | Reported in |
+| --- | --- | --- | --- |
+| `typed_decided` | `none` | `resolved` exact match | logical metrics |
+| `typed_decided` | `open` | `unresolved` | ambiguity bucket |
+| `typed_undecided` | `none` | `unresolved` | undecided bucket |
+| `typed_undecided` | `open` | `unresolved` | ambiguity bucket |
+| `untyped_legacy` | `none` | not asserted | detection / visual only |
+| `untyped_legacy` | `open` | `unresolved` | ambiguity bucket |
+
+Manifest validation is strict and read-only:
+
+- `typed_decided` and `typed_undecided` are assignable only to an `item_id`
+  that belongs to a typed (v2) Gold set; the validator rejects either state on
+  a v1 item.
+- `untyped_legacy` is assignable only to a table whose Gold record has no
+  logical field; the validator rejects it for a v2 table that carries
+  `logical_columns` or an explicit `null`.
+- `gold_ambiguity_status == "open"` requires exactly one overlay entry for that
+  `item_id`; `"none"` requires zero entries. Both are checked without editing
+  Gold.
+- An `open` item is never counted as a resolved exact match, whatever its
+  annotation state: it stays out of every exactness denominator and appears in
+  the ambiguity bucket together with its predicted
+  `logical_mapping_status`.
 
 **Ambiguity overlay.** The five named v1 cases are preserved without editing
 Gold:
@@ -1480,11 +2026,13 @@ Rules:
   competing interpretations and the existing review note; it never rewrites a
   Gold value.
 - No algorithm output may create, resolve or influence an overlay entry.
-- An `ambiguous` item is excluded from the decided denominator and reported
-  separately; it is never counted as a resolved exact match.
+- Every overlay entry sets `gold_ambiguity_status = "open"` for its `item_id`;
+  it does not change that item's `gold_annotation_state`.
+- An `open` item is excluded from every exactness denominator and reported in
+  the ambiguity bucket; it is never counted as a resolved exact match.
 - `LM358-P04-T02` is retained as the case where `role = unknown` is correct;
   the design must not "fix" it by inventing a label.
-- An ambiguous item may be included in the negative/ambiguous detection set.
+- An `open` item may be included in the negative/ambiguous detection set.
   The only assertion there is `logical_mapping_status == "unresolved"`; the
   evaluation never requires the algorithm to pick one of the competing Gold
   interpretations, and never asserts a made-up logical column count.
@@ -1495,17 +2043,24 @@ Rules:
 
 | Metric | Definition | Denominator |
 | --- | --- | --- |
-| LogicalBoundary precision / recall | matched kept boundaries within 2.5pt vs Gold logical `column_boundaries` | predicted / Gold boundaries on `decided` tables with typed boundaries |
-| LogicalColumn exact match | predicted count and ordered intervals equal Gold `column_boundaries` | `gold_logical_status == "decided"` |
-| Physical→logical mapping exact match | each logical column's physical column set, `physical_left/right` and row-band overlaps equal the S2b-set annotation | S2b-set cases with an annotated projection |
-| LogicalCell projection exact match | row range, logical column span, physical cell set and per-cell word partition equal the S2b-set annotation | S2b-set annotated projection cases |
-| Header provenance coverage | logical columns with a complete, existing header cell chain | labelled logical columns on `decided` tables |
-| Ambiguous detection recall | gold-ambiguous cases predicted `unresolved` | gold-ambiguous cases (reported separately) |
+| LogicalBoundary precision / recall | matched kept boundaries within 2.5pt vs Gold logical `column_boundaries` | predicted / Gold boundaries on `typed_decided` + `none` tables with typed boundaries |
+| LogicalColumn exact match | predicted count and ordered intervals equal Gold `column_boundaries` | `gold_annotation_state == "typed_decided"` and `gold_ambiguity_status == "none"` |
+| Physical→logical mapping exact match | each logical column's physical column set, `physical_left/right` and row-band overlaps equal the S2b-set annotation | S2b-set cases with an annotated projection, `gold_ambiguity_status == "none"` |
+| LogicalCell projection exact match | row range, logical column span, physical cell set and per-cell word partition equal the S2b-set annotation | S2b-set annotated projection cases, `gold_ambiguity_status == "none"` |
+| Header provenance coverage | logical columns with a complete, existing header cell chain | labelled logical columns on `typed_decided` + `none` tables |
+| Undecided handling | predicted `unresolved` on explicitly undecided tables | `gold_annotation_state == "typed_undecided"` |
+| Ambiguous detection recall | predicted `unresolved` on gold-ambiguous cases | `gold_ambiguity_status == "open"` (reported separately) |
 | Zero-regression | S1/S2a/candidate fields byte-identical | all regression tables |
+
+The two Gold axes are joined by `item_id`; a metric that quotes only one of
+them (for example "on decided tables") is underspecified and is rejected by the
+report validator. `untyped_legacy` tables never appear in a logical
+denominator, with or without an ambiguity overlay.
 
 Report per-item results and a failure list; never report only a single exact
 match. A boundary count match with a wrong physical mapping is a failure, not a
-pass. A Gold-ambiguous case is never counted as a resolved exact match.
+pass. An item with `gold_ambiguity_status == "open"` is never counted as a
+resolved exact match.
 
 ### 12.4 Anti-overfitting rules
 
@@ -1523,12 +2078,24 @@ pass. A Gold-ambiguous case is never counted as a resolved exact match.
 | Stage | Deliverable | Allowed changes | Gate |
 | --- | --- | --- | --- |
 | S2b-Design | this document | docs only | Reviewer approval required |
-| S2b-Schema | models, additive fields, read-only validator, unit tests | no detector integration; no S1/S2a/Gold change | Reviewer checks schema, evidence union and snapshot compatibility |
+| S2b-Schema | models, additive fields, read-only validator, unit tests | no detector integration; no S1/S2a behaviour or Gold change; edits limited to the §5.8 allowlist | Reviewer checks schema, evidence union and snapshot compatibility |
 | S2b-Prototype | logical lattice on the standalone S2b set | no pipeline integration; no extraction dependencies | Reviewer checks boundaries, mapping, word partition and failure behavior |
 | S2b-Integration | detector/rebuilder integration, full regression, compatibility report | additive wiring only; no physical or S2a change | Reviewer checks zero regression and evidence completeness |
 
 No stage may begin before the previous gate is approved. S2b-Integration is not
 authorized by S2a freeze or by this design.
+
+**S2b-Schema edit boundary.** The schema stage may change only the files listed
+as allowed in §5.8. In particular it may add the version argument and strict
+`V1_FIELDS`/`V2_FIELDS` validation in `config.py`, thread the snapshot version
+through `pipeline.py`, add read-only version dispatch to the audit/validate
+tools, and add optional logical fields plus an `_assign_words` return value.
+It may not alter primitive collection, `GRID_TOL`, S2a visual derivation, the
+evidence predicates, `grid.xs`/`grid.ys`, physical cell bbox/text, Candidate
+IDs, or any Gold file. Read-only version detection in an existing audit
+consumer is a compatibility exception, not permission to change S2a behaviour.
+If a required change falls outside the allowlist, the stage stops and returns
+to review.
 
 ## 14. Open decisions for Reviewer
 
@@ -1549,10 +2116,30 @@ authorized by S2a freeze or by this design.
    `header_text` / `heuristic` / `fail_closed` values plus the approved S2
    `subrule_short_label`, `role_evidence` carries a stable code, and
    `role_header_cell_id` carries the domain `HeaderCell.header_cell_id`.
-8. Confirm that all v1 tables are `untyped_legacy` for logical metrics and that
-   the existing `n_columns` fallback is not used as a logical annotation.
+8. Confirm the two Gold axes in §12.2 (`gold_annotation_state`,
+   `gold_ambiguity_status`) and that all v1 tables are `untyped_legacy` for
+   logical metrics, with the existing `n_columns` fallback never used as a
+   logical annotation.
 9. Confirm that `PhysicalColumnOverlap` is table-global (one `grid.xs` per
    table) and that cross-table aggregation is out of scope for S2b.
+10. Approve the directed `HeaderCanopyEvidence` record (§5.3), including
+    `boundary_edge`, the two anchor refs and the multi-cell membership rules.
+11. Approve the per-band `SubruleLabelAssignment` record and the ratio formula
+    in §6.3 as the only promotion evidence.
+12. Approve `TableBBoxEvidence`/`RegionExtentEvidence` being validated against
+    a fresh parse (`boundary_evidence_stale`), and the indexed
+    `implied_outer` encoding in §5.3.
+13. Approve fixed-anchor candidate grouping (§6.1) and the retained
+    `candidate_x` / `anchor_x` / `source_xs` fields that make grouping
+    auditable without re-grouping.
+14. Approve the lexical classes and the frozen unit lexicon in §6.3.1, and the
+    rule that a `field_name` or `prose` right side never becomes
+    `condition_path` (§6.5).
+15. Approve the `LogicalCell` decomposition, bbox, text, deterministic ID and
+    kind rules in §5.6/§9.3, including the canonical word universe.
+16. Approve strict snapshot schema validation (`table_params_snapshot_schema_invalid`,
+    `table_params_snapshot_version_mismatch`) and the §13 edit boundary for
+    S2b-Schema.
 
 ## 15. Acceptance checklist for the design gate
 
@@ -1560,6 +2147,26 @@ authorized by S2a freeze or by this design.
       boundary decisions, evidence chain, failure strategy.
 - [ ] R1–R7 are answered with repository paths and line references.
 - [ ] P0-1..P0-4 and P1-1..P1-5 are closed in the document.
+- [ ] N1 is closed: `HeaderCanopyEvidence` is directed, names both anchors,
+      and an independent auditor can decide the boundary from the record and
+      the header cells alone.
+- [ ] N2 is closed: `SubrulePromotedEvidence` carries per-band, per-cell and
+      per-word assignments, and `short_label_ratio` is recomputable from them.
+- [ ] N3 is closed: `TableBBoxEvidence` and `RegionExtentEvidence` are checked
+      against a fresh parse, and the `implied_outer` values are structurally
+      encoded.
+- [ ] N4 is closed: candidate grouping uses a fixed anchor and retains every
+      source x.
+- [ ] N5 is closed: `condition_path` requires an explicit condition marker and
+      the ratio formula is exact.
+- [ ] N6 is closed: `LogicalCell` bbox, text, id, row-span and word universe
+      are reproducible without algorithm-specific knowledge.
+- [ ] N7 is closed: `gold_annotation_state` and `gold_ambiguity_status` are
+      independent axes joined by `item_id`.
+- [ ] N8 is closed: v1/v2 snapshots are schema-validated, and the S2b-Schema
+      edit boundary is explicit.
+- [ ] S1–S3 are closed: role-ref contradiction, projection/visual geometry and
+      structural/tie-break edge cases.
 - [ ] Hard constraints in §4 are accepted.
 - [ ] Proposed parameters and the v1/v2 snapshot dispatch are approved or
       amended.
