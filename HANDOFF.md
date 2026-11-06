@@ -665,3 +665,24 @@ Gold, S1 rule or threshold change; S2b/S2c not started; not pushed.
   with the `identity.grid_tol` block; all 0 issues.
 - **Implementation commit.** `d02e690` (`fix(parser): bind S2a audit to S1
   component tolerance and required artifacts`), local only, not pushed.
+
+## Phase 1.4 S2a — S1 frozen-baseline binding for GRID_TOL (2026-11-06)
+
+**Status:** GRID_TOL is now bound to the frozen S1 code commit; no parser,
+validator, Gold or threshold change; S2b/S2c not started; not pushed.
+
+- **Baseline.** `S1_FROZEN_COMMIT = 3fc45195d8da20d95dd30ef87ef19859d3d2e002`
+  (last S1 code commit before the S2 design commits).
+  `S1_FROZEN_RULE_PRIMITIVES_SHA256 =
+  49e85b601e405b05e585c05a38030b6116b1002e78dab4c2156786ee5a279ab6`, computed
+  with `git cat-file blob 3fc4519:src/icpdf/parser/rule_primitives.py | sha256sum`.
+  The blob is unchanged across `003311f..HEAD`, so it also identifies the S1
+  code used to generate the runs.
+- **Runtime check.** `grid_tol_binding()` hashes the live
+  `rule_primitives.py` and records `frozen_baseline_match`; `verify_identity()`
+  refuses the audit when it is false.
+- **Tests.** `159 passed, 2 xfailed`; new drift-refusal test.
+- **Artifacts.** Three `runs/phase14_s2a/review_r2/audit_*.json` regenerated
+  with baseline fields; all 0 issues.
+- **Implementation commit.** `432cf4a` (`fix(parser): bind S2a audit tolerance
+  to the frozen S1 baseline`), local only, not pushed.
