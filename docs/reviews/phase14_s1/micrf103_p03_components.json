@@ -1,0 +1,208 @@
+{
+ "pdf": "E:\\workspace\\IcPdfParser\\data\\pdfs\\DAC707KP-6__MICRF103YM-Micrel-datasheet-21204957.pdf",
+ "page": 3,
+ "components": [
+  {
+   "component_id": 0,
+   "bbox": [
+    184.08,
+    186.48,
+    554.88,
+    202.8
+   ],
+   "horizontal_rules": 2,
+   "vertical_rules": 5,
+   "column_xs": [
+    184.08,
+    446.88,
+    482.88,
+    518.88,
+    554.88
+   ],
+   "primitive_count": 7,
+   "primitive_kinds": [
+    "line"
+   ],
+   "primitive_indices": [
+    2,
+    3,
+    33,
+    34,
+    35,
+    36,
+    37
+   ]
+  },
+  {
+   "component_id": 1,
+   "bbox": [
+    184.08,
+    219.12,
+    554.88,
+    333.6
+   ],
+   "horizontal_rules": 8,
+   "vertical_rules": 5,
+   "column_xs": [
+    184.08,
+    446.88,
+    482.88,
+    518.88,
+    554.88
+   ],
+   "primitive_count": 13,
+   "primitive_kinds": [
+    "line"
+   ],
+   "primitive_indices": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    53,
+    54,
+    55,
+    56,
+    57
+   ]
+  },
+  {
+   "component_id": 2,
+   "bbox": [
+    184.08,
+    349.92,
+    554.88,
+    431.64
+   ],
+   "horizontal_rules": 6,
+   "vertical_rules": 5,
+   "column_xs": [
+    184.08,
+    446.88,
+    482.88,
+    518.88,
+    554.88
+   ],
+   "primitive_count": 11,
+   "primitive_kinds": [
+    "line"
+   ],
+   "primitive_indices": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    38,
+    39,
+    40,
+    41,
+    42
+   ]
+  },
+  {
+   "component_id": 3,
+   "bbox": [
+    184.08,
+    448.08,
+    554.88,
+    530.04
+   ],
+   "horizontal_rules": 4,
+   "vertical_rules": 5,
+   "column_xs": [
+    184.08,
+    446.88,
+    482.88,
+    518.88,
+    554.88
+   ],
+   "primitive_count": 9,
+   "primitive_kinds": [
+    "line"
+   ],
+   "primitive_indices": [
+    18,
+    19,
+    20,
+    21,
+    43,
+    44,
+    45,
+    46,
+    47
+   ]
+  },
+  {
+   "component_id": 4,
+   "bbox": [
+    184.08,
+    546.48,
+    554.88,
+    732.0
+   ],
+   "horizontal_rules": 11,
+   "vertical_rules": 5,
+   "column_xs": [
+    184.08,
+    446.88,
+    482.88,
+    518.88,
+    554.88
+   ],
+   "primitive_count": 16,
+   "primitive_kinds": [
+    "line"
+   ],
+   "primitive_indices": [
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    48,
+    49,
+    50,
+    51,
+    52
+   ]
+  }
+ ],
+ "gaps": [
+  {
+   "upper": 0,
+   "lower": 1,
+   "height_pt": 16.32,
+   "labels": []
+  },
+  {
+   "upper": 1,
+   "lower": 2,
+   "height_pt": 16.32,
+   "labels": []
+  },
+  {
+   "upper": 2,
+   "lower": 3,
+   "height_pt": 16.44,
+   "labels": []
+  },
+  {
+   "upper": 3,
+   "lower": 4,
+   "height_pt": 16.44,
+   "labels": []
+  }
+ ]
+}

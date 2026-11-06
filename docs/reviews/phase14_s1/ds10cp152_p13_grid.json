@@ -1,0 +1,201 @@
+{
+ "run": "20261106T012109Z-21f780",
+ "table_id": "p013-t01",
+ "page": 13,
+ "bbox": [
+  256.9,
+  213.46,
+  506.36,
+  264.69
+ ],
+ "header_rows": 0,
+ "headers": [
+  "",
+  ""
+ ],
+ "row_count": 5,
+ "column_count": 2,
+ "column_xs": [
+  256.9,
+  275.67,
+  506.36
+ ],
+ "full_width_rows_detected": [],
+ "region_components": [
+  1
+ ],
+ "boundary_source": "ruled",
+ "merge_evidence": [],
+ "rows": [
+  {
+   "row_index": 0,
+   "row_id": "p013-t01-r01",
+   "bbox": [
+    256.9,
+    213.46,
+    506.36,
+    223.57
+   ],
+   "cells": [
+    {
+     "cell_id": "p013-t01-r01-c00",
+     "column_id": 0,
+     "bbox": [
+      256.9,
+      213.46,
+      275.67,
+      223.57
+     ],
+     "text": "A0"
+    },
+    {
+     "cell_id": "p013-t01-r01-c01",
+     "column_id": 1,
+     "bbox": [
+      275.67,
+      213.46,
+      506.36,
+      223.57
+     ],
+     "text": "Dimension designed to accommodate the component width"
+    }
+   ]
+  },
+  {
+   "row_index": 1,
+   "row_id": "p013-t01-r02",
+   "bbox": [
+    256.9,
+    223.57,
+    506.36,
+    233.69
+   ],
+   "cells": [
+    {
+     "cell_id": "p013-t01-r02-c00",
+     "column_id": 0,
+     "bbox": [
+      256.9,
+      223.57,
+      275.67,
+      233.69
+     ],
+     "text": "B0"
+    },
+    {
+     "cell_id": "p013-t01-r02-c01",
+     "column_id": 1,
+     "bbox": [
+      275.67,
+      223.57,
+      506.36,
+      233.69
+     ],
+     "text": "Dimension designed to accommodate the component length"
+    }
+   ]
+  },
+  {
+   "row_index": 2,
+   "row_id": "p013-t01-r03",
+   "bbox": [
+    256.9,
+    233.69,
+    506.36,
+    243.96
+   ],
+   "cells": [
+    {
+     "cell_id": "p013-t01-r03-c00",
+     "column_id": 0,
+     "bbox": [
+      256.9,
+      233.69,
+      275.67,
+      243.96
+     ],
+     "text": "K0"
+    },
+    {
+     "cell_id": "p013-t01-r03-c01",
+     "column_id": 1,
+     "bbox": [
+      275.67,
+      233.69,
+      506.36,
+      243.96
+     ],
+     "text": "Dimension designed to accommodate the component thickness"
+    }
+   ]
+  },
+  {
+   "row_index": 3,
+   "row_id": "p013-t01-r04",
+   "bbox": [
+    256.9,
+    243.96,
+    506.36,
+    253.89
+   ],
+   "cells": [
+    {
+     "cell_id": "p013-t01-r04-c00",
+     "column_id": 0,
+     "bbox": [
+      256.9,
+      243.96,
+      275.67,
+      253.89
+     ],
+     "text": "W"
+    },
+    {
+     "cell_id": "p013-t01-r04-c01",
+     "column_id": 1,
+     "bbox": [
+      275.67,
+      243.96,
+      506.36,
+      253.89
+     ],
+     "text": "Overall width of the carrier tape"
+    }
+   ]
+  },
+  {
+   "row_index": 4,
+   "row_id": "p013-t01-r05",
+   "bbox": [
+    256.9,
+    253.89,
+    506.36,
+    264.69
+   ],
+   "cells": [
+    {
+     "cell_id": "p013-t01-r05-c00",
+     "column_id": 0,
+     "bbox": [
+      256.9,
+      253.89,
+      275.67,
+      264.69
+     ],
+     "text": "P1"
+    },
+    {
+     "cell_id": "p013-t01-r05-c01",
+     "column_id": 1,
+     "bbox": [
+      275.67,
+      253.89,
+      506.36,
+      264.69
+     ],
+     "text": "Pitch between successive cavity centers"
+    }
+   ]
+  }
+ ]
+}

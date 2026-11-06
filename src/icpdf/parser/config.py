@@ -40,7 +40,6 @@ class TableParams(BaseModel):
     merge_shared_ratio: float = Field(default=0.6, gt=0, le=1)
     merge_extent_tol_pt: float = Field(default=3.0, ge=0)
     merge_min_x_overlap_ratio: float = Field(default=0.6, gt=0, le=1)
-    merge_caption_scale: float = Field(default=1.15, gt=1)
 
 
 class ParserConfig(BaseModel):

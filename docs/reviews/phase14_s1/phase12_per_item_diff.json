@@ -1,0 +1,1553 @@
+{
+ "before_label": "phase14-s1-final-phase12",
+ "after_label": "phase14-s1-review-phase12",
+ "overall_before": {
+  "tables": 46,
+  "tp": 46,
+  "fp": 0,
+  "fn": 0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "out_of_scope_predictions": 8,
+  "predictions_on_gold_pages": 54,
+  "negative_items": 19,
+  "negative_items_with_fp": 0,
+  "negative_fp": 0
+ },
+ "overall_after": {
+  "tables": 46,
+  "tp": 46,
+  "fp": 0,
+  "fn": 0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "out_of_scope_predictions": 8,
+  "predictions_on_gold_pages": 54,
+  "negative_items": 19,
+  "negative_items_with_fp": 0,
+  "negative_fp": 0
+ },
+ "changed_items": [],
+ "items": [
+  {
+   "item_id": "ADC12DJ5200-P01-T01",
+   "page": 1,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9996,
+    "after": 0.9996
+   },
+   "pred_rows": {
+    "before": 2,
+    "after": 2
+   },
+   "pred_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 2,
+    "after": 2
+   },
+   "gold_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P100-T01",
+   "page": 100,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 38,
+    "after": 38
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 38,
+    "after": 38
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P102-T01",
+   "page": 102,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P102-T02",
+   "page": 102,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P102-T03",
+   "page": 102,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9998,
+    "after": 0.9998
+   },
+   "pred_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P39-T01",
+   "page": 39,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "pred_columns": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "gold_columns": {
+    "before": 7,
+    "after": 7
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P41-T01",
+   "page": 41,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P43-T01",
+   "page": 43,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9998,
+    "after": 0.9998
+   },
+   "pred_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "gold_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P46-T01",
+   "page": 46,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P47-T01",
+   "page": 47,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9979,
+    "after": 0.9979
+   },
+   "pred_rows": {
+    "before": 2,
+    "after": 2
+   },
+   "pred_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 2,
+    "after": 2
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P54-T01",
+   "page": 54,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9988,
+    "after": 0.9988
+   },
+   "pred_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_columns": {
+    "before": 2,
+    "after": 2
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "gold_columns": {
+    "before": 2,
+    "after": 2
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P61-T01",
+   "page": 61,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 6,
+    "after": 6
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P61-T02",
+   "page": 61,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 14,
+    "after": 14
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 14,
+    "after": 14
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P72-T01",
+   "page": 72,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P78-T01",
+   "page": 78,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "gold_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P78-T02",
+   "page": 78,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "gold_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P78-T03",
+   "page": 78,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 18,
+    "after": 18
+   },
+   "pred_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 18,
+    "after": 18
+   },
+   "gold_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P78-T04",
+   "page": 78,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "gold_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P79-T01",
+   "page": 79,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9998,
+    "after": 0.9998
+   },
+   "pred_rows": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 5,
+    "after": 5
+   },
+   "gold_columns": {
+    "before": 17,
+    "after": 17
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADC12DJ5200-P98-T01",
+   "page": 98,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 42,
+    "after": 42
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 42,
+    "after": 42
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P17-T01",
+   "page": 17,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_columns": {
+    "before": 13,
+    "after": 13
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "gold_columns": {
+    "before": 13,
+    "after": 13
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P17-T02",
+   "page": 17,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_columns": {
+    "before": 13,
+    "after": 13
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "gold_columns": {
+    "before": 13,
+    "after": 13
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P17-T03",
+   "page": 17,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_columns": {
+    "before": 8,
+    "after": 8
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "gold_columns": {
+    "before": 8,
+    "after": 8
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P23-T01",
+   "page": 23,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "pred_columns": {
+    "before": 2,
+    "after": 2
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "gold_columns": {
+    "before": 2,
+    "after": 2
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P27-T01",
+   "page": 27,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 4,
+    "after": 4
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P35-T01",
+   "page": 35,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "pred_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 8,
+    "after": 8
+   },
+   "gold_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P37-T01",
+   "page": 37,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "gold_columns": {
+    "before": 3,
+    "after": 3
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P40-T01",
+   "page": 40,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 14,
+    "after": 14
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 14,
+    "after": 14
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P44-T01",
+   "page": 44,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 31,
+    "after": 31
+   },
+   "pred_columns": {
+    "before": 11,
+    "after": 11
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 31,
+    "after": 31
+   },
+   "gold_columns": {
+    "before": 11,
+    "after": 11
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P45-T01",
+   "page": 45,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 5,
+    "after": 5
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P52-T01",
+   "page": 52,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 9,
+    "after": 9
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 9,
+    "after": 9
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P67-T01",
+   "page": 67,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_columns": {
+    "before": 2,
+    "after": 2
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 5,
+    "after": 5
+   },
+   "gold_columns": {
+    "before": 2,
+    "after": 2
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P70-T01",
+   "page": 70,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "electrical_characteristics",
+    "after": "electrical_characteristics"
+   },
+   "gold_rows": {
+    "before": 3,
+    "after": 3
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P74-T01",
+   "page": 74,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 4,
+    "after": 4
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "ADS1299-P76-T01",
+   "page": 76,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 15,
+    "after": 15
+   },
+   "pred_columns": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_table_type": {
+    "before": "ordering_information",
+    "after": "ordering_information"
+   },
+   "gold_rows": {
+    "before": 15,
+    "after": 15
+   },
+   "gold_columns": {
+    "before": 10,
+    "after": 10
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P04-T01",
+   "page": 4,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 17,
+    "after": 17
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 17,
+    "after": 17
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P04-T02",
+   "page": 4,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 7,
+    "after": 7
+   },
+   "gold_columns": {
+    "before": 4,
+    "after": 4
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P05-T01",
+   "page": 5,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 10,
+    "after": 10
+   },
+   "gold_columns": {
+    "before": 5,
+    "after": 5
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P05-T02",
+   "page": 5,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 0.9999,
+    "after": 0.9999
+   },
+   "pred_rows": {
+    "before": 9,
+    "after": 9
+   },
+   "pred_columns": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_table_type": {
+    "before": "thermal",
+    "after": "thermal"
+   },
+   "gold_rows": {
+    "before": 9,
+    "after": 9
+   },
+   "gold_columns": {
+    "before": 10,
+    "after": 10
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P06-T01",
+   "page": 6,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 51,
+    "after": 51
+   },
+   "pred_columns": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_table_type": {
+    "before": "electrical_characteristics",
+    "after": "electrical_characteristics"
+   },
+   "gold_rows": {
+    "before": 51,
+    "after": 51
+   },
+   "gold_columns": {
+    "before": 7,
+    "after": 7
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P08-T01",
+   "page": 8,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 52,
+    "after": 52
+   },
+   "pred_columns": {
+    "before": 7,
+    "after": 7
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 52,
+    "after": 52
+   },
+   "gold_columns": {
+    "before": 7,
+    "after": 7
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P10-T01",
+   "page": 10,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 50,
+    "after": 50
+   },
+   "pred_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 50,
+    "after": 50
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P11-T01",
+   "page": 11,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 46,
+    "after": 46
+   },
+   "pred_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 46,
+    "after": 46
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P12-T01",
+   "page": 12,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 47,
+    "after": 47
+   },
+   "pred_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 47,
+    "after": 47
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P14-T01",
+   "page": 14,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 50,
+    "after": 50
+   },
+   "pred_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "pred_table_type": {
+    "before": "other",
+    "after": "other"
+   },
+   "gold_rows": {
+    "before": 50,
+    "after": 50
+   },
+   "gold_columns": {
+    "before": 6,
+    "after": 6
+   },
+   "changed": false
+  },
+  {
+   "item_id": "LM358-P33-T01",
+   "page": 33,
+   "matched": {
+    "before": true,
+    "after": true
+   },
+   "iou": {
+    "before": 1.0,
+    "after": 1.0
+   },
+   "pred_rows": {
+    "before": 16,
+    "after": 16
+   },
+   "pred_columns": {
+    "before": 10,
+    "after": 10
+   },
+   "pred_table_type": {
+    "before": "ordering_information",
+    "after": "ordering_information"
+   },
+   "gold_rows": {
+    "before": 16,
+    "after": 16
+   },
+   "gold_columns": {
+    "before": 10,
+    "after": 10
+   },
+   "changed": false
+  }
+ ]
+}

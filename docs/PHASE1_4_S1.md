@@ -99,8 +99,10 @@ Merge test (all must hold):
 2. vertical gap between 2pt and 24pt;
 3. shared internal column rules ≥ 2 and ≥ 60% of each component's columns;
 4. widest horizontal-rule extents align within 3pt;
-5. no span in the gap is larger than 1.15× the median body size (a larger
-   label is a new table caption, a same-size bold band stays in the table).
+5. the gap contains no table/figure caption label ("Table 6-27.", "Tabelle
+   6.28", "表 3", ...).  The label text is the signal; font size is
+   deliberately ignored, because an in-table section band may be bold or
+   larger and some templates set captions at the body size.
 
 Absorbed components are not emitted separately: one cluster produces one
 region whose `components` lists every member.  Multi-component regions expand
@@ -114,7 +116,7 @@ need no change and validate these runs with 0 errors.
 
 ```bash
 python -m pytest -o addopts="" -q
-# 78 passed, 2 xfailed in 8.20s
+# 89 passed, 2 xfailed in 8.29s
 ```
 
 The two xfails are the CY29FCT520 block diagram (P02) and package drawing
@@ -122,15 +124,23 @@ The two xfails are the CY29FCT520 block diagram (P02) and package drawing
 
 ```bash
 python -m pytest tests/unit/test_rule_primitives.py tests/unit/test_table_regions.py \
-                 tests/integration/test_phase14_s1.py -o addopts="" -q
-# 15 passed, 2 xfailed
+                 tests/unit/test_label_grid.py tests/integration/test_phase14_s1.py \
+                 -o addopts="" -q
+# 26 passed, 2 xfailed
 ```
 
 Unit coverage: line/thin-rect/quad provenance; diagonal quad ignored; thick
 quad ignored; collinear merge keeps both sources; quad grid → one component;
 stacked-lattice merge → one region; absorbed component recorded once; caption
-blocks a merge; different lattice and zero gap stay separate; single component
-keeps `ruled`.
+text blocks a merge (body-size caption included); a larger section heading in
+the gap still merges; two independent tables sharing a lattice do not merge;
+section-local columns merge cells in the other sections; different lattice and
+zero gap stay separate; single component keeps `ruled`.
+
+`tests/unit/test_label_grid.py` covers the headerless exception: the tape
+key/description grid is accepted; prose rows, sparse drawing bands,
+text-alignment grids, two-short-label diagrams, a missing column-0 key, a
+merged leading cell and two-row grids are rejected.
 
 Integration coverage (PDFs from `gold/generalization/spec.yaml`, skipped if
 absent):
@@ -256,3 +266,41 @@ python -m tools.render_detection_crops \
   --run runs/phase14_s1/final_generalization/20261106T010114Z-5cc138 \
   --page 13 --out docs/evidence/phase14_s1/ds10cp152_p13_detected.png
 ```
+
+## 8. Reviewer follow-up (2026-11-06)
+
+S1 commit for review: `003311fa8ee24ef68254fa3852329a9a9f1d762a`
+(`feat(parser): Phase 1.4 S1 - ruling primitives, components, table regions`).
+The follow-up changes below are in a separate commit so the original S1 slice
+stays a rollback point.
+
+Two points from the review were implemented, not only documented:
+
+1. **Caption blocking no longer uses font size.** `_gap_has_caption` now
+   matches a caption label by text (`Table`, `Tab.`, `Tabelle`, `Tabla`,
+   `Tableau`, `Tabela`, `Таблица`, `表`, `표`, `Figure`, `Fig.`, `图`).  A
+   synthetic test sets a 12pt section heading in the gap and still merges; a
+   second test uses a body-size `Table 12. ...` caption between two tables
+   that share columns and asserts they stay separate.  The font-size field
+   `merge_caption_scale` was removed (the YAML config and its SHA are
+   untouched).
+2. **`_is_label_grid` is narrower.** In addition to the previous conditions,
+   every populated row must contain a description/value cell (≥3 words or
+   ≥15 characters) beside the short column-0 key.  A fully ruled 3×2 grid of
+   two short labels per row (block-diagram shape) is now rejected; prose,
+   sparse bands, text-alignment grids, merged leading cells and two-row grids
+   have explicit negative tests in `tests/unit/test_label_grid.py`.
+
+The review reruns are in `runs/phase14_s1/review_rerun/`; the per-item diff
+against the S1 final runs is in `docs/reviews/phase14_s1/`:
+
+* Gold v2: unchanged 21/4/0, P 0.8400, R 1.0, F1 0.9130; `changed_items=[]`.
+* Phase 1.2: unchanged 46/0/0, P/R/F1 1.0; `changed_items=[]`.
+* Evidence Validator: 6/6 runs `errors=0 warnings=0`.
+* Unit/integration: `89 passed, 2 xfailed`.
+
+Review artifacts: `docs/reviews/phase14_s1/REVIEW_RESPONSE.md`,
+`micrf103_p03_components_vs_region.png`, `micrf103_p03_grid.json`,
+`micrf103_p03_grid_rows.png`, `ds10cp152_p13_grid.json`,
+`ds10cp152_p13_grid_cells.png`, `gold_v2_per_item_diff.json`,
+`phase12_per_item_diff.json`, plus the full commit patches.

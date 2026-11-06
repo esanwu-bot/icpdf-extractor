@@ -153,10 +153,22 @@ def _is_short_label(text: str) -> bool:
     return len(token.split()) <= 2 and not any(ch in token for ch in _LABEL_PUNCTUATION)
 
 
+def _has_description(cells: list[GridCell], leading: GridCell) -> bool:
+    """A key grid pairs a short code with prose, not two short diagram labels."""
+    return any(cell is not leading
+               and (len(cell.text.split()) >= 3
+                    or len(cell.text.strip()) >= 15)
+               for cell in cells)
+
+
 def _is_label_grid(grid: TableGrid) -> bool:
     """A fully ruled key/description grid (e.g. tape dimension codes) is a
-    table without a header row or numeric values.  Drawings and prose fail
-    because their rows are sparse or their leading cell is a sentence."""
+    table without a header row or numeric values.
+
+    This is deliberately narrow: every populated row is a short code in
+    column 0 followed by a description.  Prose, sparse drawing bands, merged
+    leading cells and two-short-label diagrams fail.
+    """
     if grid.source != "rule_lattice" or grid.n_rows < 3 or grid.n_columns < 2:
         return False
     populated: list[list[GridCell]] = []
@@ -173,6 +185,8 @@ def _is_label_grid(grid: TableGrid) -> bool:
         if leading.column != 0 or leading.column_span != 1:
             return False
         if not _is_short_label(leading.text):
+            return False
+        if not _has_description(cells, leading):
             return False
         if len(_nonempty(_row_cells(grid, leading.row))) < 2:
             return False

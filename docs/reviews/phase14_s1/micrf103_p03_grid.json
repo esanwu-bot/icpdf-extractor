@@ -1,0 +1,1612 @@
+{
+ "run": "20261106T012104Z-5cad73",
+ "table_id": "p003-t01",
+ "page": 3,
+ "bbox": [
+  46.8,
+  186.48,
+  586.8,
+  732.0
+ ],
+ "header_rows": 1,
+ "headers": [
+  "Parameter",
+  "Condition",
+  "Min",
+  "Typ",
+  "Max",
+  "Units"
+ ],
+ "row_count": 30,
+ "column_count": 6,
+ "column_xs": [
+  46.8,
+  184.08,
+  446.88,
+  482.88,
+  518.88,
+  554.88,
+  586.8
+ ],
+ "full_width_rows_detected": [],
+ "region_components": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "boundary_source": "implied_horizontal",
+ "merge_evidence": [
+  "merge: component 0 and component 1 share 5 column rule(s) across a 16.3pt band",
+  "absorbed: component 1 is emitted through region seed 0",
+  "merge: component 0 and component 2 share 5 column rule(s) across a 16.3pt band",
+  "absorbed: component 2 is emitted through region seed 0",
+  "merge: component 0 and component 3 share 5 column rule(s) across a 16.4pt band",
+  "absorbed: component 3 is emitted through region seed 0",
+  "merge: component 0 and component 4 share 5 column rule(s) across a 16.4pt band",
+  "absorbed: component 4 is emitted through region seed 0",
+  "implied_outer: left/right boundaries 46.8/586.8 come from the common horizontal-rule extent"
+ ],
+ "rows": [
+  {
+   "row_index": 0,
+   "row_id": "p003-t01-r01",
+   "bbox": [
+    46.8,
+    186.48,
+    586.8,
+    202.8
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r01-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      186.48,
+      184.08,
+      202.8
+     ],
+     "text": "Parameter"
+    },
+    {
+     "cell_id": "p003-t01-r01-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      186.48,
+      446.88,
+      202.8
+     ],
+     "text": "Condition"
+    },
+    {
+     "cell_id": "p003-t01-r01-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      186.48,
+      482.88,
+      202.8
+     ],
+     "text": "Min"
+    },
+    {
+     "cell_id": "p003-t01-r01-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      186.48,
+      518.88,
+      202.8
+     ],
+     "text": "Typ"
+    },
+    {
+     "cell_id": "p003-t01-r01-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      186.48,
+      554.88,
+      202.8
+     ],
+     "text": "Max"
+    },
+    {
+     "cell_id": "p003-t01-r01-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      186.48,
+      586.8,
+      202.8
+     ],
+     "text": "Units"
+    }
+   ]
+  },
+  {
+   "row_index": 1,
+   "row_id": "p003-t01-r02",
+   "bbox": [
+    46.8,
+    202.8,
+    184.08,
+    219.12
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r02-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      202.8,
+      184.08,
+      219.12
+     ],
+     "text": "Power Supply"
+    }
+   ]
+  },
+  {
+   "row_index": 2,
+   "row_id": "p003-t01-r03",
+   "bbox": [
+    46.8,
+    219.12,
+    586.8,
+    235.56
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r03-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      219.12,
+      184.08,
+      235.56
+     ],
+     "text": "Standby Supply Current, I Q"
+    },
+    {
+     "cell_id": "p003-t01-r03-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      219.12,
+      446.88,
+      235.56
+     ],
+     "text": "V STBY  < 0.5V"
+    },
+    {
+     "cell_id": "p003-t01-r03-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      219.12,
+      518.88,
+      235.56
+     ],
+     "text": "0.10"
+    },
+    {
+     "cell_id": "p003-t01-r03-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      219.12,
+      586.8,
+      235.56
+     ],
+     "text": "µ A"
+    }
+   ]
+  },
+  {
+   "row_index": 3,
+   "row_id": "p003-t01-r04",
+   "bbox": [
+    46.8,
+    235.56,
+    586.8,
+    251.88
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r04-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      235.56,
+      184.08,
+      251.88
+     ],
+     "text": "MARK Supply Current, I ON"
+    },
+    {
+     "cell_id": "p003-t01-r04-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      235.56,
+      446.88,
+      251.88
+     ],
+     "text": "@868MHz"
+    },
+    {
+     "cell_id": "p003-t01-r04-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      235.56,
+      518.88,
+      251.88
+     ],
+     "text": "19"
+    },
+    {
+     "cell_id": "p003-t01-r04-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      235.56,
+      554.88,
+      251.88
+     ],
+     "text": "26.5"
+    },
+    {
+     "cell_id": "p003-t01-r04-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      235.56,
+      586.8,
+      251.88
+     ],
+     "text": "mA"
+    }
+   ]
+  },
+  {
+   "row_index": 4,
+   "row_id": "p003-t01-r05",
+   "bbox": [
+    184.08,
+    251.88,
+    586.8,
+    268.2
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r05-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      251.88,
+      446.88,
+      268.2
+     ],
+     "text": "@915MHz"
+    },
+    {
+     "cell_id": "p003-t01-r05-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      251.88,
+      518.88,
+      268.2
+     ],
+     "text": "20"
+    },
+    {
+     "cell_id": "p003-t01-r05-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      251.88,
+      554.88,
+      268.2
+     ],
+     "text": "27.5"
+    },
+    {
+     "cell_id": "p003-t01-r05-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      251.88,
+      586.8,
+      268.2
+     ],
+     "text": "mA"
+    }
+   ]
+  },
+  {
+   "row_index": 5,
+   "row_id": "p003-t01-r06",
+   "bbox": [
+    46.8,
+    268.2,
+    586.8,
+    284.52
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r06-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      268.2,
+      184.08,
+      284.52
+     ],
+     "text": "SPACE Supply Current, I OFF"
+    },
+    {
+     "cell_id": "p003-t01-r06-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      268.2,
+      446.88,
+      284.52
+     ],
+     "text": "@868MHz"
+    },
+    {
+     "cell_id": "p003-t01-r06-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      268.2,
+      518.88,
+      284.52
+     ],
+     "text": "14"
+    },
+    {
+     "cell_id": "p003-t01-r06-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      268.2,
+      554.88,
+      284.52
+     ],
+     "text": "18"
+    },
+    {
+     "cell_id": "p003-t01-r06-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      268.2,
+      586.8,
+      284.52
+     ],
+     "text": "mA"
+    }
+   ]
+  },
+  {
+   "row_index": 6,
+   "row_id": "p003-t01-r07",
+   "bbox": [
+    184.08,
+    284.52,
+    586.8,
+    300.96
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r07-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      284.52,
+      446.88,
+      300.96
+     ],
+     "text": "@915MHz"
+    },
+    {
+     "cell_id": "p003-t01-r07-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      284.52,
+      518.88,
+      300.96
+     ],
+     "text": "15"
+    },
+    {
+     "cell_id": "p003-t01-r07-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      284.52,
+      554.88,
+      300.96
+     ],
+     "text": "21"
+    },
+    {
+     "cell_id": "p003-t01-r07-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      284.52,
+      586.8,
+      300.96
+     ],
+     "text": "mA"
+    }
+   ]
+  },
+  {
+   "row_index": 7,
+   "row_id": "p003-t01-r08",
+   "bbox": [
+    46.8,
+    300.96,
+    586.8,
+    317.28
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r08-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      300.96,
+      184.08,
+      317.28
+     ],
+     "text": "MARK/SPACE Ratio"
+    },
+    {
+     "cell_id": "p003-t01-r08-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      300.96,
+      446.88,
+      317.28
+     ],
+     "text": "33%@868MHz"
+    },
+    {
+     "cell_id": "p003-t01-r08-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      300.96,
+      518.88,
+      317.28
+     ],
+     "text": "16"
+    },
+    {
+     "cell_id": "p003-t01-r08-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      300.96,
+      586.8,
+      317.28
+     ],
+     "text": "mA"
+    }
+   ]
+  },
+  {
+   "row_index": 8,
+   "row_id": "p003-t01-r09",
+   "bbox": [
+    184.08,
+    317.28,
+    586.8,
+    333.6
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r09-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      317.28,
+      446.88,
+      333.6
+     ],
+     "text": "33%@915MHz"
+    },
+    {
+     "cell_id": "p003-t01-r09-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      317.28,
+      518.88,
+      333.6
+     ],
+     "text": "17"
+    },
+    {
+     "cell_id": "p003-t01-r09-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      317.28,
+      586.8,
+      333.6
+     ],
+     "text": "mA"
+    }
+   ]
+  },
+  {
+   "row_index": 9,
+   "row_id": "p003-t01-r10",
+   "bbox": [
+    46.8,
+    333.6,
+    446.88,
+    349.92
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r10-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      333.6,
+      446.88,
+      349.92
+     ],
+     "text": "RF Output Section and Modulation Limits:"
+    }
+   ]
+  },
+  {
+   "row_index": 10,
+   "row_id": "p003-t01-r11",
+   "bbox": [
+    46.8,
+    349.92,
+    586.8,
+    366.36
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r11-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      349.92,
+      184.08,
+      366.36
+     ],
+     "text": "Maximum Power Level, P OUT"
+    },
+    {
+     "cell_id": "p003-t01-r11-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      349.92,
+      446.88,
+      366.36
+     ],
+     "text": "@868MHz  (EIRP)"
+    },
+    {
+     "cell_id": "p003-t01-r11-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      349.92,
+      518.88,
+      366.36
+     ],
+     "text": "-3"
+    },
+    {
+     "cell_id": "p003-t01-r11-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      349.92,
+      586.8,
+      366.36
+     ],
+     "text": "dBm"
+    }
+   ]
+  },
+  {
+   "row_index": 11,
+   "row_id": "p003-t01-r12",
+   "bbox": [
+    184.08,
+    366.36,
+    586.8,
+    382.68
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r12-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      366.36,
+      446.88,
+      382.68
+     ],
+     "text": "@915MHz  (EIRP)"
+    },
+    {
+     "cell_id": "p003-t01-r12-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      366.36,
+      518.88,
+      382.68
+     ],
+     "text": "-3"
+    },
+    {
+     "cell_id": "p003-t01-r12-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      366.36,
+      586.8,
+      382.68
+     ],
+     "text": "dBm"
+    }
+   ]
+  },
+  {
+   "row_index": 12,
+   "row_id": "p003-t01-r13",
+   "bbox": [
+    46.8,
+    382.68,
+    586.8,
+    399.0
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r13-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      382.68,
+      184.08,
+      399.0
+     ],
+     "text": "Output Power Variation"
+    },
+    {
+     "cell_id": "p003-t01-r13-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      382.68,
+      446.88,
+      399.0
+     ],
+     "text": "over supply and temperature"
+    },
+    {
+     "cell_id": "p003-t01-r13-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      382.68,
+      518.88,
+      399.0
+     ],
+     "text": "± 2"
+    },
+    {
+     "cell_id": "p003-t01-r13-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      382.68,
+      586.8,
+      399.0
+     ],
+     "text": "dBm"
+    }
+   ]
+  },
+  {
+   "row_index": 13,
+   "row_id": "p003-t01-r14",
+   "bbox": [
+    46.8,
+    399.0,
+    586.8,
+    415.32
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r14-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      399.0,
+      184.08,
+      415.32
+     ],
+     "text": "Extinction ratio for ASK"
+    },
+    {
+     "cell_id": "p003-t01-r14-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      399.0,
+      482.88,
+      415.32
+     ],
+     "text": "38"
+    },
+    {
+     "cell_id": "p003-t01-r14-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      399.0,
+      518.88,
+      415.32
+     ],
+     "text": "45"
+    },
+    {
+     "cell_id": "p003-t01-r14-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      399.0,
+      586.8,
+      415.32
+     ],
+     "text": "dBc"
+    }
+   ]
+  },
+  {
+   "row_index": 14,
+   "row_id": "p003-t01-r15",
+   "bbox": [
+    46.8,
+    415.32,
+    586.8,
+    431.64
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r15-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      415.32,
+      184.08,
+      431.64
+     ],
+     "text": "Varactor tuning range"
+    },
+    {
+     "cell_id": "p003-t01-r15-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      415.32,
+      446.88,
+      431.64
+     ],
+     "text": "Note 5"
+    },
+    {
+     "cell_id": "p003-t01-r15-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      415.32,
+      482.88,
+      431.64
+     ],
+     "text": "2.6"
+    },
+    {
+     "cell_id": "p003-t01-r15-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      415.32,
+      518.88,
+      431.64
+     ],
+     "text": "3.0"
+    },
+    {
+     "cell_id": "p003-t01-r15-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      415.32,
+      554.88,
+      431.64
+     ],
+     "text": "3.3"
+    },
+    {
+     "cell_id": "p003-t01-r15-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      415.32,
+      586.8,
+      431.64
+     ],
+     "text": "pF"
+    }
+   ]
+  },
+  {
+   "row_index": 15,
+   "row_id": "p003-t01-r16",
+   "bbox": [
+    46.8,
+    431.64,
+    184.08,
+    448.08
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r16-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      431.64,
+      184.08,
+      448.08
+     ],
+     "text": "Reference Oscillator Section"
+    }
+   ]
+  },
+  {
+   "row_index": 16,
+   "row_id": "p003-t01-r17",
+   "bbox": [
+    46.8,
+    448.08,
+    586.8,
+    475.44
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r17-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      448.08,
+      184.08,
+      475.44
+     ],
+     "text": "Reference Oscillator Input\nImpedance"
+    },
+    {
+     "cell_id": "p003-t01-r17-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      448.08,
+      518.88,
+      475.44
+     ],
+     "text": "300"
+    },
+    {
+     "cell_id": "p003-t01-r17-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      448.08,
+      586.8,
+      475.44
+     ],
+     "text": "k Ω"
+    }
+   ]
+  },
+  {
+   "row_index": 17,
+   "row_id": "p003-t01-r18",
+   "bbox": [
+    46.8,
+    475.44,
+    586.8,
+    502.8
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r18-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      475.44,
+      184.08,
+      502.8
+     ],
+     "text": "Reference Oscillator Source\nCurrent"
+    },
+    {
+     "cell_id": "p003-t01-r18-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      475.44,
+      518.88,
+      502.8
+     ],
+     "text": "5.0"
+    },
+    {
+     "cell_id": "p003-t01-r18-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      475.44,
+      586.8,
+      502.8
+     ],
+     "text": "µ A"
+    }
+   ]
+  },
+  {
+   "row_index": 18,
+   "row_id": "p003-t01-r19",
+   "bbox": [
+    46.8,
+    502.8,
+    586.8,
+    530.04
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r19-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      502.8,
+      184.08,
+      530.04
+     ],
+     "text": "Reference Oscillator Input\nVoltage (peak-to-peak)"
+    },
+    {
+     "cell_id": "p003-t01-r19-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      502.8,
+      482.88,
+      530.04
+     ],
+     "text": "0.2"
+    },
+    {
+     "cell_id": "p003-t01-r19-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      502.8,
+      554.88,
+      530.04
+     ],
+     "text": "1.0"
+    },
+    {
+     "cell_id": "p003-t01-r19-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      502.8,
+      586.8,
+      530.04
+     ],
+     "text": "V PP"
+    }
+   ]
+  },
+  {
+   "row_index": 19,
+   "row_id": "p003-t01-r20",
+   "bbox": [
+    46.8,
+    530.04,
+    184.08,
+    546.48
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r20-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      530.04,
+      184.08,
+      546.48
+     ],
+     "text": "Digital / Control Section"
+    }
+   ]
+  },
+  {
+   "row_index": 20,
+   "row_id": "p003-t01-r21",
+   "bbox": [
+    46.8,
+    546.48,
+    586.8,
+    562.8
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r21-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      546.48,
+      184.08,
+      562.8
+     ],
+     "text": "Calibration Time"
+    },
+    {
+     "cell_id": "p003-t01-r21-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      546.48,
+      446.88,
+      562.8
+     ],
+     "text": "note 7, ASK=HIGH"
+    },
+    {
+     "cell_id": "p003-t01-r21-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      546.48,
+      518.88,
+      562.8
+     ],
+     "text": "20"
+    },
+    {
+     "cell_id": "p003-t01-r21-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      546.48,
+      586.8,
+      562.8
+     ],
+     "text": "ms"
+    }
+   ]
+  },
+  {
+   "row_index": 21,
+   "row_id": "p003-t01-r22",
+   "bbox": [
+    46.8,
+    562.8,
+    586.8,
+    590.16
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r22-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      562.8,
+      184.08,
+      590.16
+     ],
+     "text": "Power Amplifier Output Hold-off\nTime from STBY"
+    },
+    {
+     "cell_id": "p003-t01-r22-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      562.8,
+      446.88,
+      590.16
+     ],
+     "text": "note 4, STDBY transition from LOW to HIGH\ncrystal, ESR < 20 Ω"
+    },
+    {
+     "cell_id": "p003-t01-r22-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      562.8,
+      518.88,
+      590.16
+     ],
+     "text": "5"
+    },
+    {
+     "cell_id": "p003-t01-r22-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      562.8,
+      586.8,
+      590.16
+     ],
+     "text": "ms"
+    }
+   ]
+  },
+  {
+   "row_index": 22,
+   "row_id": "p003-t01-r23",
+   "bbox": [
+    46.8,
+    590.16,
+    586.8,
+    606.48
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r23-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      590.16,
+      184.08,
+      606.48
+     ],
+     "text": "Transmitter Stabilization Time"
+    },
+    {
+     "cell_id": "p003-t01-r23-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      590.16,
+      446.88,
+      606.48
+     ],
+     "text": "from external reference (500mVpp)"
+    },
+    {
+     "cell_id": "p003-t01-r23-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      590.16,
+      518.88,
+      606.48
+     ],
+     "text": "9"
+    },
+    {
+     "cell_id": "p003-t01-r23-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      590.16,
+      586.8,
+      606.48
+     ],
+     "text": "ms"
+    }
+   ]
+  },
+  {
+   "row_index": 23,
+   "row_id": "p003-t01-r24",
+   "bbox": [
+    46.8,
+    606.48,
+    586.8,
+    622.8
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r24-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      606.48,
+      184.08,
+      622.8
+     ],
+     "text": "From STBY"
+    },
+    {
+     "cell_id": "p003-t01-r24-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      606.48,
+      446.88,
+      622.8
+     ],
+     "text": "crystal, ESR < 20 Ω"
+    },
+    {
+     "cell_id": "p003-t01-r24-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      606.48,
+      518.88,
+      622.8
+     ],
+     "text": "12"
+    },
+    {
+     "cell_id": "p003-t01-r24-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      606.48,
+      586.8,
+      622.8
+     ],
+     "text": "ms"
+    }
+   ]
+  },
+  {
+   "row_index": 24,
+   "row_id": "p003-t01-r25",
+   "bbox": [
+    46.8,
+    622.8,
+    586.8,
+    650.16
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r25-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      622.8,
+      184.08,
+      650.16
+     ],
+     "text": "Maximum Data rate\n- ASK modulation"
+    },
+    {
+     "cell_id": "p003-t01-r25-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      622.8,
+      446.88,
+      650.16
+     ],
+     "text": "duty cycle of the modulating signal = 50%"
+    },
+    {
+     "cell_id": "p003-t01-r25-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      622.8,
+      482.88,
+      650.16
+     ],
+     "text": "115"
+    },
+    {
+     "cell_id": "p003-t01-r25-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      622.8,
+      586.8,
+      650.16
+     ],
+     "text": "kbits/s"
+    }
+   ]
+  },
+  {
+   "row_index": 25,
+   "row_id": "p003-t01-r26",
+   "bbox": [
+    46.8,
+    650.16,
+    586.8,
+    666.6
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r26-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      650.16,
+      184.08,
+      666.6
+     ],
+     "text": "STBY HIGH V IH"
+    },
+    {
+     "cell_id": "p003-t01-r26-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      650.16,
+      446.88,
+      666.6
+     ],
+     "text": "enable voltage"
+    },
+    {
+     "cell_id": "p003-t01-r26-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      650.16,
+      482.88,
+      666.6
+     ],
+     "text": "0.8V DD"
+    },
+    {
+     "cell_id": "p003-t01-r26-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      650.16,
+      586.8,
+      666.6
+     ],
+     "text": "V"
+    }
+   ]
+  },
+  {
+   "row_index": 26,
+   "row_id": "p003-t01-r27",
+   "bbox": [
+    46.8,
+    666.6,
+    554.88,
+    682.92
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r27-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      666.6,
+      184.08,
+      682.92
+     ],
+     "text": "STBY LOW V IL"
+    },
+    {
+     "cell_id": "p003-t01-r27-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      666.6,
+      554.88,
+      682.92
+     ],
+     "text": "0.1V DD"
+    }
+   ]
+  },
+  {
+   "row_index": 27,
+   "row_id": "p003-t01-r28",
+   "bbox": [
+    46.8,
+    682.92,
+    586.8,
+    699.24
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r28-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      682.92,
+      184.08,
+      699.24
+     ],
+     "text": "ASK Pin"
+    },
+    {
+     "cell_id": "p003-t01-r28-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      682.92,
+      446.88,
+      699.24
+     ],
+     "text": "V IH , input high voltage"
+    },
+    {
+     "cell_id": "p003-t01-r28-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      682.92,
+      482.88,
+      699.24
+     ],
+     "text": "0.8V DD"
+    },
+    {
+     "cell_id": "p003-t01-r28-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      682.92,
+      586.8,
+      699.24
+     ],
+     "text": "V"
+    }
+   ]
+  },
+  {
+   "row_index": 28,
+   "row_id": "p003-t01-r29",
+   "bbox": [
+    184.08,
+    699.24,
+    586.8,
+    715.56
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r29-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      699.24,
+      446.88,
+      715.56
+     ],
+     "text": "V IL , input low voltage"
+    },
+    {
+     "cell_id": "p003-t01-r29-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      699.24,
+      554.88,
+      715.56
+     ],
+     "text": "0.1V DD"
+    },
+    {
+     "cell_id": "p003-t01-r29-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      699.24,
+      586.8,
+      715.56
+     ],
+     "text": "V"
+    }
+   ]
+  },
+  {
+   "row_index": 29,
+   "row_id": "p003-t01-r30",
+   "bbox": [
+    46.8,
+    715.56,
+    586.8,
+    732.0
+   ],
+   "cells": [
+    {
+     "cell_id": "p003-t01-r30-c00",
+     "column_id": 0,
+     "bbox": [
+      46.8,
+      715.56,
+      184.08,
+      732.0
+     ],
+     "text": "ASK Input Current"
+    },
+    {
+     "cell_id": "p003-t01-r30-c01",
+     "column_id": 1,
+     "bbox": [
+      184.08,
+      715.56,
+      446.88,
+      732.0
+     ],
+     "text": "ASK = 0V, 5.0V input current"
+    },
+    {
+     "cell_id": "p003-t01-r30-c02",
+     "column_id": 2,
+     "bbox": [
+      446.88,
+      715.56,
+      482.88,
+      732.0
+     ],
+     "text": "–10"
+    },
+    {
+     "cell_id": "p003-t01-r30-c03",
+     "column_id": 3,
+     "bbox": [
+      482.88,
+      715.56,
+      518.88,
+      732.0
+     ],
+     "text": "0.1"
+    },
+    {
+     "cell_id": "p003-t01-r30-c04",
+     "column_id": 4,
+     "bbox": [
+      518.88,
+      715.56,
+      554.88,
+      732.0
+     ],
+     "text": "10"
+    },
+    {
+     "cell_id": "p003-t01-r30-c05",
+     "column_id": 5,
+     "bbox": [
+      554.88,
+      715.56,
+      586.8,
+      732.0
+     ],
+     "text": "µ A"
+    }
+   ]
+  }
+ ]
+}

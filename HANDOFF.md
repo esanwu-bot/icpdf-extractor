@@ -379,3 +379,21 @@ and S2/S3/S4 remain frozen.
 - **Left over.** S3 drawing gate (4 negative FPs), S2 visual/logical columns
   and `condition_path`, S4 roles, fill-only quad outlines, cross-page regions.
 - Not pushed to Codeup.
+
+### S1 review follow-up (2026-11-06)
+
+- **S1 commit:** `003311fa8ee24ef68254fa3852329a9a9f1d762a`; follow-up changes
+  are a separate local commit.
+- **Files.** `table_regions.py` caption block now matches caption text
+  (`Table`/`Tabelle`/`Tabla`/`表`/`Figure`/…), not font size;
+  `config.py` drops `merge_caption_scale` (YAML/config SHA unchanged);
+  `header_semantics.py` `_is_label_grid` also requires a description cell
+  (≥3 words/≥15 chars) beside the short key.
+- **Tests.** `tests/unit/test_table_regions.py` adds larger-heading merge,
+  body-size caption split, independent-tables split, section-local column
+  mapping; new `tests/unit/test_label_grid.py` (7 negative/positive cases).
+  Full suite `89 passed, 2 xfailed`.
+- **Reruns.** `runs/phase14_s1/review_rerun/` six runs, evidence 0/0;
+  Gold v2 and Phase 1.2 per-item diffs are empty (`changed_items=[]`).
+- **Review artifacts.** `docs/reviews/phase14_s1/` (response, components/grid
+  JSON + images, per-item diff JSON, commit patches).

@@ -17,6 +17,7 @@ the Phase 1.1 over-detection.
 
 from __future__ import annotations
 
+import re
 import statistics
 from dataclasses import dataclass, field
 
@@ -112,44 +113,37 @@ def _horizontal_extent(component: RuleComponent) -> tuple[float, float] | None:
     return (widest.a, widest.b)
 
 
-def _body_font_size(layout: PageLayout,
-                    components: list[RuleComponent]) -> float | None:
-    sizes: list[float] = []
-    for block in layout.blocks:
-        for span in block.spans:
-            if span.size is None or not span.text.strip():
-                continue
-            cx = (span.bbox[0] + span.bbox[2]) / 2.0
-            cy = (span.bbox[1] + span.bbox[3]) / 2.0
-            if any(component.bbox[0] - 1.0 <= cx <= component.bbox[2] + 1.0
-                   and component.bbox[1] - 1.0 <= cy <= component.bbox[3] + 1.0
-                   for component in components):
-                sizes.append(span.size)
-    return statistics.median(sizes) if sizes else None
+# A caption label starts a new table.  The signal is the document convention
+# ("Table 6-28.", "Tabelle 6.28", "表 3"), not the font size: an in-table
+# section band may be set at any size, and a caption may inherit the body size.
+_CAPTION = re.compile(
+    r"^\s*(?:table|tab\.?|tabelle|tabla|tableau|tabela|tabel|таблица|表|표"
+    r"|figure|fig\.?|图)\b",
+    re.IGNORECASE,
+)
 
 
 def _gap_has_caption(layout: PageLayout, y0: float, y1: float,
-                     x0: float, x1: float, body_size: float | None,
-                     params: TableParams) -> bool:
-    """A larger-than-body label in the gap is a new table caption, not a row.
+                     x0: float, x1: float) -> bool:
+    """A caption label in the gap starts a new table, so do not merge.
 
-    Datasheets separate stacked tables with a bold caption ("Table 6-28. ...")
-    set at a larger size than the table body, while an in-table section band
-    ("Power Supply") uses the body size.  Only the typographic signal is used.
+    Only the label text is used.  Font size is deliberately ignored: section
+    bands inside one table can be bold or larger, and captions in some
+    templates are set at the body size.
     """
-    if body_size is None or y1 - y0 <= 0:
+    if y1 - y0 <= 0:
         return False
-    limit = body_size * params.merge_caption_scale
     for block in layout.blocks:
         for span in block.spans:
-            if span.size is None or not span.text.strip():
+            text = span.text.strip()
+            if not text:
                 continue
             if not (y0 - 1.0 <= span.bbox[1] and span.bbox[3] <= y1 + 1.0):
                 continue
             cx = (span.bbox[0] + span.bbox[2]) / 2.0
             if not (x0 <= cx <= x1):
                 continue
-            if span.size > limit:
+            if _CAPTION.match(text):
                 return True
     return False
 
@@ -196,10 +190,9 @@ def _merge_pair(layout: PageLayout, upper: RuleComponent, lower: RuleComponent,
                  upper_extent[0], lower_extent[0])
     gap_x1 = max(upper.bbox[2], lower.bbox[2],
                  upper_extent[1], lower_extent[1])
-    body_size = _body_font_size(layout, [upper, lower])
     if _gap_has_caption(layout, upper.bbox[3], lower.bbox[1],
-                        gap_x0, gap_x1, body_size, params):
-        return False, None, "gap contains a caption-sized label"
+                        gap_x0, gap_x1):
+        return False, None, "gap contains a table/figure caption"
     evidence = {
         "shared": tuple(shared),
         "gap": gap,
