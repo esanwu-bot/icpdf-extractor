@@ -12,10 +12,14 @@ output.  Decisions live in:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from icpdf.domain.common import BBox
-from icpdf.domain.table import ReconstructionStatus, TableType
+from icpdf.domain.table import (
+    ReconstructionStatus,
+    TableType,
+    validate_grid_ys,
+)
 from icpdf.domain.visual import VisualBoundary
 from icpdf.parser.config import TableParams
 from icpdf.parser.header_semantics import assess_region, infer_semantics
@@ -81,6 +85,11 @@ class DetectedTable(BaseModel):
     # Phase 1.4 S2b - the physical row lattice, copied verbatim from TableGrid.
     grid_ys: tuple[float, ...] = ()
     n_rows: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def _check_row_lattice(self) -> "DetectedTable":
+        validate_grid_ys(self.grid_ys, self.n_rows)
+        return self
 
 
 def _ragged_rows(grid: TableGrid, header_rows: int) -> list[int]:

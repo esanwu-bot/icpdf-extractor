@@ -3,11 +3,15 @@
 
 from __future__ import annotations
 
+import pymupdf as fitz
+
 from icpdf.parser.config import TableParams
+from icpdf.parser.coords import PageGeometry
 from icpdf.parser.layout import PageLayout
 from icpdf.parser.rule_primitives import RuleComponent, RuleSegment
 from icpdf.parser.structure import TableRegion, recognize_structure
-from icpdf.parser.text_blocks import TextWord
+from icpdf.parser.table_detector import detect_tables
+from icpdf.parser.text_blocks import TextWord, extract_text_blocks
 
 
 def _word(word_id: str, x0: float, y0: float, x1: float,
@@ -68,3 +72,74 @@ def test_alignment_grid_retains_group_words():
     assert [word.word_id for word in grid.cell_words[0]] == ["A0"]
     assert [word.word_id for word in grid.cell_words[1]] == ["B0"]
     assert [word.word_id for word in grid.cell_words[5]] == ["B2"]
+
+
+def _word_map(blocks) -> dict[str, TextWord]:
+    return {word.word_id: word for block in blocks
+            for line in block.lines for word in line.words}
+
+
+def _assert_cell_ids_match_words(detected, words: dict[str, TextWord]) -> None:
+    seen: set[str] = set()
+    for row in detected.rows:
+        for cell in row.cells:
+            assert cell.word_ids
+            for word_id in cell.word_ids:
+                word = words[word_id]
+                cx = (word.bbox[0] + word.bbox[2]) / 2.0
+                cy = (word.bbox[1] + word.bbox[3]) / 2.0
+                assert cell.bbox[0] - 0.8 <= cx <= cell.bbox[2] + 0.8
+                assert cell.bbox[1] - 0.8 <= cy <= cell.bbox[3] + 0.8
+                assert word_id not in seen
+                seen.add(word_id)
+    inside = {
+        word_id for word_id, word in words.items()
+        if detected.bbox[0] - 0.8 <= (word.bbox[0] + word.bbox[2]) / 2.0
+        <= detected.bbox[2] + 0.8
+        and detected.bbox[1] - 0.8 <= (word.bbox[1] + word.bbox[3]) / 2.0
+        <= detected.bbox[3] + 0.8
+    }
+    assert seen == inside
+
+
+def test_detect_tables_bridges_rule_grid_word_ids():
+    doc = fitz.open()
+    page = doc.new_page(width=612, height=792)
+    xs = (100.0, 250.0, 400.0)
+    ys = (100.0, 130.0, 160.0, 190.0)
+    for x in xs:
+        page.draw_line((x, ys[0]), (x, ys[-1]), width=1)
+    for y in ys:
+        page.draw_line((xs[0], y), (xs[-1], y), width=1)
+    for row, y in enumerate((115.0, 145.0, 175.0)):
+        for column, x in enumerate((110.0, 260.0, 410.0)):
+            page.insert_text((x, y), f"R{row}C{column}", fontsize=9)
+    geometry = PageGeometry.from_page(page, 72.0, 1)
+    blocks = extract_text_blocks(page, 1, geometry)
+    tables = detect_tables(blocks, 1, TableParams(), page=page,
+                           geometry=geometry)
+    doc.close()
+
+    assert len(tables) == 1
+    table = tables[0]
+    assert table.detection_method == "rule_lattice"
+    assert table.n_rows == 3
+    _assert_cell_ids_match_words(table, _word_map(blocks))
+
+
+def test_detect_tables_bridges_alignment_grid_word_ids():
+    doc = fitz.open()
+    page = doc.new_page(width=612, height=792)
+    for row, y in enumerate((100.0, 120.0, 140.0)):
+        for column, x in enumerate((100.0, 250.0, 400.0)):
+            page.insert_text((x, y), f"R{row}C{column}", fontsize=9)
+    geometry = PageGeometry.from_page(page, 72.0, 1)
+    blocks = extract_text_blocks(page, 1, geometry)
+    tables = detect_tables(blocks, 1, TableParams())
+    doc.close()
+
+    assert len(tables) == 1
+    table = tables[0]
+    assert table.detection_method == "text_alignment"
+    assert table.n_rows == 3
+    _assert_cell_ids_match_words(table, _word_map(blocks))
