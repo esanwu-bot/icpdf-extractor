@@ -438,3 +438,43 @@ Phase 2 stay frozen.
   granularity, thresholds, P08 deferral, status handling, field migration,
   `SECTION` candidates, `TextSpan.flags`, `partial_condition_band` shape).
 - Not pushed to Codeup.
+
+## Phase 1.4 S2 — design revision r1 (2026-11-06)
+
+**Status:** design-only revision submitted for confirmation; **still no S2
+code**.  Reviewer approved the architecture, three-lattice split, visual/logical
+metric split and table-level fail-closed, but withheld S2a pending three P0
+data-model fixes and the `ConditionContext` clarification.
+
+- **P0-1 many-to-many cells.** Physical cells no longer carry a single
+  `logical_cell_id` / `logical_column`.  `LogicalCell.physical_cell_refs` is the
+  authoritative reverse map; physical cells get derived multi-valued
+  `logical_cell_ids` / `logical_columns`; word ownership is a partition.
+  Candidates keep physical identity (`candidate_id = document:cell_id`) and
+  gain `logical_cell_refs` / `logical_columns`; conflicting multi-role mappings
+  fall back to `unknown` + `multi_logical_mapping`.  Synthetic straddling-cell
+  case added to the test plan.
+- **P0-2 header provenance.** `LogicalHeaderRef` now carries
+  `logical_header_id`, `source_header_cell_refs`, `source_cell_refs` and
+  `evidence_word_ids`, resolved in `table_rebuilder` to domain id lists.  A
+  logical header with text but no source evidence is a validator error.
+- **P0-3 row contract.** All `row_start` / `row_end` / `source_row` use the
+  zero-based physical grid row, inclusive at both ends; array position would be
+  a separate `row_index` and is out of scope.  Validator form:
+  `0 <= row_start <= row_end <= n_rows - 1`.
+- **ConditionContext.** `ConditionBand` stays a physical evidence region;
+  candidate inheritance moves to a separate `ConditionContext`
+  (`condition_band_id`, `target_candidate_ids`, `association_evidence` =
+  `row_overlap` / `header_path` / `column_map` / `explicit_subrule_label`).
+  Same-row membership alone is not evidence.
+- **Reviewer decisions.** All 12 r0 questions answered (§14); thresholds
+  (0.85 coverage, 2 words, 12 chars, 0.5 ratio, 0.90 bold, 4pt span, 0.5pt
+  crossing epsilon) are experimental and must live in `TableParams` with a run
+  parameter-snapshot hash.  `unresolved_section_hint` added for section-like
+  rows lacking bold evidence; SECTION candidates are context-only
+  (`eligible_for_parameter_extraction = false`); `partial_condition_band` is
+  not implemented.
+- **New sections.** §14 recorded decisions, §16 frozen acceptance red lines,
+  §7.0 row contract, §7.4 ConditionContext, §12 synthetic P0-1 / context /
+  provenance tests, S2-design-r1 slice row.
+- Still not pushed to Codeup; no PDF rerun and no Gold change.

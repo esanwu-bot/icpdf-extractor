@@ -2,11 +2,11 @@
 
 Status: design proposal.  **S1 (sections 2.1–2.2 and the region-aggregation
 part of 2.3) is implemented** — see `docs/PHASE1_4_S1.md`.  **The S2 design and
-data-model change proposal is `docs/PHASE1_4_S2.md`; it is submitted for
-Reviewer confirmation and no S2 code has been written.**  S3/S4 remain design
-only.  Parser parameters are frozen and Phase 2 stays frozen.  The purpose is
-to agree on the object model and decision order before any change to
-`icpdf.parser.table_detector`.
+data-model change proposal is `docs/PHASE1_4_S2.md`, now at revision r1 after
+the Reviewer reviewed r0; r1 is submitted for confirmation and no S2 code has
+been written.**  S3/S4 remain design only.  Parser parameters are frozen and
+Phase 2 stays frozen.  The purpose is to agree on the object model and decision
+order before any change to `icpdf.parser.table_detector`.
 
 Inputs to this design:
 
@@ -173,11 +173,18 @@ Invariants (corrected in the S2 proposal; the earlier
 
 * `not_printed` tables have `visual_columns = null` and a decided logical
   mapping from header/label evidence only;
+* every logical boundary carries at least one evidence source
+  (`printed_rule`, `header_canopy`, `label_aligned`, `structural`,
+  `subrule_promoted`); none is created from a target count or gold value;
 * otherwise every logical boundary is a visual boundary or carries
   header/label evidence, and every visual column overlaps at least one logical
   column while every logical column overlaps at least one visual column;
 * a visual column may overlap several logical columns (header canopy), and
-  several visual columns may map to one logical column (demoted sub-rule).
+  several visual columns may map to one logical column (demoted sub-rule);
+* the physical↔logical cell relation is many-to-many and is stored on the
+  logical side; word ownership is a partition across logical cells;
+* all row ranges use the zero-based physical grid row, inclusive at both ends
+  (`0 <= row_start <= row_end <= n_rows - 1`).
 
 See `docs/PHASE1_4_S2.md` §6 for the full set.
 

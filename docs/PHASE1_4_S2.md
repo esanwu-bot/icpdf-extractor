@@ -1,10 +1,24 @@
 # Phase 1.4 S2 — VisualBoundary / LogicalColumn separation and logical projection
 
-Status: **design and data-model change proposal only**.  No implementation code
-is part of this proposal.  Implementation starts only after the Reviewer
-confirms this document.  S1 behaviour is frozen; `RulePrimitive`,
-`RuleComponent` and `TableRegion` aggregation, Gold v2 (`gen-2026-11-06.2`)
-and the Candidate Registry contract are not changed by this proposal.
+Status: **design revision r1 (post-review), data-model proposal only**.  No
+implementation code is part of this proposal.  The Reviewer approved the S2
+architecture direction, the three-lattice separation, the visual/logical metric
+split and table-level fail-closed, but withheld S2a authorisation until the
+three P0 data-model corrections (many-to-many cell mapping, header provenance,
+row-index contract) and the `ConditionContext` separation in this revision are
+confirmed.  S2a starts only after that confirmation.  S1 behaviour is frozen;
+`RulePrimitive`, `RuleComponent` and `TableRegion` aggregation, Gold v2
+(`gen-2026-11-06.2`) and the Candidate Registry contract are not changed by
+this proposal.
+
+Revision record:
+
+* r0 `cfcaa828b33727126d27db823a65c55e58f28ef7` — initial design; reviewed.
+* r1 — this document.  Incorporates the review: P0-1 many-to-many
+  physical↔logical mapping, P0-2 complete header provenance, P0-3 row-index
+  contract, `ConditionBand` / `ConditionContext` separation, the 12 recorded
+  decisions (§14) and the frozen acceptance red lines (§16).  No PDF rerun and
+  no Gold change were needed for this revision.
 
 S1 acceptance basis (as recorded by the Reviewer):
 
@@ -36,8 +50,10 @@ adds the logical projection that the separation requires:
 6. **Fail-closed mapping** — when the logical mapping cannot be decided, the
    table reports `logical_columns = null` and
    `logical_mapping_status = unresolved`; nothing is forced.
-7. **Traceability** — logical cells and candidates reference physical cell ids
-   and word ids; candidates carry the logical column and context path.
+7. **Traceability** — logical cells reference the physical cells and words that
+   produce them.  The physical↔logical cell relation is many-to-many and is
+   stored on the logical side; candidates keep their physical identity and
+   carry logical cell references plus an explicit context path.
 
 Frozen constraints carried from the Reviewer instruction:
 
@@ -200,30 +216,57 @@ whatever role its header provides, otherwise `unknown`.  No role is inferred
 from mere adjacency.  This deliberately narrows the Gold-spec example
 "an unlabeled column left of MIN/TYP/MAX is a condition column": in CY29 P06
 the left parameter column must stay `unknown`, while the promoted sub-column is
-`condition`.  See open question 4.
+`condition`.  See §14 decision 4.
 
 ## 6. Invariants
 
-These replace the old `logical_columns <= visual_columns` invariant:
+These replace the old `logical_columns <= visual_columns` invariant (withdrawn;
+Gold v2 has 8 logical / 4 visual on CY29FCT520-P04-T01 and 9 / 7 on P05):
 
 1. `visual_columns` is `null` exactly when `visual_boundary_status` is
    `not_printed`.
-2. When visual boundaries exist, every logical boundary is either within 2.5pt
-   of a visual boundary or has header/label evidence.  No logical boundary is
-   invented from cell content alone.
-3. When visual boundaries exist, every visual column interval overlaps at least
+2. **Every logical boundary carries at least one evidence source.**  Allowed
+   sources: `printed_rule`, `header_canopy`, `label_aligned`, `structural`,
+   `subrule_promoted`.  A logical boundary is never created because of a
+   target column count, a gold value, or cell content alone.
+3. When visual boundaries exist, every logical boundary is within 2.5pt of a
+   visual boundary or has header/label evidence.
+4. When visual boundaries exist, every visual column interval overlaps at least
    one logical column and every logical column overlaps at least one visual
    column.  A visual column may overlap several logical columns (header
    canopy); several visual columns may map to one logical column (demoted
    sub-rule).
-4. If `logical_mapping_status = unresolved`, then `logical_columns` is `null`,
+5. **The physical↔logical cell relation is many-to-many.**  A physical cell may
+   back several logical cells and a logical cell may merge several physical
+   cells; `LogicalCell.physical_cell_refs` is the authoritative reverse map.
+   Word ownership is a partition: every word belongs to exactly one logical
+   cell, and the word sets of logical cells sharing a physical cell are
+   disjoint.
+6. If `logical_mapping_status = unresolved`, then `logical_columns` is `null`,
    `logical_boundaries`, `column_projection`, `logical_cells`,
    `logical_headers` and `logical_column_roles` are empty; visual fields and
    physical detection are still emitted.
-5. No logical field may change `grid.xs`, `grid.ys`, cell bboxes/text or the
+7. No logical field may change `grid.xs`, `grid.ys`, cell bboxes/text or the
    region aggregation.
 
-## 7. Logical projection, section bands and condition bands
+## 7. Logical projection, section bands and condition context
+
+### 7.0 Row index contract
+
+Every row reference in this proposal uses the **zero-based physical grid row
+index** (`GridCell.row`, copied to `DetectedRow.grid_row` and domain
+`TableRow.grid_row`):
+
+* `row_start` and `row_end` are **inclusive**;
+* every `row_start`, `row_end` and `source_row` field and every validator range
+  check uses this index;
+* a `DetectedRow` array position is never used as a row reference; if an array
+  position is ever needed it is named `row_index` and is not part of S2;
+* rows are contiguous in S2.  Detection emits rows from `grid.ys` without
+  skipping empty visual rows, and no S2 structure renumbers or compacts rows;
+* `LogicalCell.row_start == row_end` for a single-row cell; a cell spanning
+  several physical rows uses an inclusive range over the same index;
+* the validator form is `0 <= row_start <= row_end <= n_rows - 1`.
 
 ### 7.1 Projection
 
@@ -288,9 +331,27 @@ the domain cells and copies the resolved ids into `physical_cell_ids` /
 column shift, is unchanged.  Header references are resolved in the same place
 from the existing `HeaderCell` ids.
 
-The physical `DetectedCell` additionally carries `logical_column`,
-`logical_cell_id` and `word_ids`; its text, bbox and column index are
-unchanged.
+The physical↔logical cell relation is many-to-many and is stored on the
+logical side:
+
+* one physical cell may be split across several logical cells when it
+  straddles a promoted boundary; each word is assigned to exactly one of them;
+* several physical cells may be merged into one logical cell (demoted
+  sub-rule);
+* therefore neither `DetectedCell` nor domain `Cell` has a single-valued
+  `logical_cell_id` or `logical_column`.
+
+`LogicalCell.physical_cell_refs` / `physical_cell_ids` is the authoritative
+reverse mapping.  For physical-side queries the parser and domain cell carry
+derived, possibly multi-valued caches `logical_cell_ids: tuple[str, ...]` and
+`logical_columns: tuple[int, ...]`; these are projections, never the source of
+truth.  A cell split by a promoted boundary has two ids in `logical_cell_ids`
+and disjoint word sets.  Its text, bbox and column index are unchanged.
+
+`logical_cell_id` is deterministic and content-independent:
+`{region_id}-r{row_start:02d}[-r{row_end:02d}]-lc{logical_column:02d}` with the
+`-ls{span}` suffix when `logical_column_span > 1`.  Splitting or merging
+physical cells never creates, removes or renumbers a candidate id.
 
 ### 7.3 Section bands
 
@@ -310,14 +371,31 @@ assigned span text has ratio 0 and cannot be a section.
 
 `merged column_span >= 2` is corroborating evidence, not a substitute for the
 bold test.  A bold numeric row and a bold multi-cell data row are rejected
-because of rules 2 and 5.  Measured: MICRF P03 rows 1/9/15/19 and DS10 P04/P05
-section rows pass; the bold numeric cells in MICRF data rows (for example
-`26.5`, `27.5`) are rejected because the row has several populated cells.
+because of rules 2 and 5.  Measured: MICRF P03 grid rows 1/9/15/19 and DS10
+P04/P05 section rows pass; the bold numeric cells in MICRF data rows (for
+example `26.5`, `27.5`) are rejected because the row has several populated
+cells.
+
+These five conditions are a high-confidence rule, not a definition of section.
+A row that is section-like but fails them — merged solo cell without bold,
+unknown bold flags without a bold font name, or styling conveyed by background
+fill, border or size — becomes `row_role = "unresolved_section_hint"`: a
+diagnostic record only, not a `SectionBand` and not a SECTION candidate.  Its
+physical candidates are emitted with `eligible_for_parameter_extraction =
+false` and `eligible_for_context = true`, so a suspected title is never forced
+into parameter output and never silently reinterpreted as a parameter row.
+Background-fill and border-based section detection are out of scope for S2;
+ordinary rows stay `data`.
 
 Logical span:
 
-* collect the internal visual boundaries whose vertical segments intersect the
-  row band;
+* collect the internal visual boundaries whose vertical segments **cross** the
+  row band.  A rule crosses the band when the length of its bbox clipped to the
+  band's vertical interval is greater than `crossing_epsilon_pt` (default
+  0.5pt).  Endpoint proximity to the band bbox is not evidence;
+* if the section-like row has more than one populated cell, the single-label
+  rule does not apply and the row becomes `unresolved_section_hint`; no
+  `SectionBand` is emitted;
 * **no crossing boundary** → the band is full-width; the logical cell spans all
   logical columns (MICRF P03: `column_span = 6`, bbox = table width);
 * **crossing boundaries exist** → the band is bounded; the logical cell spans
@@ -340,15 +418,23 @@ SectionBand
 ```
 
 Section rows stay in `rows`; they are not deleted and do not change
-`reconstruction_status` (see open question 8).  The section label becomes a
-`SECTION` candidate, not a parameter/value candidate.  The same physical cell
-yields the same `candidate_id`, so candidate count and ids stay stable.
+`reconstruction_status` (see §14 decision 8).  The row gains
+`row_role = "section"` and the section's `ContextRef`; `row_role` never feeds
+`_ragged_rows`.  A row with one cell may be a section or a ragged data row, and
+section recognition does not alter the physical reconstruction state.
 
-### 7.4 Condition bands and `condition_path`
+The section label becomes a `SECTION` candidate, not a parameter/value
+candidate.  The same physical cell yields the same `candidate_id`, so candidate
+count and ids stay stable.  Section candidates are context evidence only:
+`eligible_for_parameter_extraction = false`, `eligible_for_context = true`
+(§14 decision 10).
 
-Demoted partial separators become `ConditionBand`s.  Contiguous demoted
-separators inside one logical column and overlapping row ranges are grouped
-into one band:
+### 7.4 Condition bands and condition context
+
+A `ConditionBand` is a **physical evidence region**: the row range and cells
+spanned by one or more demoted separators.  It is not itself an inheritance
+rule.  Contiguous demoted separators inside one logical column and overlapping
+row ranges are grouped into one band.
 
 ```text
 ConditionBand
@@ -362,7 +448,36 @@ ConditionBand
   demotion_reason: str
 ```
 
-`ContextRef` preserves the hierarchy:
+`ConditionContext` is the separate **candidate-level relation** that inherits a
+band's condition:
+
+```text
+ConditionContext
+  context_id: str
+  condition_band_id: str
+  target_candidate_ids: tuple[str, ...]
+  association_evidence: tuple[str, ...]
+      # row_overlap | header_path | column_map | explicit_subrule_label
+```
+
+An association is created only from explicit evidence:
+
+* `row_overlap` — the candidate's grid row is inside the band's inclusive row
+  range **and** the band's demoted separators lie inside or immediately left of
+  the candidate's physical cell on that row.  Same-row membership alone is not
+  sufficient when the band and the candidate occupy unrelated column ranges;
+* `header_path` — the band's label is a header path that also covers the
+  candidate's logical column;
+* `column_map` — the band's logical column maps to the candidate's logical
+  column through `ColumnMapping`;
+* `explicit_subrule_label` — the demoted separator carries a repeated short
+  label that names the condition field.
+
+If no evidence applies, no context is attached.  Several condition fields in
+one row produce several context refs, one per band, in left-to-right band
+order; they are never merged into one label.
+
+`ContextRef` is the serialized path element:
 
 ```text
 ContextRef
@@ -371,29 +486,70 @@ ContextRef
   label
   source_cell_id
   source_row
+  evidence: tuple[str, ...]
 ```
 
-* `DetectedRow.context_refs` (and domain `TableRow.context_refs`) lists
-  section refs applying to that row (a new section closes the previous one);
-* a candidate's `context_path` = row section refs + condition refs whose row
-  range contains the cell and whose logical column contains the candidate's
-  logical column;
+* `DetectedRow.context_refs` (and domain `TableRow.context_refs`) lists the
+  section refs applying to that row; a new section closes the previous one;
+* a condition ref reaches a candidate only through a `ConditionContext`; a
+  candidate's `context_path` = its row's section refs followed by its linked
+  condition refs, ordered by `row_start` then band position;
 * a `ConditionBand` label is the covering logical column's header path when
   available (for example `TEST CONDITIONS`), otherwise empty; per-row varying
   condition text is a condition-column value, not a context label.
 
-This keeps section/condition hierarchy out of ordinary parameter and value
-columns without inventing labels.
+This keeps section/condition hierarchy out of parameter/value columns, and
+prevents the unconditional same-row inheritance that a single `ContextRef`
+model would imply.
 
 ### 7.5 Logical headers and roles
 
 `logical_headers`, `logical_header_path` and `logical_header_cells` are built by
-overlapping the existing header cells with logical intervals.  The parser
-emits `LogicalHeaderRef {level, source_column, logical_column, text, bbox}`;
-`table_rebuilder` turns each ref into a domain `HeaderCell` whose
-`column_id` is the logical column and whose `source_cell_id` is the resolved
-physical cell (new id shape `{table_id}-lh{level:02d}-c{logical_column:02d}`,
-leaving S1 header ids untouched).
+overlapping the existing header cells with logical intervals.  A canopy header
+may cover several logical columns, one logical header may concatenate several
+physical header cells, and one physical header cell may support several logical
+headers; therefore the parser emits a ref that keeps all provenance:
+
+```text
+LogicalHeaderRef
+  logical_header_id: str            # deterministic
+  level: int
+  logical_column: int
+  text: str
+  bbox
+  source_header_cell_refs: tuple[HeaderCellRef, ...]   # S1 header cells
+  source_cell_refs: tuple[PhysicalCellRef, ...]        # physical cells back it
+  evidence_word_ids: tuple[str, ...]
+```
+
+```text
+HeaderCellRef
+  level: int
+  column: int      # S1 header grid column
+  grid_row: int    # physical header row
+```
+
+`HeaderCellRef` resolves to the existing S1 header id
+`{table_id}-h{level:02d}-c{column:02d}`; it is not a `PhysicalCellRef`, because
+one physical header cell can back several header ids.  `table_rebuilder`
+resolves each ref into a domain `HeaderCell` with `source_header_cell_ids`,
+`source_cell_ids` and `evidence_word_ids`.  Header
+cell ids and column ids are not interchangeable: `column_id` is the logical
+column, while the source lists identify the physical evidence.  The logical id
+shape is `{table_id}-lh{level:02d}-c{logical_column:02d}`; S1 header ids are
+untouched.  A logical header is never emitted with only its final text and no
+physical source.
+
+Three concepts stay separate:
+
+* `logical_boundary_source` — why the boundary exists (`printed_rule`,
+  `header_canopy`, `label_aligned`, `structural`, `subrule_promoted`);
+* `logical_column_role` — the assigned role (`parameter`, `condition`,
+  `unknown`, …);
+* `role_source` — why that role was assigned (`header_text`,
+  `subrule_short_label`, `fail_closed`, `section_band`).
+
+A promoted boundary therefore does not by itself confirm a semantic role.
 
 * a canopy cell backs every logical column it overlaps;
 * sub-labels (`MIN`, `TYP`, `MAX`) are appended in header-level order;
@@ -404,7 +560,7 @@ leaving S1 header ids untouched).
 `logical_column_roles` uses the existing `role_for_header` mapper.  Role
 sources: `header_text`, `subrule_short_label`, `fail_closed`.  The physical
 `headers` and `column_roles` fields stay as they are in S1; the logical fields
-are additive (see open question 9).
+are additive and do not migrate S1 semantics (see §14 decision 9).
 
 ## 8. Fail-closed behaviour
 
@@ -412,6 +568,9 @@ The logical mapping is `unresolved` when any of the following holds:
 
 * a partial separator has mixed short-label evidence below the promotion
   threshold;
+* a candidate logical boundary has no evidence source at all;
+* a section-like row has several populated label cells, so the single-label
+  span rule cannot be applied (§7.3);
 * header-canopy boundaries conflict with printed boundaries and cannot be
   ordered;
 * `not_printed` tables have no stable header/label boundaries;
@@ -428,6 +587,11 @@ On `unresolved`:
 * the table stays in the logical exactness denominator as a miss, and is
   reported as `logical_mapping_unresolved`; it is not silently excluded.
 
+An unresolved logical mapping does **not** invalidate physical evidence.  Visual
+fields, cell provenance, word ids and physical candidates remain valid and are
+reported independently; `logical_mapping_unresolved` is a separate statistic,
+not a physical failure.
+
 ## 9. Proposed data-model changes
 
 All changes are additive with defaults.  No existing field is renamed,
@@ -439,8 +603,8 @@ removed or reinterpreted.  `extra="forbid"` models remain valid for old JSON.
 layer does not import the parser):
 
 * `BoundaryEvidence`, `VisualBoundary`, `LogicalBoundary`, `ColumnMapping`
-* `PhysicalCellRef`, `LogicalHeaderRef`, `SectionBand`, `ConditionBand`,
-  `ContextRef`, `LogicalCell`
+* `PhysicalCellRef`, `HeaderCellRef`, `LogicalHeaderRef`, `SectionBand`,
+  `ConditionBand`, `ConditionContext`, `ContextRef`, `LogicalCell`
 * `LogicalStructure` (the complete visual + logical result for one region)
 
 `src/icpdf/parser/logical_structure.py` (new; no changes to
@@ -459,39 +623,59 @@ refs to domain cell ids; no domain module imports the parser.
 | --- | --- |
 | `TextSpan` (`text_blocks.py`) | `flags: int \| None = None` — exposes PyMuPDF bold bit 16; font-name parsing remains a fallback |
 | `DetectedTable` | `visual_boundaries: tuple[float, ...] = ()`, `visual_boundary_status: str = "unknown"`, `visual_columns: int \| None = None`, `partial_boundaries: tuple[float, ...] = ()`, `logical_boundaries: tuple[float, ...] = ()`, `logical_columns: int \| None = None`, `logical_mapping_status: str = "unresolved"`, `column_projection`, `section_bands`, `condition_bands`, `logical_cells`, `logical_headers`, `logical_header_path`, `logical_header_cells`, `logical_column_roles` |
-| `DetectedCell` | `logical_column: int \| None = None`, `logical_cell_id: str \| None = None`, `word_ids: tuple[str, ...] = ()` |
+| `DetectedCell` | `logical_cell_ids: tuple[str, ...] = ()`, `logical_columns: tuple[int, ...] = ()`, `word_ids: tuple[str, ...] = ()` (derived caches; no single-valued logical id) |
 | `DetectedRow` | `row_role: str = "data"`, `context_refs: tuple[ContextRef, ...] = ()` (it already has `grid_row`) |
-| domain `Table` | the same logical/visual fields, as lists; `logical_header_cells: list[HeaderCell]` (logical `column_id`), and resolved `physical_cell_ids` / `source_cell_ids` |
-| domain `Cell` | `logical_column: int \| None = None`, `logical_cell_id: str \| None = None`, `word_ids: list[str] = []` |
+| domain `Table` | the same logical/visual fields, as lists; `logical_header_cells: list[HeaderCell]` (logical `column_id`), resolved `physical_cell_ids` / `source_cell_ids`, and `condition_contexts` |
+| domain `Cell` | `logical_cell_ids: list[str] = []`, `logical_columns: list[int] = []`, `word_ids: list[str] = []` |
+| domain `HeaderCell` | additive `source_header_cell_ids: list[str] = []`, `source_cell_ids: list[str] = []`, `evidence_word_ids: list[str] = []`; existing `source_cell_id` is unchanged |
 | domain `TableRow` | `grid_row: int \| None = None`, `row_role: str = "data"`, `context_refs: list[ContextRef] = []` |
-| `Candidate` | `logical_column: int \| None = None`, `logical_cell_id: str \| None = None`, `context_path: list[ContextRef] = []`; `CandidateType` gains `SECTION = "section"` |
-| `Candidate` roles | section rows use `candidate_type=SECTION`, `column_role=UNKNOWN`, `role_source="section_band"`; other candidates use the logical column role |
-| `TableParams` | additive defaults only: `subrule_logical_span=0.85`, `section_bold_ratio=0.9`, `short_label_max_words=2`, `short_label_max_chars=12`, `short_label_band_ratio=0.5`, `visual_min_rule_span_pt=4.0` |
+| `Candidate` | physical identity is unchanged (`candidate_id` = document id + physical `cell_id`); additive `logical_cell_refs: list[str] = []`, `logical_columns: list[int] = []`, `context_path: list[ContextRef] = []`, `eligible_for_parameter_extraction: bool = True`, `eligible_for_context: bool = False`; `CandidateType` gains `SECTION = "section"` |
+| `Candidate` roles | section rows use `candidate_type=SECTION`, `column_role=UNKNOWN`, `role_source="section_band"`, eligibility `false / true`; `unresolved_section_hint` rows keep physical candidate type but eligibility `false / true`; other candidates use the logical column role |
+| `TableParams` | additive defaults only: `subrule_logical_span=0.85`, `section_bold_ratio=0.9`, `short_label_max_words=2`, `short_label_max_chars=12`, `short_label_band_ratio=0.5`, `visual_min_rule_span_pt=4.0`, `crossing_epsilon_pt=0.5`; the unit-only exclusion list is a separate auditable table in the same params module |
 
-`TableParams` values live in code defaults; the YAML config and its SHA
+All thresholds live in `TableParams`; the algorithm functions contain no
+scattered magic numbers.  The YAML config and its SHA
 `ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c` stay
-unchanged.
+unchanged, but every run manifest records the effective parameter values
+(including code defaults) and a parameter-snapshot hash, so a later change to a
+code default cannot make an old run irreproducible.  The short-label unit-only
+exclusion set is an explicit, auditable table in the params module rather than
+opaque string matching.
 
 ### 9.3 Candidate and evidence traceability
 
-When the mapping is decided, `build_candidates` looks up the role and header
-through `cell.logical_column` in `logical_column_roles` / `logical_headers`;
-when the mapping is unresolved it falls back to the S1 physical
-`headers` / `column_roles`.  Candidate ids, cell ids, bboxes, raw text and
-unit extraction are unchanged.
+A candidate is a **physical-cell object**, not a logical-cell object.  Its
+identity is unchanged; the logical interpretation is attached as references.
 
-* `candidate_id` remains `"{document_id}:{cell_id}"`; ids and bboxes are
-  unchanged.
-* Every candidate gains `logical_column`, `logical_cell_id` and
-  `context_path` when the mapping is decided.
+`build_candidates` resolves the role through the candidate's logical refs:
+
+* exactly one logical cell → use that logical column's role and header path;
+* several logical cells with the same role → use that role;
+* several logical cells with conflicting roles → `column_role = UNKNOWN`,
+  `role_source = "multi_logical_mapping"`; both refs are kept and no role is
+  forced;
+* unresolved mapping → fall back to the S1 physical `headers` /
+  `column_roles`, with no logical refs.
+
+Candidate ids, cell ids, bboxes, raw text and unit extraction are unchanged.
+
+* `candidate_id` remains `"{document_id}:{cell_id}"`; splitting one physical
+  cell into several logical cells never creates new candidate ids.
+* Every candidate gains `logical_cell_refs`, derived `logical_columns` and
+  `context_path` when the mapping is decided, plus the eligibility flags.
 * Every `LogicalCell` lists `physical_cell_refs` at parser level and
-  `physical_cell_ids` in the domain table, plus `word_ids`.
-* Every `VisualBoundary` / `LogicalBoundary` records its source evidence
-  (rule component ids / header cell ids) and coverage.
+  `physical_cell_ids` in the domain table, plus `word_ids`; word ownership is a
+  partition across logical cells (`word_ids` sets are disjoint).
+* Every `LogicalHeaderRef` lists `source_header_cell_refs`, `source_cell_refs`
+  and `evidence_word_ids`, resolved to the corresponding domain id lists.
+* Every `VisualBoundary` / `LogicalBoundary` records its evidence source (rule
+  component ids, header cell ids or label run) and coverage; an evidence-free
+  logical boundary is an error.
 * Section and condition bands record `source_cell_refs`, resolved to
-  `source_cell_ids` in the domain table.
-* When the mapping is unresolved, candidate logical fields stay null; no
-  physical candidate is dropped.
+  `source_cell_ids`; every `ConditionContext` lists its target candidates and
+  association evidence.
+* When the mapping is unresolved, candidate logical fields stay empty; no
+  physical candidate is dropped or renumbered.
 
 ### 9.4 Example records
 
@@ -553,6 +737,34 @@ condition_bands:
     demotion_reason: subrule_coverage_below_threshold
 ```
 
+Synthetic P0-1 case — one physical cell split by a promoted boundary.  The
+physical cell is unchanged; two logical cells reference it and their word sets
+are disjoint:
+
+```yaml
+logical_cells:
+  - logical_cell_id: syn-r05-lc01
+    row_start: 5
+    row_end: 5
+    logical_column: 1
+    logical_column_span: 1
+    text: <words W1>
+    physical_cell_refs: [{grid_row: 5, cell_index: 0, column_index: 1}]
+    word_ids: [W1]
+  - logical_cell_id: syn-r05-lc02
+    row_start: 5
+    row_end: 5
+    logical_column: 2
+    logical_column_span: 1
+    text: <words W2 W3>
+    physical_cell_refs: [{grid_row: 5, cell_index: 0, column_index: 1}]
+    word_ids: [W2, W3]
+```
+
+The domain cell carries `logical_cell_ids: [syn-r05-lc01, syn-r05-lc02]`,
+`logical_columns: [1, 2]`, `word_ids: [W1, W2, W3]`, while the candidate keeps
+`candidate_id = "{document_id}:{cell_id}"` and lists both logical refs.
+
 ## 10. Evaluation changes
 
 The evaluator already reports `visual_column_count_exact` and
@@ -577,6 +789,12 @@ A predicted `unresolved` table remains in the logical denominator as a miss.
 It is not excluded, because the denominator is defined by the gold mapping.
 Detection, row count and cell-text metrics continue to include every accepted
 table.
+
+Every per-item report states `pred_logical_columns`, `gold_logical_columns` and
+`logical_exact` explicitly, including known misses (CY29 P08: `9 / 12 /
+false`), so a miss can never be hidden by denominator editing.  Each run
+manifest records the effective `TableParams` values and their snapshot hash
+(§9.2).
 
 Design-time expectation (not an acceptance claim): visual 19/19 and logical
 20/21, with CY29 P08 as the known miss.  S2d re-runs the frozen sets and
@@ -612,18 +830,37 @@ New reference-integrity checks (structural only, **not semantic proof**):
 4. Projection: logical indices contiguous from 0; visual indices valid; when
    visual boundaries exist, every visual column is overlapped by at least one
    logical column; no projection interval falls outside the table.
-5. Section/condition bands: row ranges inside `[0, n_rows)`, not inside the
-   header band for sections, source cell ids exist, visual/logical column
-   indices valid, `bold_ratio` in `[0, 1]`.
-6. `grid_row` values are unique and non-negative; `row_role` is in the fixed
-   vocabulary; every context `band_id` resolves to a section or condition
+5. Row contract: `grid_row` values unique and non-negative; every
+   `row_start` / `row_end` / `source_row` satisfies
+   `0 <= row_start <= row_end <= n_rows - 1`; `row_role` in the fixed
+   vocabulary; section bands do not overlap the header band and their
+   `bold_ratio` is in `[0, 1]`.
+6. Section/condition bands: source cell ids exist, visual/logical column
+   indices valid; every context `band_id` resolves to a section or condition
    band, and a section ref's row is inside that band.
-7. Logical cells: physical cell ids exist (domain) and every parser-level
-   ref resolved to exactly one emitted cell, word ids unique, logical column
-   valid, section cells cover their band's logical columns.
-8. Candidates: logical column/cell references resolve; section candidates have
-   `candidate_type=SECTION` and a section `source_cell_id`; unresolved tables
-   carry no logical references.
+7. Logical cells: physical cell ids exist (domain) and every parser-level ref
+   resolved to exactly one emitted cell; word ids resolve and are unique
+   across the logical cells sharing a physical cell; logical column valid;
+   section cells cover their band's logical columns; a logical cell with no
+   `physical_cell_id` / `word_id` is an error.
+8. Many-to-many consistency: for every physical cell, `logical_cell_ids` equals
+   exactly the set of logical cells whose `physical_cell_ids` contain it;
+   `logical_columns` equals the derived column set; a single-valued logical
+   field on a physical cell is an error.
+9. Headers: every logical header resolves to at least one
+   `source_header_cell_ids` entry and one `source_cell_ids` entry;
+   `evidence_word_ids`
+   resolve; `logical_header_id` is unique; a logical header with text but no
+   source evidence is an error.
+10. Boundaries: every logical boundary has at least one allowed evidence
+    source (§6 invariant 2); a promoted boundary records its short-label
+    evidence.
+11. Candidates: logical cell/column references resolve; section candidates
+    have `candidate_type=SECTION`, a section `source_cell_id` and
+    `eligible_for_parameter_extraction == false`; `unresolved_section_hint`
+    rows have the same eligibility; unresolved tables carry no logical
+    references; a `ConditionContext` target exists and its
+    `association_evidence` is non-empty.
 
 Every code above gets a positive and a corrupted-negative fixture.  Passing
 the validator is still not evidence that a boundary is semantically correct;
@@ -644,26 +881,44 @@ Positive:
    listed).
 7. One logical cell spanning several visual columns (section band).
 8. `not_printed` table with stable header labels → decided mapping.
-9. Cell straddling a promoted boundary → word-center split, no duplication.
-10. Section followed by data rows → `row_context` closes at the next section.
+9. **P0-1 acceptance case**: one physical cell straddling a promoted boundary
+   yields two logical cells that both reference the same physical cell; word
+   sets are disjoint and the candidate keeps one physical `candidate_id`.
+10. Section followed by data rows → row context closes at the next section.
+11. A condition band associated by `header_path` / `column_map` attaches a
+    context ref to the parameter candidate on the same row.
+12. A logical header concatenated from two physical header cells keeps both
+    `source_header_cell_ids`, both `source_cell_ids` and all
+    `evidence_word_ids`.
 
 Negative:
 
-11. Bold numeric full-width row → not a section.
-12. Bold multi-cell data row → not a section.
-13. Header row with bold styling → not a section.
-14. Sub-rule with prose right side → demoted.
-15. Sub-rule with numeric/unit right side → demoted.
-16. Sub-rule with mixed label/prose evidence → `unresolved`.
-17. `not_printed` table without stable labels → `unresolved`.
-18. Whole-table bold with no solo rows → no section, mapping intact.
+13. Bold numeric full-width row → not a section.
+14. Bold multi-cell data row → not a section.
+15. Header row with bold styling → not a section.
+16. Merged solo non-bold row → `unresolved_section_hint`, no `SectionBand`, no
+    SECTION candidate, candidate ineligible for parameter extraction.
+17. Sub-rule with prose right side → demoted.
+18. Sub-rule with numeric/unit right side → demoted.
+19. Sub-rule with mixed label/prose evidence → `unresolved`.
+20. `not_printed` table without stable labels → `unresolved`.
+21. Whole-table bold with no solo rows → no section, mapping intact.
+22. Condition band in an unrelated column on the same row → no
+    `ConditionContext` (same-row membership is not evidence).
+23. Word center exactly on a promoted boundary → `unresolved`, not an arbitrary
+    assignment.
+24. Logical header with text but no source refs → validator error.
+25. Physical cell with a single-valued logical id, or a reverse map that does
+    not match the logical cells → validator error.
 
 ### 12.2 Real PDF integration tests
 
 `tests/integration/test_phase14_s2.py` (skips when PDFs are absent):
 
 * MICRF103 P03: physical 30×6 unchanged; visual 6 / implied_outer; logical 6;
-  section bands rows 1/9/15/19 span 6.
+  section bands at zero-based grid rows 1/9/15/19 span 6.
+* DS10 P04: section bands at zero-based grid rows 1/7/15/24 span 2; P05 rows
+  1/12.
 * CY29 P04-T01: visual 4 / printed; logical 8.
 * CY29 P04-T02: visual 6 / partial [173.2]; logical 9.
 * CY29 P05: visual 7 / partial [193.9, 266.0]; logical 9 with both demoted.
@@ -683,63 +938,70 @@ Negative:
   the frozen cases.
 * `DetectedTable` serialization round-trips with default logical fields, so S1
   JSON remains readable.
+* Physical candidate ids and counts are identical before and after S2 on both
+  frozen sets; every changed logical field is listed per item.
+* Every row range in emitted structures satisfies the §7.0 contract.
 
 ## 13. Implementation slices after approval
 
 | Slice | Content | Acceptance |
 | --- | --- | --- |
+| S2-design-r1 | this revision: many-to-many mapping, header provenance, row contract, `ConditionContext`, recorded decisions and red lines | Reviewer confirms this document; no code |
 | S2a | new `logical_structure.py`; additive models; visual boundaries and status | visual 19/19 on the gold comparable set; physical diff empty |
-| S2b | logical boundaries, demotion/promotion, projection, logical headers/roles, fail-closed | logical 20/21; no physical change; unresolved tables keep physical payload |
-| S2c | section/condition bands, `context_path`, candidate tagging | MICRF section rows span 6, DS10 span 2; section candidates; candidate ids unchanged |
-| S2d | evaluator visual/logical split, validator codes, frozen reruns and report | separate metrics; validator 0/0; per-item physical diff empty |
+| S2b | logical boundaries, demotion/promotion, many-to-many projection, header provenance, roles, fail-closed | logical 20/21; no physical change; unresolved tables keep physical payload; reverse-map consistency |
+| S2c | section bands, SECTION candidates, `ConditionBand` + `ConditionContext`, `context_path` | MICRF section rows span 6, DS10 span 2; section candidates ineligible for extraction; candidate ids unchanged; no unconditional same-row context |
+| S2d | evaluator visual/logical split, validator codes, frozen reruns and report | separate metrics with per-item `pred/gold/logical_exact`; validator 0/0; per-item physical diff empty; parameter snapshot recorded |
 
 Each slice is a separate local commit with its full SHA in the report.  No push
 to Codeup.  No slice is reported as accepted before Reviewer confirmation.
 
-## 14. Open questions for the Reviewer
+## 14. Reviewer decisions (r1)
 
-1. **Section evidence.**  Is requiring bold (≥90%) plus a solo populated cell
-   acceptable, with a merged span only corroborating?  Should an unbolded
-   merged section row be an `unresolved` section candidate instead of a
-   section, or silently remain a data row?
-2. **Invariant correction.**  Approve replacing
-   `logical_columns <= visual_columns` with the evidence-based invariants in
-   section 6.  Gold v2 already contradicts the old invariant (CY29 P04-T01
-   8/4, P05 9/7).
-3. **Section span.**  Approve the crossing-rule test (no crossing → full
-   width; crossing → label cell span).  It reproduces MICRF `column_span = 6`
-   and DS10 `column_span = 2` from the page's own ruling.
-4. **Promoted sub-column role.**  Approve `condition` with
-   `role_source = subrule_short_label` and no adjacency-only inference.  This
-   narrows the Gold-spec example: CY29 P06's left parameter column stays
-   `unknown`.
-5. **Fail-closed granularity.**  Approve table-level `logical_columns = null`
-   when any boundary is unresolved, rather than a partially mapped table.
-6. **Promotion thresholds.**  Approve `subrule_logical_span = 0.85`,
-   `short_label_max_words = 2`, `short_label_max_chars = 12`,
-   `short_label_band_ratio = 0.5` and the unit-only exclusion.  These are
-   measured on five documents only, not tuned on the gold answers.
-7. **CY29 P08.**  Accept the known 9-vs-12 logical undercount as a reported
-   miss in S2 and defer header-label column splitting (a candidate for S4), or
-   require label-run splitting in S2?
-8. **Section rows and status.**  Keep section rows in `rows` and leave
-   `_ragged_rows` / `reconstruction_status` unchanged (probed statuses do not
-   change either way), or exclude section rows from the ragged expectation?
-9. **Field migration.**  Keep physical `headers` / `column_roles` and add
-   `logical_*` fields, or migrate the existing fields to logical semantics in
-   a later slice?  This proposal keeps both to avoid changing S1 consumers.
-10. **Section candidates.**  Approve `CandidateType.SECTION` with the same
-    `candidate_id` as the physical cell, replacing the value/row-label
-    candidate for section rows (candidate count unchanged).
-11. **TextSpan flags.**  Approve adding `TextSpan.flags` so bold detection has
-    a stable source instead of font-name parsing alone.
-12. **Partial condition band.**  Emit the richer `ConditionBand` only, or also
-    a Gold-spec-shaped `partial_condition_band` field?  Gold v2 currently has
-    no instances, so there is no annotation to validate the latter.
+The Reviewer answered all 12 questions from r0.  These decisions are binding
+for S2 and are already folded into §§5–13:
+
+| # | Topic | Decision | Binding constraint |
+| --- | --- | --- | --- |
+| 1 | Section evidence | Conditional approval | Bold ≥90% + solo populated cell is a high-confidence rule, not a definition.  Insufficient evidence → `unresolved_section_hint` diagnostic; never forced into a parameter candidate.  No background-fill/border detection in S2. |
+| 2 | Old invariant | Approved | `logical_columns <= visual_columns` withdrawn.  Evidence-based invariants adopted; every logical boundary needs an allowed evidence source. |
+| 3 | Section span | Approved with geometry | Crossing means clipped intersection length with the row band > `crossing_epsilon_pt` (0.5pt), never endpoint proximity.  Several populated label cells → unresolved. |
+| 4 | Promoted role | Approved | `condition` / `subrule_short_label`; no adjacency inference.  `logical_boundary_source`, `logical_column_role` and `role_source` are separate fields. |
+| 5 | Fail-closed | Approved | Whole-table `logical_columns = null`, `logical_mapping_status = "unresolved"`; physical payload and candidates retained; physical evidence validity is independent; `logical_mapping_unresolved` is a separate statistic. |
+| 6 | Thresholds | Experimental approval | 0.85 coverage, 2 words, 12 chars, 0.5 band ratio, 0.90 bold, 4pt minimum span, 0.5pt crossing epsilon.  All live in `TableParams`; no magic numbers; runs record values and a parameter-snapshot hash; unit-only exclusion table is auditable. |
+| 7 | CY29 P08 | Known miss accepted | Report `pred 9 / gold 12 / logical_exact false`; header-label splitting deferred to S4/a separate task; not excluded from the denominator. |
+| 8 | Section rows | Approved | Rows stay in `rows` with `row_role = section` and context refs; `_ragged_rows` / `reconstruction_status` unchanged; section recognition never changes physical reconstruction state. |
+| 9 | Physical vs logical fields | Approved, dual track | Keep `headers` / `column_roles`; add `logical_*`; no silent semantic migration of S1 fields. |
+| 10 | `CandidateType.SECTION` | Conditional approval | Same physical `candidate_id`; SECTION is context evidence: `eligible_for_parameter_extraction = false`, `eligible_for_context = true`; P0-1 mapping fix comes first. |
+| 11 | `TextSpan.flags` | Approved | Store raw `flags: int \| None`; `None` = unknown; bit 16 = bold; font-name parsing is fallback; missing flags are never treated as non-bold. |
+| 12 | Condition shape | `ConditionBand` only | No `partial_condition_band` until Gold v2 contains a validated instance. |
+
+No open question remains.  S2a begins only after the Reviewer confirms this
+revision.
 
 ## 15. Non-goals
 
 No S3 drawing/schematic gate; no S4 role expansion; no OCR/LLM/other engine;
 no vendor/model/page special case; no Gold v2 edit; no detection or
 `RuleComponent`/`TableRegion` change; no YAML config change; no Codeup push;
-no acceptance version built from unreviewed metrics.
+no acceptance version built from unreviewed metrics.  Additionally out of
+scope: header-label column splitting (CY29 P08 stays a known miss),
+background-fill / border-based section detection, a `partial_condition_band`
+field, migration of S1 `headers` / `column_roles` semantics, and any
+single-valued logical id on a physical cell.
+
+## 16. Frozen acceptance red lines
+
+These hold from S2a onward and may not be bypassed to improve a metric:
+
+| Red line | Requirement |
+| --- | --- |
+| S1 physical structure | `grid.xs/ys`, cell bbox/text and region aggregation item-by-item unchanged |
+| Candidate identity | Existing physical candidate ids and counts unchanged |
+| Evidence | Every logical cell traces to physical cells and word ids |
+| Header | Every logical header traces to source header cells |
+| Fail-closed | Undecided mapping reports `unresolved`; no invented logical boundary |
+| Section | SECTION never enters formal parameter output |
+| Gold | Gold v2 unmodified |
+| Evaluation | `unresolved` still counts in the logical denominator |
+| Regression | Phase 1.2 46 items and Gold v2 21 items compared per item |
+| Configuration | Thresholds recorded in the run parameter snapshot for reproducibility |
