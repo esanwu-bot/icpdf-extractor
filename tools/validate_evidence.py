@@ -16,10 +16,14 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from icpdf.domain.visual import VISUAL_BOUNDARY_ROLES, VISUAL_BOUNDARY_STATUSES
+from icpdf.parser.config import snapshot_sha256
 from icpdf.parser.header_semantics import role_for_header
 
 TOL = 0.75
 ROLE_SOURCES = {"header_text", "heuristic", "fail_closed", "unknown"}
+DEFAULT_VISUAL_TOL = 2.5
+DEFAULT_VISUAL_FULL = 0.85
 
 
 def _load(path: Path):
@@ -56,6 +60,150 @@ class _Report:
         self.warnings.append({"code": code, "detail": detail, **ids})
 
 
+def _validate_visual(table: dict, report: _Report, *, required: bool,
+                     tol: float = DEFAULT_VISUAL_TOL,
+                     full: float = DEFAULT_VISUAL_FULL) -> None:
+    """Reference integrity of the derived visual lattice (S2a).
+
+    This proves internal consistency and traceability, never that a separator
+    is semantically the right column boundary.
+    """
+    table_id = table["table_id"]
+    if "visual_boundary_status" not in table:
+        if required:
+            report.error("VISUAL_STATUS_MISSING",
+                         "run records table parameters but the table has no visual status",
+                         table_id=table_id)
+        return
+    status = table.get("visual_boundary_status")
+    if status not in VISUAL_BOUNDARY_STATUSES:
+        report.error("VISUAL_STATUS_INVALID", f"unknown status {status!r}",
+                     table_id=table_id)
+        return
+    boundaries = table.get("visual_boundaries") or []
+    partial = table.get("partial_boundaries") or []
+    evidence = table.get("visual_boundary_evidence") or []
+    x0, x1 = table["bbox"][0], table["bbox"][2]
+
+    if boundaries != sorted(boundaries):
+        report.error("VISUAL_BOUNDARIES_UNSORTED", "visual boundaries are not sorted",
+                     table_id=table_id)
+    if len({round(x, 3) for x in boundaries}) != len(boundaries):
+        report.error("VISUAL_BOUNDARY_DUPLICATE", "duplicate visual boundary",
+                     table_id=table_id)
+    for x in boundaries:
+        if not (x0 - tol <= x <= x1 + tol):
+            report.error("VISUAL_BOUNDARY_OUTSIDE_TABLE",
+                         f"boundary {x:.2f} leaves the table x-range",
+                         table_id=table_id)
+    if boundaries:
+        if abs(boundaries[0] - x0) > tol:
+            report.error("VISUAL_OUTER_LEFT",
+                         f"first boundary {boundaries[0]:.2f} is not bbox.x0 {x0:.2f}",
+                         table_id=table_id)
+        if abs(boundaries[-1] - x1) > tol:
+            report.error("VISUAL_OUTER_RIGHT",
+                         f"last boundary {boundaries[-1]:.2f} is not bbox.x1 {x1:.2f}",
+                         table_id=table_id)
+
+    columns = table.get("visual_columns")
+    if status == "not_printed":
+        if columns is not None:
+            report.error("VISUAL_COLUMNS_NOT_NULL",
+                         "not_printed table must carry visual_columns=null",
+                         table_id=table_id)
+        if partial:
+            report.error("VISUAL_NOT_PRINTED_PARTIAL",
+                         "not_printed table has partial boundaries", table_id=table_id)
+        if len(boundaries) > 2:
+            report.error("VISUAL_NOT_PRINTED_INTERNAL",
+                         "not_printed table has internal boundaries", table_id=table_id)
+    elif columns != len(boundaries) - 1:
+        report.error("VISUAL_COLUMNS_MISMATCH",
+                     f"visual_columns={columns} but {len(boundaries)} boundaries",
+                     table_id=table_id)
+    if status == "partial" and not partial:
+        report.error("VISUAL_PARTIAL_EMPTY", "partial table lists no partial boundary",
+                     table_id=table_id)
+
+    for x in partial:
+        if not any(abs(x - boundary) <= tol for boundary in boundaries):
+            report.error("VISUAL_PARTIAL_NOT_BOUNDARY",
+                         f"partial boundary {x:.2f} is not a visual boundary",
+                         table_id=table_id)
+        if boundaries and (abs(x - boundaries[0]) <= tol
+                           or abs(x - boundaries[-1]) <= tol):
+            report.error("VISUAL_PARTIAL_OUTER",
+                         f"partial boundary {x:.2f} is an outer edge",
+                         table_id=table_id)
+
+    if len(evidence) != len(boundaries):
+        report.error("VISUAL_EVIDENCE_COUNT",
+                     f"{len(evidence)} evidence records for {len(boundaries)} boundaries",
+                     table_id=table_id)
+    inner: list[dict] = []
+    outer_drawn: list[bool] = []
+    for x in boundaries:
+        matches = [item for item in evidence if abs(item.get("x", 1e9) - x) <= tol]
+        if len(matches) != 1:
+            report.error("VISUAL_EVIDENCE_BOUNDARY",
+                         f"{len(matches)} evidence records for boundary {x:.2f}",
+                         table_id=table_id)
+            continue
+        item = matches[0]
+        role = item.get("role")
+        coverage = float(item.get("coverage") or 0.0)
+        if role not in VISUAL_BOUNDARY_ROLES:
+            report.error("VISUAL_EVIDENCE_ROLE_INVALID", f"unknown role {role!r}",
+                         table_id=table_id)
+            continue
+        if not (0.0 <= coverage <= 1.0):
+            report.error("VISUAL_EVIDENCE_COVERAGE",
+                         f"coverage {coverage} outside [0, 1]", table_id=table_id)
+        if role == "outer_left" and abs(x - x0) > tol:
+            report.error("VISUAL_EVIDENCE_ROLE_MISMATCH",
+                         "outer_left evidence is not at bbox.x0", table_id=table_id)
+        if role == "outer_right" and abs(x - x1) > tol:
+            report.error("VISUAL_EVIDENCE_ROLE_MISMATCH",
+                         "outer_right evidence is not at bbox.x1", table_id=table_id)
+        if role == "internal":
+            if not (x0 + tol < x < x1 - tol):
+                report.error("VISUAL_EVIDENCE_ROLE_MISMATCH",
+                             f"internal evidence {x:.2f} is not strictly inside",
+                             table_id=table_id)
+            inner.append(item)
+            if not item.get("drawn"):
+                report.error("VISUAL_INTERNAL_NOT_DRAWN",
+                             "internal boundary has no printed rule", table_id=table_id)
+            is_partial = any(abs(x - value) <= tol for value in partial)
+            if is_partial and coverage >= full:
+                report.error("VISUAL_PARTIAL_COVERAGE",
+                             f"partial boundary {x:.2f} covers {coverage:.3f}",
+                             table_id=table_id)
+            if not is_partial and coverage < full:
+                report.error("VISUAL_FULL_COVERAGE",
+                             f"non-partial boundary {x:.2f} covers only {coverage:.3f}",
+                             table_id=table_id)
+        else:
+            expected = coverage >= full
+            if bool(item.get("drawn")) != expected:
+                report.error("VISUAL_OUTER_EVIDENCE_INCONSISTENT",
+                             f"{role} drawn={item.get('drawn')} at coverage {coverage:.3f}",
+                             table_id=table_id)
+            outer_drawn.append(bool(item.get("drawn")))
+
+    if status == "not_printed" and inner:
+        report.error("VISUAL_NOT_PRINTED_EVIDENCE",
+                     "not_printed table has internal evidence", table_id=table_id)
+    if status == "printed" and not all(outer_drawn):
+        report.error("VISUAL_PRINTED_OUTER_IMPLIED",
+                     "printed table has an implied outer edge", table_id=table_id)
+    if status == "implied_outer" and all(outer_drawn):
+        report.error("VISUAL_IMPLIED_OUTER_DRAWN",
+                     "implied_outer table has both outer edges drawn",
+                     table_id=table_id)
+
+
 def validate_run(run_dir: str | Path) -> dict:
     run_dir = Path(run_dir)
     tables = _load(run_dir / "tables.json")
@@ -65,6 +213,24 @@ def validate_run(run_dir: str | Path) -> dict:
     manifest = _load(run_dir / "run_manifest.json")
     candidates = candidate_set.get("candidates") or []
     report = _Report()
+
+    params_snapshot = manifest.get("table_params")
+    visual_params = (params_snapshot or {}).get("params") or {}
+    visual_tol = float(visual_params.get("visual_boundary_tol_pt", DEFAULT_VISUAL_TOL))
+    visual_full = float(visual_params.get("visual_full_height_coverage",
+                                          DEFAULT_VISUAL_FULL))
+    if params_snapshot is not None:
+        if manifest.get("table_params_sha256") != snapshot_sha256(params_snapshot):
+            report.error("PARAM_SNAPSHOT_HASH",
+                         "table_params_sha256 does not match the parameter snapshot")
+        config_path = run_dir / "run_config.json"
+        if config_path.exists():
+            config = _load(config_path)
+            if (config.get("table_params") != params_snapshot
+                    or config.get("table_params_sha256")
+                    != manifest.get("table_params_sha256")):
+                report.error("CONFIG_PARAMS_MISMATCH",
+                             "run_config table parameters differ from the manifest")
 
     if candidate_set.get("run_id") != manifest.get("run_id"):
         report.error("RUN_ID_MISMATCH", "candidates.run_id differs from manifest")
@@ -107,6 +273,9 @@ def validate_run(run_dir: str | Path) -> dict:
         elif not _inside_page(table["bbox"], rect):
             report.error("TABLE_BBOX_OUTSIDE_PAGE",
                          "table bbox leaves the page box", table_id=table_id)
+
+        _validate_visual(table, report, required=params_snapshot is not None,
+                         tol=visual_tol, full=visual_full)
 
         row_ids: set[str] = set()
         for row in table.get("rows") or []:
@@ -306,6 +475,11 @@ def validate_run(run_dir: str | Path) -> dict:
                 1 for candidate in candidates if candidate.get("role_header_cell_id")),
             "role_sources": dict(role_sources),
             "cross_page_tables": cross_page,
+            "visual_boundary_status": dict(Counter(
+                table.get("visual_boundary_status", "absent") for table in tables)),
+            "visual_columns_null": sum(1 for table in tables
+                                       if table.get("visual_columns") is None),
+            "table_params_sha256": manifest.get("table_params_sha256"),
         },
     }
 
@@ -327,6 +501,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"errors={summary['errors']}  warnings={summary['warnings']}  "
           f"header_cells={summary['header_cells']}  "
           f"role_sources={summary['role_sources']}")
+    print(f"visual={summary['visual_boundary_status']}  "
+          f"visual_columns_null={summary['visual_columns_null']}  "
+          f"table_params_sha256={summary['table_params_sha256']}")
     for label, items in (("ERROR", report["errors"]), ("WARN", report["warnings"])):
         for item in items[:args.limit]:
             print(f"  {label} {item['code']}: {item['detail']}")

@@ -13,7 +13,11 @@ from icpdf import PARSER_VERSION, __version__
 from icpdf.domain import Product
 from icpdf.domain.candidate import ColumnRole
 from icpdf.parser.candidate_registry import build_candidates
-from icpdf.parser.config import load_config
+from icpdf.parser.config import (
+    load_config,
+    table_params_sha256,
+    table_params_snapshot,
+)
 from icpdf.parser.page_renderer import render_page
 from icpdf.parser.pdf_loader import LoadedPDF, load_pdf
 from icpdf.parser.table_detector import detect_tables
@@ -31,6 +35,8 @@ def _sanitized_config(requested_mpn: str, dpi: float, config, config_sha: str) -
         "dpi": dpi,
         "parser_config": config.model_dump(mode="json"),
         "parser_config_sha256": config_sha,
+        "table_params": table_params_snapshot(config.tables),
+        "table_params_sha256": table_params_sha256(config.tables),
         "llm": {
             "provider": "dashscope",
             "model": os.getenv("ICPDF_LLM_MODEL", ""),
@@ -109,6 +115,8 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
         "contract_version": CONTRACT_VERSION,
         "parser_config": config.model_dump(mode="json"),
         "parser_config_sha256": config_sha,
+        "table_params": table_params_snapshot(config.tables),
+        "table_params_sha256": table_params_sha256(config.tables),
         "platform": platform.platform(),
         "dpi": effective_dpi,
         "page_count": document.page_count,

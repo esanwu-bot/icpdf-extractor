@@ -70,4 +70,9 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
         region_components=detected.region_components,
         boundary_source=detected.boundary_source,
         merge_evidence=detected.merge_evidence,
+        visual_boundaries=list(detected.visual_boundaries),
+        visual_boundary_status=detected.visual_boundary_status,
+        visual_columns=detected.visual_columns,
+        partial_boundaries=list(detected.partial_boundaries),
+        visual_boundary_evidence=list(detected.visual_boundary_evidence),
     )

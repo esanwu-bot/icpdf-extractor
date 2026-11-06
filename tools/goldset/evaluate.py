@@ -129,6 +129,13 @@ def _prediction_columns(table: dict) -> int:
     return max(columns) + 1 if columns else 0
 
 
+def _predicted_visual(table: dict) -> int | None:
+    """Visual columns when the run carries the S2a lattice, else the physical count."""
+    if "visual_columns" in table:
+        return table.get("visual_columns")
+    return _prediction_columns(table)
+
+
 def _predicted_roles(run: dict) -> dict[tuple[str, int], str]:
     counts: dict[tuple[str, int], Counter] = defaultdict(Counter)
     for candidate in run["candidates"]:
@@ -174,6 +181,21 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
     logical_comparable = gold_logical is not None
     pred_rows = len(pred["rows"])
     pred_columns = _prediction_columns(pred)
+    # S2a: visual columns are an independent prediction.  Runs produced before
+    # the visual lattice existed fall back to the physical count so their
+    # archived reports stay reproducible.
+    if "visual_columns" in pred:
+        pred_visual = pred.get("visual_columns")
+        pred_visual_status = pred.get("visual_boundary_status") or "unknown"
+        visual_predicted = True
+    else:
+        pred_visual = pred_columns
+        pred_visual_status = "unknown"
+        visual_predicted = False
+    visual_exact = (visual_comparable and pred_visual is not None
+                    and pred_visual == gold_visual)
+    visual_status_exact = visual_comparable and pred_visual_status == visual_status
+    visual_not_printed = visual_status == "not_printed"
 
     gold_text = _gold_cell_texts(gold_table)
     pred_text = _cell_texts(pred["rows"])
@@ -221,7 +243,15 @@ def _score_pair(gold: dict, pred: dict, roles: dict[tuple[str, int], str]) -> di
                     "visual_gold": gold_visual,
                     "visual_status": visual_status,
                     "visual_comparable": visual_comparable,
-                    "visual_exact": visual_comparable and pred_columns == gold_visual,
+                    "visual_pred": pred_visual,
+                    "visual_pred_status": pred_visual_status,
+                    "visual_predicted": visual_predicted,
+                    "visual_pred_boundaries": pred.get("visual_boundaries") or [],
+                    "visual_pred_partial": pred.get("partial_boundaries") or [],
+                    "visual_exact": visual_exact,
+                    "visual_status_exact": visual_status_exact,
+                    "visual_not_printed": visual_not_printed,
+                    "visual_not_printed_null": visual_not_printed and pred_visual is None,
                     "logical_gold": gold_logical,
                     "logical_comparable": logical_comparable,
                     "logical_exact": role_length_ok},
@@ -447,6 +477,9 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                     "iou": round(score, 4),
                     "pred_rows": len(pred["rows"]),
                     "pred_columns": _prediction_columns(pred),
+                    "pred_visual_columns": _predicted_visual(pred),
+                    "pred_visual_status": pred.get("visual_boundary_status"),
+                    "pred_partial_boundaries": pred.get("partial_boundaries") or [],
                     "pred_table_type": pred["table_type"],
                     "reconstruction_status": pred.get("reconstruction_status"),
                     "structure": _score_pair(table, pred, roles),
@@ -485,10 +518,22 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
             "visual_columns": item["structure"]["columns"]["visual_gold"],
             "logical_columns": item["structure"]["columns"]["logical_gold"],
             "visual_status": item["structure"]["columns"]["visual_status"],
+            "pred_visual_columns": item["structure"]["columns"]["visual_pred"],
+            "pred_visual_status": item["structure"]["columns"]["visual_pred_status"],
             "pred_columns": item["pred_columns"],
         } for item in details if item["matched"]
             and item["structure"]["columns"]["visual_comparable"]
             and not item["structure"]["columns"]["visual_exact"]],
+        "visual_status_mismatch": [{
+            "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
+            "visual_columns": item["structure"]["columns"]["visual_gold"],
+            "visual_status": item["structure"]["columns"]["visual_status"],
+            "pred_visual_status": item["structure"]["columns"]["visual_pred_status"],
+            "pred_visual_columns": item["structure"]["columns"]["visual_pred"],
+            "pred_partial_boundaries": item["structure"]["columns"]["visual_pred_partial"],
+        } for item in details if item["matched"]
+            and item["structure"]["columns"]["visual_comparable"]
+            and not item["structure"]["columns"]["visual_status_exact"]],
         "header_text_mismatch": [{
             "item_id": item["item_id"], "pdf_id": item["pdf_id"], "page": item["page"],
             "gold_headers": item["structure"]["headers"]["gold_text"],
@@ -539,6 +584,16 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                            if item["structure"]["columns"]["visual_exact"])
         visual_excluded = sum(1 for item in matched_details
                               if item["structure"]["columns"]["visual_status"] == "not_printed")
+        visual_status_exact = sum(1 for item in visual_comparable
+                                  if item["structure"]["columns"]["visual_status_exact"])
+        visual_not_printed = [item for item in matched_details
+                              if item["structure"]["columns"]["visual_not_printed"]]
+        visual_not_printed_null = sum(
+            1 for item in visual_not_printed
+            if item["structure"]["columns"]["visual_not_printed_null"])
+        visual_without_lattice = sum(
+            1 for item in matched_details
+            if not item["structure"]["columns"]["visual_predicted"])
         logical_comparable = [item for item in matched_details
                               if item["structure"]["columns"]["logical_comparable"]]
         logical_exact = sum(1 for item in logical_comparable
@@ -596,6 +651,10 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
             "visual_column_count_exact": visual_exact,
             "visual_column_tables": len(visual_comparable),
             "visual_column_excluded_not_printed": visual_excluded,
+            "visual_status_exact": visual_status_exact,
+            "visual_not_printed_tables": len(visual_not_printed),
+            "visual_not_printed_pred_null": visual_not_printed_null,
+            "visual_tables_without_lattice": visual_without_lattice,
             "logical_column_count_exact": logical_exact,
             "logical_column_tables": len(logical_comparable),
             "logical_column_excluded_undecided": logical_excluded,
@@ -641,6 +700,8 @@ def evaluate(gold_tables: list[dict], negatives: list[dict], runs: list[dict],
                 "visual_column_count": f"{len(visual_comparable)} matched tables with printed, "
                                        f"partial or implied visual boundaries; "
                                        f"{visual_excluded} not_printed tables excluded",
+                "visual_not_printed": f"{len(visual_not_printed)} matched gold not_printed tables; "
+                                      f"{visual_not_printed_null} predicted visual_columns=null",
                 "logical_column_count": f"{len(logical_comparable)} matched tables with a decided "
                                         f"logical mapping; {logical_excluded} undecided excluded",
                 "cell_text": "matched tables; multiset F1 over non-empty cell texts",
@@ -721,6 +782,7 @@ def _fmt(value) -> str:
 def _write_csv(path: Path, details: list[dict]) -> None:
     fields = ["item_id", "pdf_id", "page", "matched", "prediction_id", "iou", "best_iou",
               "gold_rows", "pred_rows", "gold_columns", "pred_columns",
+              "pred_visual_columns", "pred_visual_status",
               "gold_data_rows", "overlapping_predictions", "gold_table_type",
               "pred_table_type", "reconstruction_status"]
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -808,6 +870,12 @@ def _write_markdown(path: Path, report: dict) -> None:
         f"| Visual boundary exact | {structure.get('visual_column_count_exact', 0)} "
         f"(of {structure.get('visual_column_tables', 0)} comparable; "
         f"{structure.get('visual_column_excluded_not_printed', 0)} not printed excluded) |",
+        f"| Visual status exact | {structure.get('visual_status_exact', 0)} "
+        f"(of {structure.get('visual_column_tables', 0)} comparable) |",
+        f"| not_printed predicted null | {structure.get('visual_not_printed_pred_null', 0)} "
+        f"(of {structure.get('visual_not_printed_tables', 0)}) |",
+        f"| Tables without a visual lattice (legacy fallback) | "
+        f"{structure.get('visual_tables_without_lattice', 0)} |",
         f"| Logical column exact | {structure.get('logical_column_count_exact', 0)} "
         f"(of {structure.get('logical_column_tables', 0)} decided; "
         f"{structure.get('logical_column_excluded_undecided', 0)} undecided excluded) |",
@@ -870,6 +938,7 @@ def _write_markdown(path: Path, report: dict) -> None:
         f"- Row-count mismatches: {len(report['error_cases']['row_count_mismatch'])}",
         f"- Column-count mismatches: {len(report['error_cases']['column_count_mismatch'])}",
         f"- Visual-column mismatches: {len(report['error_cases']['visual_column_mismatch'])}",
+        f"- Visual-status mismatches: {len(report['error_cases']['visual_status_mismatch'])}",
         f"- Header-text mismatches: {len(report['error_cases']['header_text_mismatch'])}",
         f"- Column-role mismatches: {len(report['error_cases']['column_role_mismatch'])}",
         "",
@@ -896,7 +965,13 @@ def _write_markdown(path: Path, report: dict) -> None:
         lines.append(f"| visual cols | {item['item_id']} | {item['page']} | "
                      f"visual {item['visual_columns']} / logical "
                      f"{item['logical_columns']} ({item['visual_status']}) -> "
-                     f"pred {item['pred_columns']} |")
+                     f"pred visual {item['pred_visual_columns']} "
+                     f"({item['pred_visual_status']}), physical {item['pred_columns']} |")
+    for item in report["error_cases"]["visual_status_mismatch"]:
+        lines.append(f"| visual status | {item['item_id']} | {item['page']} | "
+                     f"{item['visual_status']} -> {item['pred_visual_status']} "
+                     f"({item['visual_columns']} vs {item['pred_visual_columns']} columns, "
+                     f"pred partial {item['pred_partial_boundaries']}) |")
     for item in report["error_cases"]["header_text_mismatch"]:
         lines.append(f"| headers | {item['item_id']} | {item['page']} | "
                      f"{item['column_hits']}/{item['columns']} column labels match |")

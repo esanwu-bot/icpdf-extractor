@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -10,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from icpdf.storage.artifact_store import sha256_bytes
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[3] / "configs" / "parser.yaml"
+TABLE_PARAMS_SNAPSHOT_VERSION = "table-params/v1"
 
 
 class PDFConfig(BaseModel):
@@ -40,6 +42,11 @@ class TableParams(BaseModel):
     merge_shared_ratio: float = Field(default=0.6, gt=0, le=1)
     merge_extent_tol_pt: float = Field(default=3.0, ge=0)
     merge_min_x_overlap_ratio: float = Field(default=0.6, gt=0, le=1)
+    # Phase 1.4 S2a - visual boundary lattice.  These govern only the derived
+    # visual separators; the recognition lattice (grid.xs/ys) is untouched.
+    visual_min_rule_span_pt: float = Field(default=4.0, gt=0)
+    visual_boundary_tol_pt: float = Field(default=2.5, gt=0)
+    visual_full_height_coverage: float = Field(default=0.85, gt=0, le=1)
 
 
 class ParserConfig(BaseModel):
@@ -58,3 +65,23 @@ def load_config(path: str | Path | None = None) -> tuple[ParserConfig, str]:
 
 def default_config() -> ParserConfig:
     return ParserConfig()
+
+
+def table_params_snapshot(params: TableParams) -> dict:
+    """Effective table parameters, including code defaults not in the YAML."""
+    return {
+        "snapshot_version": TABLE_PARAMS_SNAPSHOT_VERSION,
+        "params": params.model_dump(mode="json"),
+    }
+
+
+def snapshot_sha256(snapshot: dict) -> str:
+    """Hash a parameter snapshot in canonical JSON form."""
+    payload = json.dumps(snapshot, ensure_ascii=False, sort_keys=True,
+                         separators=(",", ":"))
+    return sha256_bytes(payload.encode("utf-8"))
+
+
+def table_params_sha256(params: TableParams) -> str:
+    """Hash of the canonical snapshot; recorded next to the values in a run."""
+    return snapshot_sha256(table_params_snapshot(params))

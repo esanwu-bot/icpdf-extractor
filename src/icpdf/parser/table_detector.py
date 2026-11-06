@@ -16,12 +16,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from icpdf.domain.common import BBox
 from icpdf.domain.table import ReconstructionStatus, TableType
+from icpdf.domain.visual import VisualBoundary
 from icpdf.parser.config import TableParams
 from icpdf.parser.header_semantics import assess_region, infer_semantics
 from icpdf.parser.layout import analyze_layout
 from icpdf.parser.structure import TableGrid, recognize_structure
 from icpdf.parser.table_regions import detect_table_regions
 from icpdf.parser.text_blocks import TextBlock
+from icpdf.parser.visual_structure import build_visual_structure
 
 
 class DetectedCell(BaseModel):
@@ -69,6 +71,12 @@ class DetectedTable(BaseModel):
     region_components: list[int] = Field(default_factory=list)
     boundary_source: str = "ruled"
     merge_evidence: list[str] = Field(default_factory=list)
+    # Phase 1.4 S2a - derived visual lattice; never affects the physical grid.
+    visual_boundaries: tuple[float, ...] = ()
+    visual_boundary_status: str = "unknown"
+    visual_columns: int | None = None
+    partial_boundaries: tuple[float, ...] = ()
+    visual_boundary_evidence: tuple[VisualBoundary, ...] = ()
 
 
 def _ragged_rows(grid: TableGrid, header_rows: int) -> list[int]:
@@ -145,6 +153,7 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
 
         status, uncertainty, confidence = _status(
             grid, region.source, semantics.header_rows, len(grid.unassigned_words))
+        visual = build_visual_structure(region, params)
         detected.append(DetectedTable(
             page_number=page_number,
             bbox=region.bbox,
@@ -169,5 +178,10 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
             boundary_source=region.boundary_source,
             merge_evidence=[f"{item.kind}: {item.detail}"
                             for item in region.evidence],
+            visual_boundaries=visual.visual_boundaries,
+            visual_boundary_status=visual.visual_boundary_status,
+            visual_columns=visual.visual_columns,
+            partial_boundaries=visual.partial_boundaries,
+            visual_boundary_evidence=visual.boundaries,
         ))
     return detected

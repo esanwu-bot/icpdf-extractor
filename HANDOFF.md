@@ -478,3 +478,52 @@ data-model fixes and the `ConditionContext` clarification.
   §7.0 row contract, §7.4 ConditionContext, §12 synthetic P0-1 / context /
   provenance tests, S2-design-r1 slice row.
 - Still not pushed to Codeup; no PDF rerun and no Gold change.
+
+## Phase 1.4 S2a — VisualBoundary implementation (2026-11-06)
+
+**Status:** S2a implemented, six-PDF rerun and evidence bundle ready for
+independent review; **not self-declared passed**; S2b/S2c not started; not
+pushed to Codeup.
+
+- **Code.** New `src/icpdf/domain/visual.py` (frozen `VisualBoundary` + role
+  vocabularies) and `src/icpdf/parser/visual_structure.py`
+  (`build_visual_structure`).  `TableParams` gains
+  `visual_min_rule_span_pt`, `visual_boundary_tol_pt`,
+  `visual_full_height_coverage`; `pipeline` writes `table_params` and
+  `table_params_sha256` into `run_config.json` and `run_manifest.json`.
+  `DetectedTable`/`Table` carry `visual_boundaries`,
+  `visual_boundary_status`, `visual_columns`, `partial_boundaries`,
+  `visual_boundary_evidence`; `table_rebuilder` copies them.  `grid.xs/ys`,
+  physical cell bbox/text and Candidate IDs unchanged.
+- **Algorithm.** Vertical ruling ≥4pt within 2.5pt of the region x-range;
+  collinear grouping; clipped-union coverage over region height; outer edges
+  always present; partial when coverage < 0.85; status precedence
+  `not_printed` → `partial` → `implied_outer` (single-sided outer per
+  Reviewer rule) → `printed`; `visual_columns = internal + 1`, `null` only
+  for `not_printed`.
+- **Effective parameters.** `table_params_sha256 =
+  82d4df4d1cb3cac9741831b0db36e19fa80c1829abc18b3f8b1ab4ee1c6b9f0a`;
+  parser YAML config SHA unchanged
+  (`ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c`).
+- **Evaluator.** Visual predictions from `visual_columns`; legacy physical
+  fallback for pre-S2a runs; visual column denominator excludes gold
+  `not_printed`; logical metric unchanged (S2b not authorized).  CSV/Markdown
+  expose `pred_visual_columns` / `pred_visual_status` / partial boundaries.
+- **Validator.** 26 `VISUAL_*` codes plus `PARAM_SNAPSHOT_HASH` and
+  `CONFIG_PARAMS_MISMATCH`; thresholds read from the manifest snapshot.
+  One negative test per visual code.
+- **Results.** 127 passed, 2 xfailed.  All six S2a runs: `errors=0
+  warnings=0 --strict`.  Gold v2: visual columns 19/19 exact, `not_printed`
+  predicted null 2/2, visual status 18/19, logical 18/21 identical to S1,
+  rows 21/21.  Phase 1.2: TP 46 FP 0 FN 0; all non-visual metrics identical
+  to the S1 control.  `runs/phase14_s2a/physical_diff.json`: 430 tables /
+  18,899 candidates, 0 diffs; `gold_item_diff.json`: 67/67 gold items, 0
+  field diffs.
+- **Known divergence.** DS10CP152-P03-T01: gold `partial` [331.0], predicted
+  `printed` at coverage 0.952 (threshold 0.85); visual columns 2/2 agree.  No
+  threshold separates it from MICRF103 P03 (0.881, must stay `implied_outer`);
+  reported rather than tuned.  Phase 1.2 gold has no visual annotations, so
+  its visual metric is diagnostic only (legacy fallback), not acceptance.
+- **Artifacts.** `docs/PHASE1_4_S2A.md`;
+  `runs/phase14_s2a/{generalization_report,phase12_report,s1_*_control,
+  physical_diff,gold_item_diff}.{json,md,csv}` (runs/ is gitignored).

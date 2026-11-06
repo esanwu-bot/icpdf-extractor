@@ -6,10 +6,34 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from icpdf.parser.config import (
+    TableParams,
+    table_params_sha256,
+    table_params_snapshot,
+)
 from tools.validate_evidence import main, validate_run
 
 ROLES = ["symbol", "min", "typ", "max"]
 TEXTS = ["VOH", "2.4", "3.3", "3.6"]
+
+
+def _visual_boundaries() -> dict:
+    return {
+        "visual_boundaries": [0.0, 100.0, 200.0, 400.0],
+        "visual_boundary_status": "printed",
+        "visual_columns": 3,
+        "partial_boundaries": [],
+        "visual_boundary_evidence": [
+            {"x": 0.0, "role": "outer_left", "drawn": True, "coverage": 1.0,
+             "component_ids": [0], "segment_count": 1},
+            {"x": 100.0, "role": "internal", "drawn": True, "coverage": 1.0,
+             "component_ids": [0], "segment_count": 1},
+            {"x": 200.0, "role": "internal", "drawn": True, "coverage": 1.0,
+             "component_ids": [0], "segment_count": 1},
+            {"x": 400.0, "role": "outer_right", "drawn": True, "coverage": 1.0,
+             "component_ids": [0], "segment_count": 1},
+        ],
+    }
 
 
 def _base_run() -> dict:
@@ -51,6 +75,7 @@ def _base_run() -> dict:
         "confidence": 0.9,
         "reconstruction_status": "reconstructed",
         "uncertainty_reason": None,
+        **_visual_boundaries(),
     }
     candidates = [{
         "candidate_id": f"doc-1:t1-r01-c{column:02d}",
@@ -86,6 +111,8 @@ def _base_run() -> dict:
             "document_id": "doc-1",
             "table_count": 1,
             "candidate_count": 4,
+            "table_params": table_params_snapshot(TableParams()),
+            "table_params_sha256": table_params_sha256(TableParams()),
         },
     }
 
@@ -213,6 +240,134 @@ def test_manifest_count_mismatch(tmp_path):
     def mutate(data):
         data["manifest"]["candidate_count"] = 5
     assert "MANIFEST_CANDIDATE_COUNT" in _codes(_validated(tmp_path, mutate))
+
+
+def _not_printed(table: dict) -> None:
+    table.update({
+        "visual_boundaries": [0.0, 400.0],
+        "visual_boundary_status": "not_printed",
+        "visual_columns": None,
+        "partial_boundaries": [],
+        "visual_boundary_evidence": [
+            {"x": 0.0, "role": "outer_left", "drawn": True, "coverage": 1.0,
+             "component_ids": [0], "segment_count": 1},
+            {"x": 400.0, "role": "outer_right", "drawn": True, "coverage": 1.0,
+             "component_ids": [0], "segment_count": 1},
+        ],
+    })
+
+
+def test_not_printed_contract_is_valid(tmp_path):
+    def mutate(data):
+        _not_printed(data["tables"][0])
+    report = _validated(tmp_path, mutate)
+    assert report["errors"] == []
+    assert report["summary"]["visual_columns_null"] == 1
+
+
+def test_visual_status_missing_when_params_present(tmp_path):
+    def mutate(data):
+        data["tables"][0].pop("visual_boundary_status")
+    assert "VISUAL_STATUS_MISSING" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_status_invalid(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_status"] = "drawn"
+    assert "VISUAL_STATUS_INVALID" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_columns_mismatch(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_columns"] = 2
+    assert "VISUAL_COLUMNS_MISMATCH" in _codes(_validated(tmp_path, mutate))
+
+
+def test_not_printed_with_partial_boundary(tmp_path):
+    def mutate(data):
+        _not_printed(data["tables"][0])
+        data["tables"][0]["partial_boundaries"] = [100.0]
+    assert "VISUAL_NOT_PRINTED_PARTIAL" in _codes(_validated(tmp_path, mutate))
+
+
+def test_not_printed_with_internal_boundary(tmp_path):
+    def mutate(data):
+        _not_printed(data["tables"][0])
+        data["tables"][0]["visual_boundaries"] = [0.0, 100.0, 400.0]
+        data["tables"][0]["visual_boundary_evidence"].insert(
+            1, {"x": 100.0, "role": "internal", "drawn": True, "coverage": 1.0,
+                "component_ids": [0], "segment_count": 1})
+    assert "VISUAL_NOT_PRINTED_INTERNAL" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_outer_edge_mismatch(tmp_path):
+    def mutate(data):
+        table = data["tables"][0]
+        table["visual_boundaries"][0] = 5.0
+        table["visual_boundary_evidence"][0]["x"] = 5.0
+    assert "VISUAL_OUTER_LEFT" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_partial_not_a_boundary(tmp_path):
+    def mutate(data):
+        data["tables"][0]["partial_boundaries"] = [150.0]
+    assert "VISUAL_PARTIAL_NOT_BOUNDARY" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_partial_coverage_inconsistent(tmp_path):
+    def mutate(data):
+        data["tables"][0]["partial_boundaries"] = [100.0]
+    assert "VISUAL_PARTIAL_COVERAGE" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_full_coverage_inconsistent(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][1]["coverage"] = 0.5
+    assert "VISUAL_FULL_COVERAGE" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_evidence_count(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"].pop()
+    assert "VISUAL_EVIDENCE_COUNT" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_outer_evidence_inconsistent(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0]["drawn"] = False
+    assert "VISUAL_OUTER_EVIDENCE_INCONSISTENT" in _codes(_validated(tmp_path, mutate))
+
+
+def test_printed_with_implied_outer(tmp_path):
+    def mutate(data):
+        item = data["tables"][0]["visual_boundary_evidence"][-1]
+        item["drawn"] = False
+        item["coverage"] = 0.0
+    assert "VISUAL_PRINTED_OUTER_IMPLIED" in _codes(_validated(tmp_path, mutate))
+
+
+def test_implied_outer_with_both_edges_drawn(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_status"] = "implied_outer"
+    assert "VISUAL_IMPLIED_OUTER_DRAWN" in _codes(_validated(tmp_path, mutate))
+
+
+def test_parameter_snapshot_hash_mismatch(tmp_path):
+    def mutate(data):
+        data["manifest"]["table_params_sha256"] = "0" * 64
+    assert "PARAM_SNAPSHOT_HASH" in _codes(_validated(tmp_path, mutate))
+
+
+def test_run_config_parameters_differ_from_manifest(tmp_path):
+    data = _base_run()
+    run = _write_run(tmp_path / "run", data)
+    config = {
+        "table_params": table_params_snapshot(TableParams(visual_min_rule_span_pt=3.0)),
+        "table_params_sha256": table_params_sha256(
+            TableParams(visual_min_rule_span_pt=3.0)),
+    }
+    (run / "run_config.json").write_text(json.dumps(config), encoding="utf-8")
+    assert "CONFIG_PARAMS_MISMATCH" in _codes(validate_run(run))
 
 
 def test_cli_exit_code_and_json(tmp_path, capsys):

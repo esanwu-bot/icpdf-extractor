@@ -7,6 +7,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .common import BBox, NonEmptyStr
+from .visual import VISUAL_BOUNDARY_STATUSES, VisualBoundary
 
 
 class TableType(str, Enum):
@@ -126,6 +127,13 @@ class Table(BaseModel):
     region_components: list[int] = Field(default_factory=list)
     boundary_source: NonEmptyStr = "ruled"
     merge_evidence: list[str] = Field(default_factory=list)
+    # Derived visual lattice (S2a).  Additive defaults keep old runs loadable;
+    # `unknown` marks a table produced before the visual lattice existed.
+    visual_boundaries: list[float] = Field(default_factory=list)
+    visual_boundary_status: str = "unknown"
+    visual_columns: int | None = Field(default=None, ge=0)
+    partial_boundaries: list[float] = Field(default_factory=list)
+    visual_boundary_evidence: list[VisualBoundary] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _check_table(self) -> "Table":
@@ -158,4 +166,16 @@ class Table(BaseModel):
         if self.reconstruction_status is ReconstructionStatus.UNRESOLVED:
             if not self.uncertainty_reason:
                 raise ValueError("unresolved table must carry uncertainty_reason")
+        if self.visual_boundary_status in VISUAL_BOUNDARY_STATUSES:
+            if self.visual_boundaries != sorted(self.visual_boundaries):
+                raise ValueError("visual_boundaries must be sorted")
+            if self.visual_boundary_status == "not_printed":
+                if self.visual_columns is not None:
+                    raise ValueError("not_printed table must have visual_columns=None")
+                if self.partial_boundaries:
+                    raise ValueError("not_printed table must have no partial boundaries")
+            elif self.visual_columns != len(self.visual_boundaries) - 1:
+                raise ValueError("visual_columns must equal len(visual_boundaries)-1")
+            if not set(self.partial_boundaries) <= set(self.visual_boundaries):
+                raise ValueError("partial boundaries must be visual boundaries")
         return self
