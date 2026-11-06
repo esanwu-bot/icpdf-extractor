@@ -60,6 +60,97 @@ class _Report:
         self.warnings.append({"code": code, "detail": detail, **ids})
 
 
+def _union_length(spans, tol: float) -> float:
+    spans = sorted((a, b) for a, b in spans if a < b)
+    if not spans:
+        return 0.0
+    total = 0.0
+    start, end = spans[0]
+    for next_start, next_end in spans[1:]:
+        if next_start <= end + tol:
+            end = max(end, next_end)
+        else:
+            total += end - start
+            start, end = next_start, next_end
+    return total + (end - start)
+
+
+def _validate_visual_segments(item: dict, table: dict, report: _Report, *,
+                              role: str, tol: float, full: float) -> None:
+    """Recompute coverage from the recorded RuleSegment evidence.
+
+    The segments are the clipped vertical spans that fed the boundary; their
+    ``component_id`` and page-level ``primitive_indices`` keep the link to the
+    RuleComponent/RulePrimitive layer.  ``coverage`` is recomputed here instead
+    of being trusted, so two fields cannot simply be wrong together.
+    """
+    table_id = table["table_id"]
+    x = float(item.get("x", 0.0))
+    segments = item.get("segments")
+    if not isinstance(segments, list):
+        report.error("VISUAL_SEGMENTS_MISSING",
+                     f"boundary {x:.2f} has no segment evidence", table_id=table_id)
+        return
+    if int(item.get("segment_count") or 0) != len(segments):
+        report.error("VISUAL_SEGMENT_COUNT",
+                     f"segment_count={item.get('segment_count')} "
+                     f"but {len(segments)} segments", table_id=table_id)
+    component_ids = sorted(int(value) for value in (item.get("component_ids") or []))
+    seen_ids: set[int] = set()
+    ty0, ty1 = table["bbox"][1], table["bbox"][3]
+    height = ty1 - ty0
+    spans: list[tuple[float, float]] = []
+    for segment in segments:
+        if not isinstance(segment, dict):
+            report.error("VISUAL_SEGMENT_SPAN", "segment is not an object",
+                         table_id=table_id)
+            continue
+        y0 = float(segment.get("y0", 0.0))
+        y1 = float(segment.get("y1", 0.0))
+        if y1 <= y0 or y0 < ty0 - tol or y1 > ty1 + tol:
+            report.error("VISUAL_SEGMENT_SPAN",
+                         f"segment [{y0:.2f}, {y1:.2f}] leaves the table height",
+                         table_id=table_id)
+        spans.append((max(ty0, y0), min(ty1, y1)))
+        component_id = segment.get("component_id")
+        if not isinstance(component_id, int):
+            report.error("VISUAL_SEGMENT_COMPONENT",
+                         "segment has no integer component_id", table_id=table_id)
+        else:
+            seen_ids.add(component_id)
+            if component_id not in component_ids:
+                report.error("VISUAL_SEGMENT_COMPONENT",
+                             f"component {component_id} is not listed on the boundary",
+                             table_id=table_id)
+        primitives = segment.get("primitive_indices")
+        if (not isinstance(primitives, list) or not primitives
+                or any(not isinstance(value, int) or value < 0 for value in primitives)
+                or primitives != sorted(set(primitives))):
+            report.error("VISUAL_SEGMENT_PRIMITIVE",
+                         f"boundary {x:.2f} has no valid primitive provenance",
+                         table_id=table_id)
+    if sorted(seen_ids) != component_ids:
+        report.error("VISUAL_COMPONENT_IDS_MISMATCH",
+                     f"component_ids={component_ids} but segments come from "
+                     f"{sorted(seen_ids)}", table_id=table_id)
+    coverage = float(item.get("coverage") or 0.0)
+    if height > 0:
+        recomputed = min(1.0, _union_length(spans, tol) / height)
+        if abs(recomputed - coverage) > 1e-6:
+            report.error("VISUAL_COVERAGE_RECOMPUTE",
+                         f"boundary {x:.2f} stores coverage {coverage:.6f} "
+                         f"but its segments give {recomputed:.6f}",
+                         table_id=table_id)
+        if bool(item.get("drawn")) and recomputed < full and role != "internal":
+            report.error("VISUAL_DRAWN_BELOW_FULL",
+                         f"drawn outer boundary {x:.2f} recomputes to "
+                         f"{recomputed:.3f}", table_id=table_id)
+        if not bool(item.get("drawn")) and recomputed >= full:
+            report.error("VISUAL_IMPLIED_ABOVE_FULL",
+                         f"implied boundary {x:.2f} recomputes to {recomputed:.3f}",
+                         table_id=table_id)
+
+
 def _validate_visual(table: dict, report: _Report, *, required: bool,
                      tol: float = DEFAULT_VISUAL_TOL,
                      full: float = DEFAULT_VISUAL_FULL) -> None:
@@ -160,6 +251,8 @@ def _validate_visual(table: dict, report: _Report, *, required: bool,
         if not (0.0 <= coverage <= 1.0):
             report.error("VISUAL_EVIDENCE_COVERAGE",
                          f"coverage {coverage} outside [0, 1]", table_id=table_id)
+        _validate_visual_segments(item, table, report, role=role, tol=tol,
+                                  full=full)
         if role == "outer_left" and abs(x - x0) > tol:
             report.error("VISUAL_EVIDENCE_ROLE_MISMATCH",
                          "outer_left evidence is not at bbox.x0", table_id=table_id)

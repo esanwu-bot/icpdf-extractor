@@ -17,6 +17,12 @@ ROLES = ["symbol", "min", "typ", "max"]
 TEXTS = ["VOH", "2.4", "3.3", "3.6"]
 
 
+def _segment(component_id: int = 0, y0: float = 0.0, y1: float = 300.0,
+             primitives=(0,)) -> dict:
+    return {"component_id": component_id, "y0": y0, "y1": y1,
+            "primitive_indices": list(primitives)}
+
+
 def _visual_boundaries() -> dict:
     return {
         "visual_boundaries": [0.0, 100.0, 200.0, 400.0],
@@ -25,13 +31,13 @@ def _visual_boundaries() -> dict:
         "partial_boundaries": [],
         "visual_boundary_evidence": [
             {"x": 0.0, "role": "outer_left", "drawn": True, "coverage": 1.0,
-             "component_ids": [0], "segment_count": 1},
+             "component_ids": [0], "segment_count": 1, "segments": [_segment()]},
             {"x": 100.0, "role": "internal", "drawn": True, "coverage": 1.0,
-             "component_ids": [0], "segment_count": 1},
+             "component_ids": [0], "segment_count": 1, "segments": [_segment()]},
             {"x": 200.0, "role": "internal", "drawn": True, "coverage": 1.0,
-             "component_ids": [0], "segment_count": 1},
+             "component_ids": [0], "segment_count": 1, "segments": [_segment()]},
             {"x": 400.0, "role": "outer_right", "drawn": True, "coverage": 1.0,
-             "component_ids": [0], "segment_count": 1},
+             "component_ids": [0], "segment_count": 1, "segments": [_segment()]},
         ],
     }
 
@@ -250,9 +256,9 @@ def _not_printed(table: dict) -> None:
         "partial_boundaries": [],
         "visual_boundary_evidence": [
             {"x": 0.0, "role": "outer_left", "drawn": True, "coverage": 1.0,
-             "component_ids": [0], "segment_count": 1},
+             "component_ids": [0], "segment_count": 1, "segments": [_segment()]},
             {"x": 400.0, "role": "outer_right", "drawn": True, "coverage": 1.0,
-             "component_ids": [0], "segment_count": 1},
+             "component_ids": [0], "segment_count": 1, "segments": [_segment()]},
         ],
     })
 
@@ -324,6 +330,67 @@ def test_visual_full_coverage_inconsistent(tmp_path):
     def mutate(data):
         data["tables"][0]["visual_boundary_evidence"][1]["coverage"] = 0.5
     assert "VISUAL_FULL_COVERAGE" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_segments_missing(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0].pop("segments")
+    assert "VISUAL_SEGMENTS_MISSING" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_segment_count_mismatch(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0]["segment_count"] = 2
+    assert "VISUAL_SEGMENT_COUNT" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_component_ids_mismatch(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0]["component_ids"] = [1]
+    assert "VISUAL_COMPONENT_IDS_MISMATCH" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_segment_component_unknown(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0]["segments"][0][
+            "component_id"] = 9
+    assert "VISUAL_SEGMENT_COMPONENT" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_segment_span_outside_table(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0]["segments"][0]["y1"] = 500.0
+    assert "VISUAL_SEGMENT_SPAN" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_segment_primitive_missing(tmp_path):
+    def mutate(data):
+        data["tables"][0]["visual_boundary_evidence"][0]["segments"][0][
+            "primitive_indices"] = []
+    assert "VISUAL_SEGMENT_PRIMITIVE" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_coverage_is_recomputed_from_segments(tmp_path):
+    def mutate(data):
+        evidence = data["tables"][0]["visual_boundary_evidence"][1]
+        evidence["segments"][0]["y1"] = 150.0
+        evidence["coverage"] = 1.0
+    assert "VISUAL_COVERAGE_RECOMPUTE" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_drawn_boundary_below_full(tmp_path):
+    def mutate(data):
+        evidence = data["tables"][0]["visual_boundary_evidence"][0]
+        evidence["segments"][0]["y1"] = 150.0
+        evidence["coverage"] = 0.5
+    assert "VISUAL_DRAWN_BELOW_FULL" in _codes(_validated(tmp_path, mutate))
+
+
+def test_visual_implied_boundary_above_full(tmp_path):
+    def mutate(data):
+        evidence = data["tables"][0]["visual_boundary_evidence"][0]
+        evidence["drawn"] = False
+    assert "VISUAL_IMPLIED_ABOVE_FULL" in _codes(_validated(tmp_path, mutate))
 
 
 def test_visual_evidence_count(tmp_path):

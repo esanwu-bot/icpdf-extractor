@@ -150,3 +150,53 @@ def test_cy29_package_outline_and_dimension_table_are_separate():
     dimension = _matched(detected, "CY29FCT520-P10-T01")
     assert dimension.visual_boundary_status == "printed"
     assert dimension.visual_columns == 3
+
+
+def _coverage(boundary, table) -> float:
+    y0, y1 = table.bbox[1], table.bbox[3]
+    spans = sorted((max(y0, segment.y0), min(y1, segment.y1))
+                   for segment in boundary.segments)
+    total, start, end = 0.0, None, None
+    for a, b in spans:
+        if start is None:
+            start, end = a, b
+        elif a <= end + 2.5:
+            end = max(end, b)
+        else:
+            total += end - start
+            start, end = a, b
+    if start is not None:
+        total += end - start
+    return total / (y1 - y0)
+
+
+def test_visual_evidence_traces_to_components_and_primitives():
+    table = _matched(_detected(_pdf("ds10cp152"), 4), "DS10CP152-P04-T01")
+    for boundary in table.visual_boundary_evidence:
+        assert boundary.segment_count == len(boundary.segments)
+        assert boundary.component_ids == sorted(
+            {segment.component_id for segment in boundary.segments})
+        assert boundary.coverage == pytest.approx(_coverage(boundary, table),
+                                                  abs=1e-6)
+        if boundary.drawn:
+            assert boundary.segments
+            if boundary.role != "internal":
+                assert boundary.coverage >= 0.85
+            for segment in boundary.segments:
+                assert segment.y1 > segment.y0
+                assert segment.primitive_indices
+                assert segment.primitive_indices == sorted(
+                    set(segment.primitive_indices))
+        elif boundary.coverage == 0.0:
+            assert boundary.segments == []
+
+
+def test_implied_outer_never_carries_drawn_line_evidence():
+    table = _matched(_detected(_pdf("micrf103"), 3), "MICRF103-P03-T01")
+    roles = _roles(table)
+    for role in ("outer_left", "outer_right"):
+        boundary = roles[role]
+        assert boundary.drawn is False
+        assert boundary.coverage == 0.0
+        assert boundary.segments == []
+        assert boundary.component_ids == []

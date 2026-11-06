@@ -1,16 +1,37 @@
 # Phase 1.4 S2a — VisualBoundary (visual boundary lattice)
 
-Status: implementation slice S2a complete, local commit only, **awaiting
-Reviewer**.  S2b (logical boundary / logical projection) and S2c
-(`ConditionContext`) are not started.  No acceptance is self-declared.
+Status: S2a implementation + Reviewer-round r1 clarification, local commit
+only, **awaiting Reviewer**.  S2b (logical boundary / logical projection) and
+S2c (`ConditionContext`) are not started.  No acceptance is self-declared.
+
+This revision answers the three S2a review items without widening scope:
+
+* **P1 status precedence** — `partial` is now driven *only* by internal
+  separators; a short or missing outer edge can never make a table `partial`.
+  The rule is stated as a table in §3.1 and covered by four asymmetric/combined
+  synthetic tests.
+* **P2 evidence provenance** — every boundary carries `segments`
+  (`component_id`, clipped `y0`/`y1`, page-level `primitive_indices`).  The
+  validator recomputes coverage from those spans instead of trusting the
+  stored `coverage`; implied outers carry no fabricated segment.  A real
+  DS10CP152 sample is in §3.3.
+* **P3 determinism** — segments are sorted by `(x, y0, y1, component_id)` and
+  grouped against a fixed anchor, not a running mean, so input order and
+  chain drift cannot change the lattice (§3.2).
+
+The first-pass S2a runs had no segment evidence and are superseded by the
+`runs/phase14_s2a/review_r1/` runs in §7.  No threshold, Gold file or S1
+physical rule was changed.
 
 Scope actually delivered, per the S2a authorization:
 
 * visual boundary derivation from printed vertical ruling, attached to
-  `DetectedTable` and the domain `Table`;
+  `DetectedTable` and the domain `Table`, with segment-level provenance back
+  to `RuleComponent` / `RulePrimitive`;
 * visual fields in the gold evaluator (separate denominator, legacy fallback
   for Gold v1);
-* visual invariants in `tools/validate_evidence.py`;
+* visual invariants in `tools/validate_evidence.py`, including independent
+  coverage recomputation from recorded segments;
 * new `TableParams` fields plus a canonical parameter snapshot and SHA-256 in
   every run manifest;
 * unit/integration tests and a six-PDF rerun against the frozen gold sets.
@@ -27,7 +48,7 @@ SHA `ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c`.
 
 | File | Change |
 | --- | --- |
-| `src/icpdf/domain/visual.py` | **new**; frozen `VisualBoundary` (`x`, `role`, `drawn`, `coverage`, `component_ids`, `segment_count`) and the role/status vocabularies |
+| `src/icpdf/domain/visual.py` | **new**; frozen `VisualBoundary` (`x`, `role`, `drawn`, `coverage`, `component_ids`, `segment_count`, `segments`), frozen `VisualSegment` (`component_id`, `y0`, `y1`, `primitive_indices`) and the role/status vocabularies |
 | `src/icpdf/parser/visual_structure.py` | **new**; `VisualStructure` and `build_visual_structure(region, params)` |
 | `src/icpdf/parser/config.py` | `visual_min_rule_span_pt=4.0`, `visual_boundary_tol_pt=2.5`, `visual_full_height_coverage=0.85`; `table_params_snapshot`, `snapshot_sha256`, `table_params_sha256` |
 | `src/icpdf/parser/table_detector.py` | `DetectedTable` additive fields `visual_boundaries`, `visual_boundary_status`, `visual_columns`, `partial_boundaries`, `visual_boundary_evidence`; builds them per accepted region |
@@ -36,18 +57,31 @@ SHA `ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c`.
 | `src/icpdf/parser/pipeline.py` | writes `table_params` and `table_params_sha256` into both `run_config.json` and `run_manifest.json` |
 | `tools/goldset/evaluate.py` | visual prediction/status metrics, separate denominator, legacy fallback, CSV columns, Markdown rows |
 | `tools/validate_evidence.py` | visual checks and parameter-snapshot verification |
-| `tests/unit/test_visual_structure.py` | **new**, 13 tests |
-| `tests/integration/test_phase14_s2.py` | **new**, 9 tests (skipped when the PDFs are absent) |
-| `tests/unit/test_evidence_validation.py` | extended to 31 tests, including one negative case per visual validator code |
+| `tests/unit/test_visual_structure.py` | **new**, 21 tests |
+| `tests/integration/test_phase14_s2.py` | **new**, 11 tests (skipped when the PDFs are absent) |
+| `tests/unit/test_evidence_validation.py` | extended to 40 tests, including one negative case per visual validator code |
 | `docs/PHASE1_4_S2A.md` | this report |
 
 ## 2. Data model
 
 ```text
+VisualSegment
+  component_id          # RuleComponent that produced the segment
+  y0, y1                # span clipped to the table region
+  primitive_indices     # page-level collect_primitives() indices
+
 VisualBoundary
   x, role ("outer_left" | "outer_right" | "internal"),
-  drawn, coverage (0..1), component_ids, segment_count
+  drawn, coverage (0..1), component_ids, segment_count,
+  segments: VisualSegment[]
 ```
+
+`drawn` has a role-dependent meaning, matching the evidence:
+
+* `internal`: a printed separator exists at this x (it may be partial);
+* `outer_left` / `outer_right`: a printed rule covers at least
+  `visual_full_height_coverage` of the region height.  A missing or short
+  outer rule is *implied* (`drawn = false`) and has no fabricated segment.
 
 `Table` / `DetectedTable` carry:
 
@@ -59,7 +93,8 @@ VisualBoundary
 * `visual_columns`: number of visual columns, `null` for `not_printed`;
 * `partial_boundaries`: subset of `visual_boundaries` whose coverage is below
   the full-height threshold;
-* `visual_boundary_evidence`: per-boundary coverage/provenance evidence.
+* `visual_boundary_evidence`: per-boundary coverage/provenance evidence,
+  including the segment list above.
 
 Domain invariants enforce the vocabulary, sortedness, `null` columns for
 `not_printed`, `visual_columns = len(visual_boundaries) - 1` otherwise, and
@@ -70,19 +105,72 @@ Domain invariants enforce the vocabulary, sortedness, `null` columns for
 1. Collect vertical spans from every `RuleComponent` of the region; drop spans
    shorter than `visual_min_rule_span_pt` (4pt); keep spans whose x lies within
    `visual_boundary_tol_pt` (2.5pt) of the region x-range.
-2. Group collinear segments whose x is within tolerance of the running group
-   mean; the group x is the mean.
+2. Sort by `(x, y0, y1, component_id)` and group against an anchor (§3.2).
 3. Clip each segment's y-span to the region and compute the union length;
    coverage = union length / region height.
 4. Classify groups within tolerance of `bbox.x0` / `bbox.x1` as outer edges;
    strictly interior groups are `internal`.
-5. Status precedence: `not_printed` (no internal boundary at all) → `partial`
-   (any internal or outer coverage below `visual_full_height_coverage`) →
-   `implied_outer` (any single outer edge not fully drawn) → `printed`.
-   A single-sided implied outer follows the Reviewer rule: it is
-   `implied_outer`, and the left/right evidence is kept separately on the
-   `VisualBoundary` objects rather than collapsed.
+5. Apply the status rule in §3.1.
 6. `visual_columns = len(internal) + 1`; `null` only for `not_printed`.
+
+### 3.1 Status precedence (frozen)
+
+| Condition | Status |
+| --- | --- |
+| no internal separator | `not_printed` |
+| at least one internal separator below full height | `partial` |
+| all internals full, both outer edges fully drawn | `printed` |
+| all internals full, at least one outer edge not fully drawn | `implied_outer` |
+
+A short or absent outer rule never produces `partial` on its own; `partial` is
+driven only by internal separators.  A single implied side is enough for
+`implied_outer`, and left/right `drawn`/`coverage` stay separate on their
+`VisualBoundary` objects.  If an internal is partial *and* an outer is implied,
+`partial` wins.
+
+Synthetic coverage of this table: left drawn/right implied, left implied/right
+drawn, both implied, both drawn, short outer only (→ `implied_outer`, no
+partial), and internal partial + implied outer (→ `partial`).
+
+### 3.2 Determinism
+
+* Sort key: `(segment.c, segment.a, segment.b, component.component_id)` — total
+  order, independent of component iteration or PDF stream order.
+* Grouping: the first segment of a group is the anchor; a later segment joins
+  only when `abs(segment.c - anchor) <= visual_boundary_tol_pt`.  The group x
+  is the mean of its members, computed after the group is complete.
+* This removes the running-mean chain effect: segments at
+  `100.0, 102.4, 104.4, 106.4` form two groups, not one drifting cluster.  A
+  dedicated test asserts that no group spans more than the tolerance from its
+  anchor and that shuffling the input yields identical boundaries, coverage,
+  `component_ids` and `segment_count`.
+* The anchor change did not alter any real-PDF result: across all 430 tables
+  of the six runs, `visual_boundaries`, `visual_boundary_status`,
+  `visual_columns` and `partial_boundaries` are identical to the first-pass
+  runs (0 field diffs).
+
+### 3.3 Evidence sample (real PDF)
+
+`runs/phase14_s2a/review_r1/visual_evidence_sample.json` — DS10CP152 page 4,
+table `DS10CP152-P04-T01` (region `[54.15, 101.05, 557.85, 511.45]`, one
+component `#0`, status `partial`, 8 visual columns).  Excerpt:
+
+```text
+boundary x=346.15 role=internal drawn=true coverage=0.10819
+  component_ids=[0] segment_count=1
+  segments=[{component_id: 0, y0: 154.0, y1: 198.4,
+             primitive_indices: [278, 295]}]
+  primitive 278: kind=thin_rect orientation=v a=176.2 b=198.4 c=346.15
+                 drawing_index=278 item_index=0 edge_index=0
+  primitive 295: kind=thin_rect orientation=v a=154.0 b=176.2 c=346.15
+                 drawing_index=295 item_index=0 edge_index=0
+```
+
+The union of the two spans is 44.4pt over the 410.4pt region height, so the
+recomputed coverage is 0.10819, and the validator classifies it as partial.
+`outer_left`/`outer_right` in the same sample have coverage 0.9996, one segment
+each, backed by 27 primitives; a `not_printed` or implied-outer boundary instead
+has `segments=[]`, `component_ids=[]`, `coverage=0`, and `drawn=false`.
 
 All thresholds live in `TableParams`.  The canonical snapshot is
 `json.dumps(snapshot, ensure_ascii=False, sort_keys=True, separators=(",", ":"))`
@@ -113,59 +201,118 @@ The FROZEN config SHA is still
 
 ## 5. Validator
 
-New codes (one negative test each):
+Codes with a dedicated negative test (40 tests in
+`tests/unit/test_evidence_validation.py`; the first 13 cover the pre-existing
+evidence chain and the rest cover visual/parameter checks):
 
-`VISUAL_STATUS_MISSING`, `VISUAL_STATUS_INVALID`, `VISUAL_BOUNDARIES_UNSORTED`,
-`VISUAL_BOUNDARY_DUPLICATE`, `VISUAL_BOUNDARY_OUTSIDE_TABLE`,
-`VISUAL_OUTER_LEFT`, `VISUAL_OUTER_RIGHT`, `VISUAL_COLUMNS_NOT_NULL`,
-`VISUAL_NOT_PRINTED_PARTIAL`, `VISUAL_NOT_PRINTED_INTERNAL`,
-`VISUAL_COLUMNS_MISMATCH`, `VISUAL_PARTIAL_EMPTY`,
-`VISUAL_PARTIAL_NOT_BOUNDARY`, `VISUAL_PARTIAL_OUTER`,
-`VISUAL_EVIDENCE_COUNT`, `VISUAL_EVIDENCE_BOUNDARY`,
-`VISUAL_EVIDENCE_ROLE_INVALID`, `VISUAL_EVIDENCE_COVERAGE`,
-`VISUAL_EVIDENCE_ROLE_MISMATCH`, `VISUAL_INTERNAL_NOT_DRAWN`,
-`VISUAL_PARTIAL_COVERAGE`, `VISUAL_FULL_COVERAGE`,
-`VISUAL_OUTER_EVIDENCE_INCONSISTENT`, `VISUAL_NOT_PRINTED_EVIDENCE`,
-`VISUAL_PRINTED_OUTER_IMPLIED`, `VISUAL_IMPLIED_OUTER_DRAWN`.
+* lattice shape — `VISUAL_STATUS_MISSING`, `VISUAL_STATUS_INVALID`,
+  `VISUAL_BOUNDARIES_UNSORTED`, `VISUAL_BOUNDARY_DUPLICATE`,
+  `VISUAL_BOUNDARY_OUTSIDE_TABLE`, `VISUAL_OUTER_LEFT`, `VISUAL_OUTER_RIGHT`,
+  `VISUAL_COLUMNS_NOT_NULL`;
+* status semantics — `VISUAL_NOT_PRINTED_PARTIAL`,
+  `VISUAL_NOT_PRINTED_INTERNAL`, `VISUAL_COLUMNS_MISMATCH`,
+  `VISUAL_PARTIAL_EMPTY`, `VISUAL_PARTIAL_NOT_BOUNDARY`,
+  `VISUAL_PARTIAL_OUTER`, `VISUAL_PRINTED_OUTER_IMPLIED`,
+  `VISUAL_IMPLIED_OUTER_DRAWN`;
+* evidence objects — `VISUAL_EVIDENCE_COUNT`, `VISUAL_EVIDENCE_BOUNDARY`,
+  `VISUAL_EVIDENCE_ROLE_INVALID`, `VISUAL_EVIDENCE_COVERAGE`,
+  `VISUAL_EVIDENCE_ROLE_MISMATCH`, `VISUAL_INTERNAL_NOT_DRAWN`,
+  `VISUAL_PARTIAL_COVERAGE`, `VISUAL_FULL_COVERAGE`,
+  `VISUAL_OUTER_EVIDENCE_INCONSISTENT`, `VISUAL_NOT_PRINTED_EVIDENCE`;
+* segment provenance (r1) — `VISUAL_SEGMENTS_MISSING`,
+  `VISUAL_SEGMENT_COUNT`, `VISUAL_COMPONENT_IDS_MISMATCH`,
+  `VISUAL_SEGMENT_COMPONENT`, `VISUAL_SEGMENT_SPAN`,
+  `VISUAL_SEGMENT_PRIMITIVE`, `VISUAL_COVERAGE_RECOMPUTE`,
+  `VISUAL_DRAWN_BELOW_FULL`, `VISUAL_IMPLIED_ABOVE_FULL`.
 
 Run-level checks: `PARAM_SNAPSHOT_HASH` (manifest hash must equal the
-recomputed hash of the recorded snapshot) and `CONFIG_PARAMS_MISMATCH`
-(`run_config.json` must record the same snapshot hash).  Thresholds used by
+recomputed hash of the recorded snapshot), `CONFIG_PARAMS_MISMATCH`
+(`run_config.json` must record the same snapshot hash); `MANIFEST_TABLE_COUNT`
+and `MANIFEST_CANDIDATE_COUNT` guard the run-level counts.  Thresholds used by
 the visual checks are read from the manifest snapshot, not hard-coded.
+
+### 5.1 Independent recomputation (r1)
+
+The validator does not trust any stored aggregate.  For every boundary it:
+
+1. requires a segment list (`VISUAL_SEGMENTS_MISSING`) and checks
+   `segment_count` against it (`VISUAL_SEGMENT_COUNT`);
+2. checks `component_ids` equals the sorted set of segment component ids
+   (`VISUAL_COMPONENT_IDS_MISMATCH`);
+3. checks each segment has an integer `component_id` that is listed on the
+   boundary (`VISUAL_SEGMENT_COMPONENT`), a non-empty `y0 < y1` span inside the
+   table's y-range ± `visual_boundary_tol_pt` (`VISUAL_SEGMENT_SPAN`), and a
+   non-empty, ascending, duplicate-free `primitive_indices`
+   (`VISUAL_SEGMENT_PRIMITIVE`);
+4. clips the recorded segment spans to the table height, unions them, divides by
+   the height, and compares with the stored `coverage` at 1e-6
+   (`VISUAL_COVERAGE_RECOMPUTE`).  This is computed from the recorded geometry
+   alone; a wrong `coverage` and a matching wrong evidence coverage cannot both
+   pass;
+5. cross-checks `drawn` against the recomputed coverage
+   (`VISUAL_DRAWN_BELOW_FULL` for a drawn non-internal boundary below the full
+   threshold, `VISUAL_IMPLIED_ABOVE_FULL` for an implied boundary above it).
+   Internal boundaries are exempt from the full-height rule for `drawn`
+   because their `drawn` means "a printed separator exists", not "covers the
+   full height".
+
+The primitive indices themselves are checked for shape only; the validator does
+not re-open the PDF, so it validates the recorded evidence chain rather than
+re-parsing.  Integration tests
+(`test_visual_evidence_traces_to_components_and_primitives`) re-derive coverage
+from the emitted segments on real PDFs.
 
 ## 6. Tests
 
 ```text
 python -m pytest
-127 passed, 2 xfailed in 13.44s
+146 passed, 2 xfailed in 10.59s
 ```
 
-New: `tests/unit/test_visual_structure.py` (13) and
-`tests/integration/test_phase14_s2.py` (9).  The integration cases assert the
-required real-PDF outcomes: MICRF103 P03 `implied_outer` with six columns and
-both outer edges undrawn; DS10CP152 P04/P05 `partial` 8; CY29FCT520 P04-T01
-`printed` 4; CY29 P05/P06 partial boundaries; DS10 P11 and CY29 P08
-`not_printed` with `null` columns; DS10 P13-T02 headerless; CY29 P10 package
-outline vs the nested dimension table (maximum-IoU matching).
+Per-file counts: `tests/unit/test_visual_structure.py` (21),
+`tests/integration/test_phase14_s2.py` (11), and
+`tests/unit/test_evidence_validation.py` (40, one negative case per validator
+code).  The other 74 tests are unchanged.
+
+The synthetic suite covers the status table explicitly: left drawn/right
+implied, left implied/right drawn, both implied, both drawn, a short outer rule
+with full internals (→ `implied_outer`, never `partial`), and an internal
+partial combined with an implied outer (→ `partial`).  It also covers
+order-independent grouping, anchor-based chain prevention
+(`100.0, 102.4, 104.4, 106.4` → two groups), segment→component→primitive
+linkage, and the rule that an implied outer carries no fabricated segment.
+
+The integration cases assert the required real-PDF outcomes: MICRF103 P03
+`implied_outer` with six columns and both outer edges undrawn; DS10CP152 P04/P05
+`partial` 8; CY29FCT520 P04-T01 `printed` 4; CY29 P05/P06 partial boundaries;
+DS10 P11 and CY29 P08 `not_printed` with `null` columns; DS10 P13-T02
+headerless; CY29 P10 package outline vs the nested dimension table
+(maximum-IoU matching).  Two r1 cases additionally recompute coverage from the
+emitted segments on DS10 P04-T01 and prove that MICRF103 P03's implied outers
+carry no segment, `component_ids=[]` and `coverage=0`.
 
 ## 7. Runs
 
-Fresh run directories, frozen after this report:
+Review-round r1 runs, frozen after this report.  The earlier
+`final_phase12/` / `final_generalization/` runs had no segment evidence and are
+superseded; they remain on disk only for the first-pass comparison in §3.2.
 
 | Document | Run | Tables | Candidates | Manifest SHA-256 |
 | --- | --- | --- | --- | --- |
-| LM358 | `runs/phase14_s2a/final_phase12/20261106T022039Z-f28c83` | 40 | 5641 | `f36796fee24ec6d324519f78221ed1e7494241817e8a6915c131ec152504a13e` |
-| ADS1299 | `runs/phase14_s2a/final_phase12/20261106T022056Z-775fab` | 57 | 2661 | `10733f135ea7086e0f9f49d965755f75cc4ba4260752701a7974396e12fcad0a` |
-| ADC12DJ5200 | `runs/phase14_s2a/final_phase12/20261106T022114Z-0a7240` | 301 | 9328 | `35a281a91ce30a18031c4ea2da62774d725d08e52b6f352397cce7368efa59ef` |
-| MICRF103 | `runs/phase14_s2a/final_generalization/20261106T022234Z-3ddfe2` | 4 | 146 | `ee1e9899fac2a9a01a5431664d3905230de53654a11c5ecee291c892f1fd8246` |
-| DS10CP152 | `runs/phase14_s2a/final_generalization/20261106T022235Z-797437` | 14 | 533 | `caaa844ee2bb5a2103102547118a3efd64095bf5f18a67e2edce43fe573ba4f0` |
-| CY29FCT520 | `runs/phase14_s2a/final_generalization/20261106T022238Z-736443` | 14 | 590 | `51d58596df27d0949e086cd0b44fa3e0aeeeeb2fdde6444961dc61557ffffa9e` |
+| LM358 | `runs/phase14_s2a/review_r1/final_phase12/20261106T023448Z-f5c3cc` | 40 | 5641 | `fe812c0b724552fe5d8511fc0ece81d11e27db4260908168a3ac5edca5d78a62` |
+| ADS1299 | `runs/phase14_s2a/review_r1/final_phase12/20261106T023504Z-e757dc` | 57 | 2661 | `ef193014adfeaeec4845de58ca990ef12c79ef399835e5934dfe90b812a9df6d` |
+| ADC12DJ5200 | `runs/phase14_s2a/review_r1/final_phase12/20261106T023521Z-c36d7b` | 301 | 9328 | `17f43934ce010a4d56bb64a46eb43b2355476c5aec3ccf5967484e953f6e1e7e` |
+| MICRF103 | `runs/phase14_s2a/review_r1/final_generalization/20261106T023642Z-d90030` | 4 | 146 | `a7600f1f9b698578f8528c37e83853be8bb582dbc8a025d646f8f43b250b6486` |
+| DS10CP152 | `runs/phase14_s2a/review_r1/final_generalization/20261106T023643Z-7f25c1` | 14 | 533 | `2281de79f3c55a9c79c4409f75d1dbcddd7650fc5711b52a450baf55f585e420` |
+| CY29FCT520 | `runs/phase14_s2a/review_r1/final_generalization/20261106T023646Z-506c4e` | 14 | 590 | `c708846c3094e100ba24d644c4f75318e78d805520b32958ca6508e8bb18a241` |
 
-Table/candidate counts equal the S1 final runs exactly.
+Table/candidate counts equal the S1 final runs exactly.  Every manifest reports
+`table_params_sha256=82d4df4d…` and the frozen parser config SHA.
 
 ### 7.1 Evidence validator
 
-`python -m tools.validate_evidence --run <dir> --strict` on all six:
+`python -m tools.validate_evidence --run <dir> --strict --json
+<dir>/validator_report.json` on all six review-r1 runs (exit status 0):
 
 | Run | errors | warnings | visual status counts |
 | --- | --- | --- | --- |
@@ -176,14 +323,15 @@ Table/candidate counts equal the S1 final runs exactly.
 | DS10CP152 | 0 | 0 | printed 9, partial 2, not_printed 3 |
 | CY29FCT520 | 0 | 0 | printed 7, partial 4, not_printed 3 |
 
-All runs report `table_params_sha256=82d4df4d…` and the same frozen parser
-config SHA.
+This includes the independent segment→coverage recomputation added in r1; every
+stored coverage and every outer `drawn` flag is reproduced from the recorded
+segments.
 
 ### 7.2 Gold v2 (`gen-2026-11-06.2`, 21 items)
 
 Command: `python -m tools.goldset.evaluate --gold gold/generalization/gold_table_set.jsonl
---run <three S2a generalization runs> --label phase14-s2a-generalization
---json runs/phase14_s2a/generalization_report.json`.
+--run <three review-r1 generalization runs> --label phase14-s2a-review-r1
+--json runs/phase14_s2a/review_r1/generalization_report.json`.
 
 | Metric | Value |
 | --- | --- |
@@ -222,10 +370,11 @@ Per item:
 
 ### 7.3 Phase 1.2 (46 items)
 
-Command: same evaluator against `gold/gold_table_set.jsonl` with the three S2a
-Phase 1.2 runs.  Detection stays TP 46 / FP 0 / FN 0.  All physical metrics
-(rows, cell text, headers, roles, table type) are byte-identical to the S1
-control run; see §8.
+Command: same evaluator against `gold/gold_table_set.jsonl` with the three
+review-r1 Phase 1.2 runs (`--label phase14-s2a-review-r1-phase12
+--json runs/phase14_s2a/review_r1/phase12_report.json`).  Detection stays
+TP 46 / FP 0 / FN 0.  All physical metrics (rows, cell text, headers, roles,
+table type) are byte-identical to the S1 control run; see §8.
 
 Phase 1.2 gold is `gold-2026-11-06.1` and has **no visual annotations**.  The
 evaluator therefore falls back to the physical column count as a stand-in
@@ -240,7 +389,7 @@ structure layer recovered columns from text alignment.
 
 ## 8. Physical-structure diff evidence
 
-Two artifacts under `runs/phase14_s2a/`:
+Two artifacts under `runs/phase14_s2a/review_r1/`:
 
 * `physical_diff.json` — S1 final run vs S2a run for **all** 430 tables and
   **18,899** candidates, comparing bbox, page, rows/cells, `detection_method`,
@@ -252,7 +401,7 @@ Two artifacts under `runs/phase14_s2a/`:
   maximum IoU (≥0.5), then compared field by field.  Result: **67 / 67 gold
   items matched, 0 field diffs** (Phase 1.2: 46/46; Gold v2: 21/21).
 
-Evaluator control comparison (`s1_*_control.json` vs the S2a reports): every
+Evaluator control comparison (`s1_*_control.json` vs the r1 reports): every
 overlapping non-visual metric is identical; the only differences are the new
 visual keys, the label and the generation timestamp.
 
@@ -288,3 +437,18 @@ Minor coordinate note: CY29FCT520-P06-T01 partial boundary x = 290.2 vs gold
   generation was used.
 * This document is an evidence bundle for independent review; S2a is **not**
   declared passed here.
+
+## 11. Reviewer r1 traceability
+
+| Item | Resolution | Code | Tests | Evidence |
+| --- | --- | --- | --- | --- |
+| P1 status precedence | Frozen four-row rule; outer deficit never yields `partial` | `parser/visual_structure.py` status block; docstring | 6 status-combination tests in `test_visual_structure.py` | §3.1; Gold v2 status 18/19 |
+| P2 evidence provenance | `segments` per boundary with `component_id`, clipped span, `primitive_indices`; implied outer has no segment | `domain/visual.py`, `parser/visual_structure.py` | `test_segment_evidence_links_components_and_primitives`, `test_implied_outer_has_no_fabricated_segment`; 2 integration cases | §3.3 real sample; `review_r1/visual_evidence_sample.json` |
+| Validator independence | Recomputes coverage from recorded segment geometry and re-checks outer `drawn`; never trusts the stored aggregate | `tools/validate_evidence.py` (`_validate_visual_segments`) | 9 new negative tests | §5.1; six runs 0 errors / 0 warnings |
+| P3 determinism | Total sort order + fixed-anchor grouping, group mean computed after close | `_group_segments` | `test_grouping_is_order_independent`, `test_anchor_grouping_prevents_chain_merge` | §3.2; zero visual-field diffs vs first pass |
+| DS10CP152-P03-T01 | Kept as reported known limitation; thresholds untouched | – | – | §9 |
+| Scope boundaries | Gold v1/v2, S1 physical rules, thresholds, S2b/S2c all untouched; no Codeup push | – | – | §10 |
+
+Acceptance remains with the Reviewer.  This round supplies the requested code
+diff, supplementary tests, validator results and this updated report; it does
+not self-declare S2a passed.

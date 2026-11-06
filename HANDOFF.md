@@ -529,3 +529,45 @@ pushed to Codeup.
   physical_diff,gold_item_diff}.{json,md,csv}` (runs/ is gitignored).
 - **Implementation commit.** `e6cba6bac51d8e3f5d4091b98ded46409042276e`
   (`feat(parser): Phase 1.4 S2a visual boundary lattice`), local only.
+
+## Phase 1.4 S2a — Reviewer round r1 (2026-11-06)
+
+**Status:** review feedback addressed; code, tests, validator results and the
+updated S2a report are ready for final review.  Not self-declared passed;
+S2b/S2c not started; not pushed to Codeup; Gold v1/v2, S1 physical rules and
+thresholds untouched.
+
+- **P1 status precedence.** Frozen rule (doc §3.1): no internal → `not_printed`;
+  any internal below full → `partial`; all internals full + both outers drawn →
+  `printed`; all internals full + ≥1 outer implied → `implied_outer`.  An outer
+  deficit alone never yields `partial`.  Six synthetic combination tests.
+- **P2 provenance.** `VisualSegment(component_id, y0, y1, primitive_indices)`
+  added to `VisualBoundary.segments`; implied outers carry no segment,
+  `component_ids=[]`, `coverage=0`.  `primitive_indices` index the page-level
+  `collect_primitives()` list.  Real sample:
+  `runs/phase14_s2a/review_r1/visual_evidence_sample.json`.
+- **P3 determinism.** Segments sorted by `(c, a, b, component_id)` and grouped
+  against a fixed anchor, group x = mean computed after close; running-mean
+  chain drift removed.  Two tests (order independence, 100.0/102.4/104.4/106.4
+  → two groups).
+- **Validator independence.** New `_validate_visual_segments` recomputes
+  coverage from recorded clipped spans (1e-6), checks segment count,
+  `component_ids`, segment spans, primitive index shape, and outer `drawn`
+  against recomputed coverage.  New codes: `VISUAL_SEGMENTS_MISSING`,
+  `VISUAL_SEGMENT_COUNT`, `VISUAL_COMPONENT_IDS_MISMATCH`,
+  `VISUAL_SEGMENT_COMPONENT`, `VISUAL_SEGMENT_SPAN`, `VISUAL_SEGMENT_PRIMITIVE`,
+  `VISUAL_COVERAGE_RECOMPUTE`, `VISUAL_DRAWN_BELOW_FULL`,
+  `VISUAL_IMPLIED_ABOVE_FULL`.
+- **Tests.** `146 passed, 2 xfailed`; `test_visual_structure.py` 21,
+  `test_phase14_s2.py` 11, `test_evidence_validation.py` 40.
+- **Runs.** Six fresh review-r1 runs under
+  `runs/phase14_s2a/review_r1/`; manifests and counts in doc §7.  First-pass
+  runs superseded (no segment evidence).
+- **Results.** All six runs: validator 0 errors / 0 warnings (`--strict`).
+  Gold v2: visual columns 19/19, `not_printed` null 2/2, visual status 18/19,
+  logical 18/21, rows 21/21.  Phase 1.2: TP 46 / FP 0 / FN 0.  Physical diff:
+  430 tables / 18,899 candidates / 0 diffs; gold items 67/67 / 0 diffs.
+  Visual fields across 430 tables identical to the first pass (0 diffs).
+- **Known divergence.** DS10CP152-P03-T01 `partial` vs `printed` kept and
+  documented; no threshold tuning.
+- **Implementation commit.** `PENDING_R1_SHA` (local only, not pushed).
