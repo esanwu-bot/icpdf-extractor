@@ -392,6 +392,8 @@ def assign_words_to_logical_columns(
     boundaries = tuple(logical_boundaries)
     if len(boundaries) < 2:
         raise ValueError("logical_boundaries needs at least two positions")
+    if any(not math.isfinite(value) for value in boundaries):
+        raise ValueError("logical_boundaries must be finite")
     if any(right <= left for left, right in zip(boundaries, boundaries[1:])):
         raise ValueError("logical_boundaries must be strictly ascending")
     columns: dict[str, int] = {}

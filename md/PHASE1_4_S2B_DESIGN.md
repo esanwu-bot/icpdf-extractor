@@ -1098,6 +1098,15 @@ reads `grid.cell_words.get(flat_index, ())` while it enumerates `grid.cells`
 cache as evidence, and an empty tuple means "this grid builder recorded no
 words for that cell", never "the words were disproved".
 
+**Persistence limitation (D5).** `detect_tables` emits a `DetectedCell` only
+when `cell.text.strip()` is non-empty (`table_detector.py:151-153`). A grid
+cell that carries words but renders empty stripped text is therefore **not**
+persisted, even though its ids remain in `TableGrid.cell_words`. No consumer
+may read the absence of a `DetectedCell` (or of a `PhysicalCellRef`) as proof
+that the cell has no words; the later mapping stage must fail closed instead
+of inventing an empty cell. The capture is complete on the grid; the artifact
+is intentionally narrower.
+
 The physical→logical cell relation is many-to-many and lives on the logical
 side. A reverse cache `logical_cell_ids` on `DetectedCell` is derived, never
 authoritative.
@@ -1274,9 +1283,13 @@ validator enforces the parallel order and rejects a length mismatch.
 
 `grid_ys` and `n_rows` are physical structure, not logical payload: they stay
 populated on an `unresolved` table and are never recomputed from `rows`.
-`grid_ys` is `tuple(grid.ys)` as stored by the builder, strictly ascending,
-with `len(grid_ys) == n_rows + 1` whenever `n_rows > 0`. An old artifact with
-no `grid_ys` loads with the legacy defaults `()` and `0` (invariant 16).
+`grid_ys` is `tuple(grid.ys)` as stored by the builder: at least two
+coordinates, all finite, strictly ascending, with
+`len(grid_ys) == n_rows + 1` and `n_rows >= 1` whenever the lattice is
+non-empty. The parser `DetectedTable` and the domain `Table` call the same
+`validate_grid_ys` helper, so neither model can be loaded with a
+single-coordinate or non-finite lattice. An old artifact with no `grid_ys`
+loads with the legacy defaults `()` and `0` (invariant 16).
 
 `DetectedCell` / domain `Cell` gain only derived caches:
 
@@ -2157,7 +2170,7 @@ extent.
 
 **D4 verifier (implemented, not yet wired).** `assign_words_to_logical_columns`
 (`structure.py:381`) is item 2 as a pure function. It requires at least two
-boundaries and rejects a non-strict lattice with `ValueError`. Per word it
+boundaries and rejects a non-finite or non-strict lattice with `ValueError`. Per word it
 raises `LogicalMappingError` carrying one of three codes and the `word_id`:
 `mapping_word_not_assigned` for a non-finite center,
 `mapping_word_outside_logical_extent` for a center outside the closed outer
@@ -2175,10 +2188,15 @@ to the domain `Table` (`table_rebuilder.py:79-80`). `rows` stays sparse:
 `detect_tables` skips a grid row with no non-empty cell
 (`table_detector.py:152-153`), so `len(rows) <= n_rows` and `len(rows)` is
 **not** the row count. `DetectedRow.grid_row` is the logical row index, not
-the sparse position. The domain validator enforces that `grid_ys` is strictly
-ascending and that `len(grid_ys) == n_rows + 1` whenever `grid_ys` is present
-(`domain/table.py:146-153`); "non-decreasing" is not acceptable because the
-closed D3 lattice is strictly ascending.
+the sparse position. One shared function, `validate_grid_ys`
+(`domain/table.py:15`), is called by both the domain `Table` validator
+(`domain/table.py:166`) and the parser `DetectedTable` validator
+(`table_detector.py:90`). A non-empty lattice needs at least two coordinates,
+`n_rows >= 1`, every coordinate finite, `len(grid_ys) == n_rows + 1`, and
+strictly ascending adjacent pairs (`right` greater than `left`); an empty
+lattice requires `n_rows == 0`. "Non-decreasing" is not acceptable because
+the closed D3 lattice is strictly ascending. Legacy artifacts keep the empty
+defaults and bypass the non-empty rules.
 
 The per-cell assignment is the R7/P1-1 fix. A `LogicalCell` cannot be
 reconstructed from `physical_cell_refs` plus a flat `word_ids` list, because
@@ -2555,14 +2573,18 @@ validator):
     is computed over canonical JSON of the parsed document, never over raw
     bytes.
 18. **Resolved-table lattice audit (artifact-only).** On a table whose
-    `logical_mapping_status` is resolved, `grid_ys` is present, strictly
-    ascending, and satisfies `len(grid_ys) == n_rows + 1`; `n_rows` is positive
-    and every logical row index in the accepted payload is inside
-    `[0, n_rows - 1]`. `rows` may be shorter than `n_rows` because empty grid
-    rows are skipped; a validator must never derive `n_rows` from `len(rows)`
-    or require `len(rows) == n_rows`. This invariant reads persisted fields
-    only and applies to resolved tables only; old artifacts were classified
-    unresolved in invariant 16 and are out of scope. A violation is
+    `logical_mapping_status` is resolved, `grid_ys` is present with at least
+    two coordinates, every coordinate is finite, `n_rows` is at least 1,
+    `len(grid_ys) == n_rows + 1`, adjacent pairs are strictly ascending, and
+    every logical row index in the accepted payload is inside
+    `[0, n_rows - 1]`. The model-level rule is the shared
+    `validate_grid_ys` (`domain/table.py:15`), called by both `Table` and
+    `DetectedTable`; this invariant adds the logical-payload row check.
+    `rows` may be shorter than `n_rows` because empty grid rows are skipped; a
+    validator must never derive `n_rows` from `len(rows)` or require
+    `len(rows) == n_rows`. This invariant reads persisted fields only and
+    applies to resolved tables only; old artifacts were classified unresolved
+    in invariant 16 and are out of scope. A violation is
     `mapping_lattice_index_mismatch`.
 19. **Fresh-parse lattice audit (separate replay).** A read-only replay that
     re-parses the same PDF must find `tuple(detected.grid_ys) == tuple(grid.ys)`

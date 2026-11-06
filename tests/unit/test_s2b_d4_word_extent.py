@@ -66,3 +66,17 @@ def test_non_finite_center_is_not_assigned():
 def test_boundaries_must_be_strictly_ascending():
     with pytest.raises(ValueError):
         assign_words_to_logical_columns([], (0.0, 0.0, 100.0))
+
+
+def test_duplicate_word_id_is_partition_mismatch():
+    with pytest.raises(LogicalMappingError) as exc:
+        assign_words_to_logical_columns(
+            [_word("dup", 10.0), _word("dup", 50.0)], BOUNDARIES)
+    assert exc.value.reason_code == "mapping_word_partition_mismatch"
+    assert exc.value.word_id == "dup"
+
+
+def test_non_finite_boundaries_are_rejected():
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValueError):
+            assign_words_to_logical_columns([], (0.0, bad, 100.0))
