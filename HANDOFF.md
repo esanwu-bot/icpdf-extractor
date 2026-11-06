@@ -642,3 +642,26 @@ S2b/S2c not started; not pushed to Codeup.
   `runs/phase14_s2a/review_r2/audit_{ds10_p04,micrf103_p03,cy29_p05}.json`.
 - **Implementation commit.** `ff38d2e` (`fix(parser): harden S2a primitive
   audit identity and rebuild checks`), local only, not pushed.
+
+## Phase 1.4 S2a — Reviewer r2 re-review: GRID_TOL and artifact completeness (2026-11-06)
+
+**Status:** the two remaining r2 questions are closed; no parser, validator,
+Gold, S1 rule or threshold change; S2b/S2c not started; not pushed.
+
+- **GRID_TOL binding (r2-P4-1).** `GRID_TOL = 2.5` lives in
+  `src/icpdf/parser/rule_primitives.py` and is **not** a `TableParams` field,
+  so `table_params_sha256` does not cover it.  The audit imports the same S1
+  symbol, passes `tol=GRID_TOL` to `build_components`, and records in
+  `identity.grid_tol`: symbol, value, source file, source SHA-256,
+  `build_components`/`rule_components` defaults, `s1_defaults_match`,
+  `in_table_params=false`, `covered_by_table_params_sha256=false`.  If either
+  S1 default drifts from the constant, the audit refuses.
+- **Required artifacts (r2-P4-2).** `REQUIRED_ARTIFACTS` is checked against the
+  manifest `artifacts` list before hashing; any missing required entry is an
+  `AuditIdentityError`, never a skipped file.  New
+  `test_manifest_missing_required_artifact_is_refused`.
+- **Tests.** `158 passed, 2 xfailed`.
+- **Artifacts.** Three `runs/phase14_s2a/review_r2/audit_*.json` regenerated
+  with the `identity.grid_tol` block; all 0 issues.
+- **Implementation commit.** `d02e690` (`fix(parser): bind S2a audit to S1
+  component tolerance and required artifacts`), local only, not pushed.
