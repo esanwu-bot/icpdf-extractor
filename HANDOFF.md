@@ -570,4 +570,6 @@ thresholds untouched.
   Visual fields across 430 tables identical to the first pass (0 diffs).
 - **Known divergence.** DS10CP152-P03-T01 `partial` vs `printed` kept and
   documented; no threshold tuning.
-- **Implementation commit.** `PENDING_R1_SHA` (local only, not pushed).
+- **Implementation commit.** `f48ecd5c3e822ecb20af03f304a252ef09cd27c8`
+  (`fix(parser): address S2a review r1 provenance and status precedence`),
+  local only, not pushed.
