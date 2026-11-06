@@ -24,8 +24,10 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from icpdf.parser.config import TableParams
-from icpdf.parser.pdf_loader import load_pdf
+import pymupdf as fitz
+
+from icpdf.parser.config import TableParams, snapshot_sha256
+from icpdf.parser.pdf_loader import file_sha256, load_pdf
 from icpdf.parser.rule_primitives import (
     GRID_TOL,
     RuleComponent,
@@ -129,6 +131,7 @@ def audit_table(table, *, primitives: list[RulePrimitive],
             add("OUTER_X_MISMATCH", f"outer_right x={x:.2f} != bbox.x1={bbox[2]:.2f}", x)
 
         seen_ids: set[int] = set()
+        seen_primitives: set[int] = set()
         spans: list[tuple[float, float]] = []
         for segment in segments:
             component_id = _get(segment, "component_id")
@@ -149,6 +152,23 @@ def audit_table(table, *, primitives: list[RulePrimitive],
 
             y0 = float(_get(segment, "y0") or 0.0)
             y1 = float(_get(segment, "y1") or 0.0)
+            if component is not None:
+                if not (component.bbox[0] - tol <= x <= component.bbox[2] + tol):
+                    add("COMPONENT_BBOX_MISMATCH",
+                        f"boundary x={x:.2f} is outside rebuilt component "
+                        f"{component_id} bbox x=[{component.bbox[0]:.2f}, "
+                        f"{component.bbox[2]:.2f}]", x)
+                if y0 < component.bbox[1] - tol or y1 > component.bbox[3] + tol:
+                    add("COMPONENT_BBOX_MISMATCH",
+                        f"segment y=[{y0:.2f}, {y1:.2f}] is outside rebuilt "
+                        f"component {component_id} bbox y=[{component.bbox[1]:.2f}, "
+                        f"{component.bbox[3]:.2f}]", x)
+                if not any(abs(vertical.c - x) <= tol
+                           for vertical in component.vertical):
+                    add("COMPONENT_VERTICAL_MISSING",
+                        f"rebuilt component {component_id} has no vertical ruling "
+                        f"at x={x:.2f}", x)
+
             indices = list(_get(segment, "primitive_indices", ()) or ())
             if not indices:
                 add("PRIMITIVE_INDEX_MISSING", "segment has no primitive indices", x)
@@ -163,6 +183,11 @@ def audit_table(table, *, primitives: list[RulePrimitive],
                         f"primitive index {index!r} is outside the page list "
                         f"(size {len(primitives)})", x)
                     continue
+                if index in seen_primitives:
+                    add("PRIMITIVE_DUPLICATE_IN_BOUNDARY",
+                        f"primitive {index} is referenced more than once by "
+                        f"boundary x={x:.2f}", x)
+                seen_primitives.add(index)
                 primitive = primitives[index]
                 if primitive.page_number != page:
                     add("PRIMITIVE_PAGE_MISMATCH",
@@ -253,29 +278,187 @@ def _iou(left, right) -> float:
     return inter / union if union else 0.0
 
 
+class AuditIdentityError(RuntimeError):
+    """The run directory does not match its recorded identity; refuse to audit."""
+
+    def __init__(self, errors: list[str]) -> None:
+        super().__init__("; ".join(errors))
+        self.errors = tuple(errors)
+
+
+def _read_json(path: Path) -> dict | list:
+    if not path.is_file():
+        raise AuditIdentityError([f"missing run artifact: {path.name}"])
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _close(left: float, right: float, tol: float = 1e-6) -> bool:
+    return abs(float(left) - float(right)) <= tol
+
+
+def _artifact_digest(run: Path, manifest: dict, name: str,
+                     errors: list[str]) -> str | None:
+    entry = next((artifact for artifact in manifest.get("artifacts", ())
+                  if artifact.get("name") == name), None)
+    path = run / name
+    if entry is None:
+        errors.append(f"manifest does not record artifact {name}")
+        return None
+    if not path.is_file():
+        errors.append(f"missing artifact {name}")
+        return None
+    digest = file_sha256(path)
+    if digest != entry.get("sha256"):
+        errors.append(f"artifact {name} sha256 {digest} != manifest {entry.get('sha256')}")
+    return digest
+
+
+def verify_identity(run: Path) -> dict:
+    """Fail closed unless the run directory is the recording it claims to be.
+
+    Checks, in order: artifact hashes, source PDF SHA-256 against the manifest
+    document hash, document/page-count/DPI agreement, the parameter snapshot
+    hash, and the recorded page geometry against a fresh ``load_pdf`` at the
+    recorded DPI (CropBox, rotation and display rect included).
+    """
+    manifest = _read_json(run / "run_manifest.json")
+    config = _read_json(run / "run_config.json")
+    document = _read_json(run / "document.json")
+    geometry = _read_json(run / "pages" / "geometry.json")
+    for name, payload in (("run_manifest.json", manifest),
+                          ("run_config.json", config),
+                          ("document.json", document)):
+        if not isinstance(payload, dict):
+            raise AuditIdentityError([f"{name} is not a JSON object"])
+    if not isinstance(geometry, list):
+        raise AuditIdentityError(["pages/geometry.json is not a page list"])
+    errors: list[str] = []
+
+    digests = {name: _artifact_digest(run, manifest, name, errors)
+               for name in ("document.json", "pages/geometry.json",
+                            "tables.json", "run_config.json")}
+
+    source = run / "source.pdf"
+    source_sha = file_sha256(source) if source.is_file() else None
+    if source_sha is None:
+        errors.append("missing source.pdf")
+    if source_sha != manifest.get("document_sha256"):
+        errors.append(f"source.pdf sha256 {source_sha} != manifest document_sha256 "
+                      f"{manifest.get('document_sha256')}")
+    if source_sha != document.get("sha256"):
+        errors.append(f"source.pdf sha256 {source_sha} != document.json sha256 "
+                      f"{document.get('sha256')}")
+
+    if document.get("page_count") != manifest.get("page_count"):
+        errors.append(f"document.json page_count {document.get('page_count')} != "
+                      f"manifest {manifest.get('page_count')}")
+    if len(geometry) != manifest.get("page_count"):
+        errors.append(f"geometry.json has {len(geometry)} pages but manifest records "
+                      f"{manifest.get('page_count')}")
+
+    dpi = manifest.get("dpi")
+    if not isinstance(dpi, (int, float)) or dpi <= 0:
+        errors.append(f"manifest dpi is not a positive number: {dpi!r}")
+        dpi = 150.0
+    if config.get("dpi") != dpi:
+        errors.append(f"run_config dpi {config.get('dpi')} != manifest dpi {dpi}")
+    if geometry and any(not _close(page.get("dpi"), dpi) for page in geometry):
+        errors.append("recorded page geometry dpi does not match manifest dpi")
+
+    snapshot = manifest.get("table_params") or {}
+    config_snapshot = config.get("table_params") or {}
+    if not isinstance(snapshot, dict) or not isinstance(snapshot.get("params"), dict):
+        errors.append("manifest table_params snapshot is not a parameter object")
+        snapshot = {}
+    if snapshot != config_snapshot:
+        errors.append("run_config table_params differ from the manifest snapshot")
+    snapshot_hash = snapshot_sha256(snapshot) if snapshot else None
+    if snapshot_hash != manifest.get("table_params_sha256"):
+        errors.append(f"table_params snapshot sha256 {snapshot_hash} != manifest "
+                      f"{manifest.get('table_params_sha256')}")
+    if config.get("table_params_sha256") != manifest.get("table_params_sha256"):
+        errors.append("run_config table_params_sha256 differs from the manifest")
+    if config.get("parser_config_sha256") != manifest.get("parser_config_sha256"):
+        errors.append("run_config parser_config_sha256 differs from the manifest")
+    if config.get("parser_config") != manifest.get("parser_config"):
+        errors.append("run_config parser_config differs from the manifest")
+    try:
+        TableParams(**snapshot.get("params", {}))
+    except Exception as exc:                                   # noqa: BLE001
+        errors.append(f"table_params snapshot is invalid: {exc}")
+
+    loaded = load_pdf(source, dpi=float(dpi)) if source_sha is not None else None
+    if loaded is not None:
+        if loaded.document.page_count != manifest.get("page_count"):
+            errors.append(f"fresh PDF page_count {loaded.document.page_count} != "
+                          f"manifest {manifest.get('page_count')}")
+        recorded_sizes = [tuple(size) for size in document.get("page_sizes") or ()]
+        fresh_sizes = [tuple(size) for size in loaded.document.page_sizes]
+        if recorded_sizes != fresh_sizes:
+            errors.append("document.json page_sizes differ from the fresh PDF")
+        if list(document.get("page_rotations") or ()) != \
+                list(loaded.document.page_rotations):
+            errors.append("document.json page_rotations differ from the fresh PDF")
+        for index, recorded in enumerate(geometry):
+            fresh = loaded.geometries[index]
+            for field in ("mediabox", "cropbox", "rect"):
+                if tuple(recorded.get(field) or ()) != tuple(getattr(fresh, field)):
+                    errors.append(f"page {index + 1} {field} differs from the fresh PDF")
+            if int(recorded.get("rotation") or 0) != fresh.rotation:
+                errors.append(f"page {index + 1} rotation differs from the fresh PDF")
+            if not _close(recorded.get("dpi"), fresh.dpi):
+                errors.append(f"page {index + 1} dpi differs from the fresh PDF")
+
+    if errors:
+        raise AuditIdentityError(errors)
+    assert loaded is not None
+    return {
+        "document_sha256": source_sha,
+        "page_count": loaded.document.page_count,
+        "dpi": loaded.geometries[0].dpi if loaded.geometries else None,
+        "table_params_sha256": snapshot_hash,
+        "parser_config_sha256": manifest.get("parser_config_sha256"),
+        "table_params": snapshot.get("params", {}),
+        "artifacts": digests,
+        "pdf": loaded,
+    }
+
+
 def _table_record(run: Path) -> list[dict]:
     payload = json.loads((run / "tables.json").read_text(encoding="utf-8"))
     return payload if isinstance(payload, list) else payload.get("tables", payload)
 
 
-def _params(run: Path) -> TableParams:
-    payload = json.loads((run / "run_config.json").read_text(encoding="utf-8"))
-    snapshot = payload.get("table_params") or {}
-    return TableParams(**snapshot.get("params", {}))
+def _segment_spans(segment, bbox, primitives: list[RulePrimitive]
+                   ) -> list[tuple[float, float]]:
+    spans: list[tuple[float, float]] = []
+    for index in _get(segment, "primitive_indices", ()) or ():
+        if not isinstance(index, int) or index < 0 or index >= len(primitives):
+            continue
+        primitive = primitives[index]
+        if primitive.orientation != "v":
+            continue
+        start, end = max(bbox[1], primitive.a), min(bbox[3], primitive.b)
+        if end > start:
+            spans.append((start, end))
+    return spans
 
 
 def audit_run_item(run: Path, item: dict) -> dict:
+    identity = verify_identity(run)
+    loaded = identity.pop("pdf")
+    params = TableParams(**identity["table_params"])
+
     page_number = int(item["page"])
+    if not 1 <= page_number <= len(loaded.geometries):
+        raise AuditIdentityError([f"page {page_number} is outside the document "
+                                  f"({len(loaded.geometries)} pages)"])
     bbox = tuple(item["table"]["bbox"])
     tables = _table_record(run)
     table = max(tables, key=lambda candidate: _iou(tuple(candidate["bbox"]), bbox))
     score = _iou(tuple(table["bbox"]), bbox)
     if score < 0.9:
         raise SystemExit(f"no table matches {item['item_id']} at IoU>=0.9 ({score:.3f})")
-
-    params = _params(run)
-    loaded = load_pdf(run / "source.pdf")
-    import pymupdf as fitz
 
     with fitz.open(str(run / "source.pdf")) as document:
         page = document[page_number - 1]
@@ -285,12 +468,24 @@ def audit_run_item(run: Path, item: dict) -> dict:
                                       tol=GRID_TOL,
                                       min_width=params.rule_min_width_pt,
                                       min_height=params.rule_min_height_pt)
+    components_by_id = {component.component_id: component for component in components}
 
     issues = audit_table(table, primitives=primitives, components=components,
                          params=params)
     table_bbox = tuple(table["bbox"])
     boundaries = []
     for boundary in table.get("visual_boundary_evidence") or []:
+        segments = []
+        for segment in boundary.get("segments") or []:
+            spans = _segment_spans(segment, table_bbox, primitives)
+            segments.append({
+                "component_id": segment.get("component_id"),
+                "y0": segment.get("y0"),
+                "y1": segment.get("y1"),
+                "recomputed_y0": min(start for start, _ in spans) if spans else None,
+                "recomputed_y1": max(end for _, end in spans) if spans else None,
+                "primitive_indices": segment.get("primitive_indices", []),
+            })
         boundaries.append({
             "x": boundary["x"],
             "role": boundary["role"],
@@ -298,17 +493,41 @@ def audit_run_item(run: Path, item: dict) -> dict:
             "coverage": boundary["coverage"],
             "recomputed_coverage": raw_coverage(boundary, table_bbox, primitives,
                                                 tol=params.visual_boundary_tol_pt),
-            "segments": boundary.get("segment_count", 0),
+            "segment_count": boundary.get("segment_count", 0),
+            "segments": segments,
             "primitives": sorted({index for segment in boundary.get("segments") or []
                                   for index in segment.get("primitive_indices") or []}),
             "component_ids": boundary.get("component_ids", []),
         })
+
+    used_ids = sorted({int(component_id)
+                       for boundary in table.get("visual_boundary_evidence") or []
+                       for component_id in boundary.get("component_ids") or []})
+    rebuild = {
+        "primitives": len(primitives),
+        "components": len(components),
+        "region_components": list(table.get("region_components") or ()),
+        "used_components": [
+            {
+                "component_id": component_id,
+                "bbox": list(components_by_id[component_id].bbox)
+                if component_id in components_by_id else None,
+                "primitives": len(components_by_id[component_id].primitive_indices)
+                if component_id in components_by_id else None,
+                "vertical_segments": len(components_by_id[component_id].vertical)
+                if component_id in components_by_id else None,
+            }
+            for component_id in used_ids
+        ],
+    }
     return {
         "run": str(run),
         "item_id": item["item_id"],
         "page": page_number,
         "gold_bbox": list(bbox),
         "table_bbox": list(table_bbox),
+        "identity": identity,
+        "rebuild": rebuild,
         "status": table.get("visual_boundary_status"),
         "visual_columns": table.get("visual_columns"),
         "partial_boundaries": table.get("partial_boundaries", []),
@@ -335,7 +554,23 @@ def main(argv: list[str] | None = None) -> int:
     if item is None:
         raise SystemExit(f"item {args.item_id} not found in {args.gold}")
 
-    result = audit_run_item(Path(args.run), item)
+    try:
+        result = audit_run_item(Path(args.run), item)
+    except AuditIdentityError as error:
+        refusal = {
+            "run": args.run,
+            "item_id": args.item_id,
+            "refused": True,
+            "identity_errors": list(error.errors),
+            "ok": False,
+        }
+        if args.out:
+            Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.out).write_text(
+                json.dumps(refusal, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8", newline="\n")
+        print(json.dumps(refusal, ensure_ascii=False, indent=2))
+        return 2
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",

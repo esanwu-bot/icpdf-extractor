@@ -14,6 +14,7 @@ The PDFs live outside the repository; these tests skip when they are absent.
 from __future__ import annotations
 
 import json
+import shutil
 from functools import lru_cache
 from pathlib import Path
 
@@ -31,9 +32,11 @@ from icpdf.parser.rule_primitives import (
 from icpdf.parser.table_detector import detect_tables
 from icpdf.parser.text_blocks import extract_text_blocks
 from tools.audit_visual_primitives import (
+    AuditIdentityError,
     audit_table,
     primitive_index_space,
     raw_coverage,
+    verify_identity,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,6 +55,16 @@ def _pdf(key: str) -> Path:
     if not path.is_file():
         pytest.skip(f"generalization PDF not available: {path}")
     return path
+
+
+def _run_for(key: str) -> Path:
+    label = SPEC["pdfs"][key]["label"]
+    root = ROOT / "runs" / "phase14_s2a" / "review_r1" / "final_generalization"
+    for manifest in root.glob("*/run_manifest.json"):
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        if payload.get("requested_mpn") == label:
+            return manifest.parent
+    pytest.skip(f"frozen run not available for {label}")
 
 
 def _iou(bbox, other) -> float:
@@ -79,6 +92,7 @@ def _prepare(key: str, page_number: int, item_id: str):
     """Detect the table and rebuild the raw primitive/component world."""
     pdf = _pdf(key)
     loaded = load_pdf(pdf)
+    assert loaded.sha256 == SPEC["pdfs"][key]["sha256"]
     with fitz.open(str(pdf)) as document:
         page = document[page_number - 1]
         geometry = loaded.geometries[page_number - 1]
@@ -273,3 +287,52 @@ def test_drawn_outer_without_segments_fails_the_audit():
         primitives, components)}
     assert "DRAWN_WITHOUT_SEGMENTS" in codes
     assert "DRAWN_BELOW_FULL" in codes
+
+
+def test_run_identity_matches_spec_and_manifest():
+    for key in ("micrf103", "ds10cp152", "cy29fct520"):
+        identity = verify_identity(_run_for(key))
+        assert identity["document_sha256"] == SPEC["pdfs"][key]["sha256"]
+        assert identity["page_count"] > 0
+        assert identity["table_params_sha256"]
+        assert identity["parser_config_sha256"]
+
+
+def test_wrong_version_pdf_is_refused(tmp_path):
+    source_run = _run_for("micrf103")
+    staged = tmp_path / "run"
+    (staged / "pages").mkdir(parents=True)
+    for name in ("run_manifest.json", "run_config.json", "document.json",
+                 "tables.json"):
+        shutil.copy2(source_run / name, staged / name)
+    shutil.copy2(source_run / "pages" / "geometry.json",
+                 staged / "pages" / "geometry.json")
+    # Same filename family, different document: identity must fail closed.
+    shutil.copy2(_pdf("ds10cp152"), staged / "source.pdf")
+
+    with pytest.raises(AuditIdentityError) as raised:
+        verify_identity(staged)
+    assert any("source.pdf sha256" in error for error in raised.value.errors)
+
+
+def test_duplicate_primitive_in_one_boundary_fails_the_audit():
+    table, primitives, components = _prepare("ds10cp152", 4, "DS10CP152-P04-T01")
+    boundary = _boundary(table, "internal", near=346.1)
+    segment = boundary.segments[0]
+    duplicated = segment.model_copy(
+        update={"primitive_indices": list(segment.primitive_indices) * 2})
+    codes = {issue.code for issue in _issues(
+        _tampered(table, boundary, duplicated), primitives, components)}
+    assert "PRIMITIVE_DUPLICATE_IN_BOUNDARY" in codes
+
+
+def test_cross_component_primitive_reference_fails_the_audit():
+    table, primitives, components = _prepare("micrf103", 3, "MICRF103-P03-T01")
+    boundary = _boundary(table, "internal", near=184.08)
+    segment = boundary.segments[0]
+    other_id = next(component_id for component_id in boundary.component_ids
+                    if component_id != segment.component_id)
+    crossed = segment.model_copy(update={"component_id": other_id})
+    codes = {issue.code for issue in _issues(
+        _tampered(table, boundary, crossed), primitives, components)}
+    assert "PRIMITIVE_NOT_IN_COMPONENT" in codes

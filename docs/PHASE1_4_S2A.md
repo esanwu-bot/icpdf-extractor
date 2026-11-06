@@ -6,9 +6,12 @@ logical projection) and S2c (`ConditionContext`) are not started.  No
 acceptance is self-declared.
 
 Round r2 adds an independent integration audit that re-opens the source PDFs,
-re-runs `collect_primitives()` and resolves every recorded `primitive_indices`
-entry to the real `RulePrimitive`; it does not touch the validator, the visual
-algorithm or any threshold.  See §5.2 and §7.4.
+re-runs `collect_primitives()`, rebuilds the `RuleComponent` set, and resolves
+every recorded `primitive_indices` entry to the real `RulePrimitive`; it does
+not touch the validator, the visual algorithm or any threshold.  The audit
+refuses to run unless the PDF SHA-256 and the parameter snapshot match the
+run manifest, and it reads its thresholds from that snapshot.  See §5.2 and
+§7.4.
 
 This revision answers the three S2a review items without widening scope:
 
@@ -66,7 +69,7 @@ SHA `ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c`.
 | `tools/audit_visual_primitives.py` | **new (r2)**; read-only audit of persisted visual evidence against a fresh `collect_primitives()` run |
 | `tests/unit/test_visual_structure.py` | **new**, 21 tests |
 | `tests/integration/test_phase14_s2.py` | **new**, 11 tests (skipped when the PDFs are absent) |
-| `tests/integration/test_phase14_primitive_audit.py` | **new (r2)**, 7 audit/negative tests (skipped when the PDFs are absent) |
+| `tests/integration/test_phase14_primitive_audit.py` | **new (r2)**, 11 audit/identity/negative tests (skipped when the PDFs are absent) |
 | `tests/unit/test_evidence_validation.py` | extended to 40 tests, including one negative case per visual validator code |
 | `docs/PHASE1_4_S2A.md` | this report |
 
@@ -282,22 +285,63 @@ from the emitted segments on real PDFs.
 ### 5.2 Independent primitive audit (r2, outside the validator)
 
 `tools/audit_visual_primitives.py` is a separate read-only audit; the formal
-validator and the visual algorithm are unchanged.  For one table it:
+validator and the visual algorithm are unchanged.  It has three independent
+stages.
 
-1. re-opens the source PDF and re-runs
-   `collect_primitives(page, page_number, geometry)`;
-2. resolves every `primitive_indices` entry as a list position on that page;
-3. checks the primitive belongs to the recorded `RuleComponent`
-   (`primitive_index ∈ component.primitive_indices`) and that the component is
-   listed in `region_components`;
-4. checks `orientation == "v"`, `abs(primitive.c - boundary.x) <= 2.5`, and that
-   the clipped primitive span lies inside the segment's `[y0, y1]`;
-5. rebuilds each segment envelope from its raw primitives and recomputes the
-   boundary coverage from the union of primitive spans divided by table height;
-6. reports issues (`PRIMITIVE_INDEX_OUT_OF_RANGE`, `PRIMITIVE_NOT_VERTICAL`,
-   `PRIMITIVE_X_MISMATCH`, `PRIMITIVE_NOT_IN_COMPONENT`,
-   `PRIMITIVE_OUTSIDE_SEGMENT`, `SEGMENT_SPAN_MISMATCH`, `COVERAGE_MISMATCH`,
-   `DRAWN_WITHOUT_SEGMENTS`, `DRAWN_BELOW_FULL`, `IMPLIED_WITH_SEGMENTS`, …).
+**Identity gate (P1, P4).** Before touching boundaries it verifies the run
+directory against its own record and refuses with `AuditIdentityError` (CLI exit
+status 2) on any mismatch:
+
+* artifact SHA-256 for `document.json`, `pages/geometry.json`, `tables.json`
+  and `run_config.json` equals the manifest `artifacts` list;
+* `source.pdf` SHA-256 equals both `run_manifest.json:document_sha256` and
+  `document.json:sha256` (a wrong-version PDF of the same product is refused);
+* `page_count`, `dpi`, page sizes and rotations agree between the manifest,
+  `document.json`, the recorded geometry and a fresh `load_pdf(dpi=<manifest>)`;
+* every recorded page's CropBox, MediaBox, display rect and rotation equals the
+  fresh PDF's geometry contract;
+* `run_config.json` and `run_manifest.json` carry the same `table_params`
+  snapshot, the same `table_params_sha256`, and the same
+  `parser_config_sha256`; the snapshot hash is recomputed with
+  `snapshot_sha256()` rather than trusted.
+
+The audit then builds `TableParams(**snapshot["params"])` and uses those values
+for every clip/coverage/threshold decision — no visual parameter is hard-coded.
+
+**Independent rebuild (P2).** It re-opens the page and re-runs the S1 chain
+`collect_primitives(page, page_number, geometry)` →
+`build_components(..., tol=GRID_TOL, min_width=params.rule_min_width_pt,
+min_height=params.rule_min_height_pt)`.  The resulting components are the only
+ones accepted: every segment's `component_id` must resolve in that fresh set,
+must be listed on the boundary and in `region_components`, its bbox must
+contain the boundary x and the segment y-span, and it must own a vertical
+ruling at that x.  Membership is checked against
+`component.primitive_indices`, not against a recorded component list.  The
+audit JSON exposes the rebuilt primitive count, component count and the
+bbox/primitive/vertical counts of every component it actually used.
+
+**Primitive resolution (P3).** For each segment and raw primitive it checks:
+page, `orientation == "v"`, `abs(primitive.c - boundary.x) <=
+params.visual_boundary_tol_pt`, membership in the rebuilt component, and
+non-duplication across the boundary.  Each primitive span is clipped to the
+table height; then:
+
+* `y0_stored == min(clipped starts)` and `y1_stored == max(clipped ends)`
+  (`SEGMENT_SPAN_MISMATCH`);
+* coverage is recomputed from the union of **raw primitive** spans divided by
+  the table height (`COVERAGE_MISMATCH`), never from the recorded segment
+  geometry;
+* stored `component_ids` must equal the segment component set
+  (`COMPONENT_IDS_MISMATCH`); implied outers must carry no segments.
+
+Issue codes include `SEGMENT_COUNT_MISMATCH`, `COMPONENT_MISSING`,
+`COMPONENT_NOT_IN_REGION`, `COMPONENT_BBOX_MISMATCH`,
+`COMPONENT_VERTICAL_MISSING`, `PRIMITIVE_INDEX_OUT_OF_RANGE`,
+`PRIMITIVE_INDEX_UNSORTED`, `PRIMITIVE_DUPLICATE_IN_BOUNDARY`,
+`PRIMITIVE_NOT_VERTICAL`, `PRIMITIVE_X_MISMATCH`,
+`PRIMITIVE_NOT_IN_COMPONENT`, `PRIMITIVE_OUTSIDE_SEGMENT`,
+`SEGMENT_SPAN_MISMATCH`, `COVERAGE_MISMATCH`, `DRAWN_WITHOUT_SEGMENTS`,
+`DRAWN_BELOW_FULL`, `IMPLIED_WITH_SEGMENTS`.
 
 It can audit either an in-memory `DetectedTable` (integration tests) or the
 persisted `tables.json` of a frozen run:
@@ -308,19 +352,23 @@ python -m tools.audit_visual_primitives --run <run dir> \
   --item-id DS10CP152-P04-T01 --out <audit.json>
 ```
 
-Exit status is 1 if any issue is found.  The audit never writes into a run
-directory; `--out` is explicit.
+Exit status is 0 when clean, 1 when issues are found, and 2 when identity
+verification refuses the run.  The emitted JSON has `identity` (document and
+parameter hashes, DPI, artifacts), `rebuild` (fresh primitive/component
+counts), per-boundary `recomputed_coverage`, and per-segment
+`recomputed_y0`/`recomputed_y1`.  The audit never writes into a run directory;
+`--out` is explicit.
 
 ## 6. Tests
 
 ```text
 python -m pytest
-153 passed, 2 xfailed in 10.05s
+157 passed, 2 xfailed in 11.09s
 ```
 
 Per-file counts: `tests/unit/test_visual_structure.py` (21),
 `tests/integration/test_phase14_s2.py` (11),
-`tests/integration/test_phase14_primitive_audit.py` (7), and
+`tests/integration/test_phase14_primitive_audit.py` (11), and
 `tests/unit/test_evidence_validation.py` (40, one negative case per validator
 code).  The other 74 tests are unchanged.
 
@@ -463,10 +511,25 @@ Primitive index space on those pages: DS10 page 4 has 442 primitives, 79 with
 334 / 333.  This confirms the evidence indices cannot be treated as
 `drawing_index`.
 
+Every audit also re-verified the run identity before evaluating boundaries:
+
+| Sample | `document_sha256` | `table_params_sha256` | DPI | Rebuilt primitives / components |
+| --- | --- | --- | --- | --- |
+| MICRF103 P03 | `670a1fab…a6708` | `82d4df4d…6b9f0a` | 150 | 58 / 5 |
+| DS10CP152 P04 | `14f395e4…30fb82` | `82d4df4d…6b9f0a` | 150 | 442 / 1 |
+| CY29FCT520 P05 | `5f374e76…80686c` | `82d4df4d…6b9f0a` | 150 | 334 / 1 |
+
+Each stored segment `[y0, y1]` equals the min/max of its raw primitives clipped
+to the table, and each recomputed coverage equals the stored value exactly
+(delta 0.0).
+
 Negative controls (integration tests) inject a tampered primitive index
-(out-of-range and a horizontal primitive) and tampered segment spans (stretched
-and shifted); the audit rejects each with the expected code.  A faked drawn
-outer with no segments is also rejected.
+(out-of-range and a horizontal primitive), tampered segment spans (stretched
+and shifted), a duplicated primitive inside one boundary, and a primitive
+reassigned to a different component; the audit rejects each with the expected
+code.  A faked drawn outer with no segments is also rejected.  A run whose
+`source.pdf` is a different document of the same product family is refused by
+the identity gate before any boundary is read.
 
 ## 8. Physical-structure diff evidence
 
@@ -521,7 +584,7 @@ Minor coordinate note: CY29FCT520-P06-T01 partial boundary x = 290.2 vs gold
 * This document is an evidence bundle for independent review; S2a is **not**
   declared passed here.
 
-## 11. Reviewer r1 traceability
+## 11. Reviewer traceability
 
 | Item | Resolution | Code | Tests | Evidence |
 | --- | --- | --- | --- | --- |
@@ -529,8 +592,12 @@ Minor coordinate note: CY29FCT520-P06-T01 partial boundary x = 290.2 vs gold
 | P2 evidence provenance | `segments` per boundary with `component_id`, clipped span, `primitive_indices`; implied outer has no segment | `domain/visual.py`, `parser/visual_structure.py` | `test_segment_evidence_links_components_and_primitives`, `test_implied_outer_has_no_fabricated_segment`; 2 integration cases | §3.3 real sample; `review_r1/visual_evidence_sample.json` |
 | Validator independence | Recomputes coverage from recorded segment geometry and re-checks outer `drawn`; never trusts the stored aggregate | `tools/validate_evidence.py` (`_validate_visual_segments`) | 9 new negative tests | §5.1; six runs 0 errors / 0 warnings |
 | P3 determinism | Total sort order + fixed-anchor grouping, group mean computed after close | `_group_segments` | `test_grouping_is_order_independent`, `test_anchor_grouping_prevents_chain_merge` | §3.2; zero visual-field diffs vs first pass |
-| Primitive authenticity (r2) | Reopen PDF, re-run `collect_primitives`, resolve indices, check ownership/orientation/x/span, recompute coverage, tamper negatives | `tools/audit_visual_primitives.py` | `test_phase14_primitive_audit.py` (7) | §5.2, §7.4; 3 samples 0 issues |
+| Primitive authenticity (r2) | Reopen PDF, re-run `collect_primitives`, resolve indices, check ownership/orientation/x/span, recompute coverage, tamper negatives | `tools/audit_visual_primitives.py` | `test_phase14_primitive_audit.py` (11) | §5.2, §7.4; 3 samples 0 issues |
 | Index space (r2) | `primitive_indices` = `collect_primitives` position, not `drawing_index` | docstring + audit | index-space test | §2; DS10 79/442 differ |
+| r2-P1 PDF identity | Source SHA-256, artifact hashes, page count/DPI, page sizes, CropBox, rotation and display rect all checked against the manifest before any boundary is read; wrong-version PDF refused | `verify_identity`, `AuditIdentityError` | `test_run_identity_matches_spec_and_manifest`, `test_wrong_version_pdf_is_refused` | §5.2 gate; §7.4 identity table |
+| r2-P2 component rebuild | Fresh `build_components()` is the only accepted component set; bbox, vertical ruling and primitive ownership checked against it | `verify_identity` + `build_components()` call, `COMPONENT_*` codes | 3 sample audits + `test_cross_component_primitive_reference_fails_the_audit` | §5.2 rebuild block in every `audit_*.json` |
+| r2-P3 strict segment rebuild | `y0 = min(clipped starts)`, `y1 = max(clipped ends)`, coverage from raw primitive union; duplicate/cross-component references rejected | `audit_table`, `_segment_spans` | `test_tampered_segment_span_fails_the_audit`, `test_duplicate_primitive_in_one_boundary_fails_the_audit` | §7.4 zero deltas; per-segment recomputed values |
+| r2-P4 snapshot binding | Thresholds come from `manifest.table_params`; snapshot SHA recomputed with `snapshot_sha256()`; no visual-threshold literal in the audit tool | `verify_identity`, `TableParams(**snapshot["params"])` | identity tests | §5.2 gate; `identity.table_params_sha256` |
 | DS10CP152-P03-T01 | Kept as reported known limitation; thresholds untouched | – | – | §9 |
 | Scope boundaries | Gold v1/v2, S1 physical rules, thresholds, S2b/S2c all untouched; no Codeup push | – | – | §10 |
 
