@@ -82,7 +82,11 @@ def _group_segments(entries: list[tuple[RuleSegment, RuleComponent]], tol: float
 
 def _primitive_indices(component: RuleComponent, segment: RuleSegment,
                        tol: float) -> list[int]:
-    """Page-level primitive indices that produced ``segment``."""
+    """Page-level ``collect_primitives`` positions that produced ``segment``.
+
+    These are list positions, not ``RulePrimitive.drawing_index`` values; the
+    audit tool resolves them against a fresh ``collect_primitives`` run.
+    """
     indices: set[int] = set()
     for index, primitive in zip(component.primitive_indices, component.primitives):
         if primitive.orientation != "v":

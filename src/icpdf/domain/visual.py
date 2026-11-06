@@ -17,10 +17,13 @@ class VisualSegment(BaseModel):
     """One clipped vertical rule segment behind a visual boundary.
 
     ``component_id`` is the :class:`RuleComponent` the segment came from and
-    ``primitive_indices`` indexes the page-level ``collect_primitives`` list,
-    so a boundary can be walked back to its ruling primitives.  ``y0``/``y1``
-    are clipped to the table region and are the inputs of the coverage
-    recomputation.
+    ``primitive_indices`` are positions in the page-level
+    ``collect_primitives(page, page_number, geometry)`` list, so a boundary can
+    be walked back to its ruling primitives.  This is a distinct index space
+    from ``RulePrimitive.drawing_index``: one drawing may yield zero, one or
+    four primitives, so the two numbers are not interchangeable.
+    ``y0``/``y1`` are clipped to the table region and are the inputs of the
+    coverage recomputation.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)

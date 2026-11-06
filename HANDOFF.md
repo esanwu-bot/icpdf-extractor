@@ -573,3 +573,38 @@ thresholds untouched.
 - **Implementation commit.** `f48ecd5c3e822ecb20af03f304a252ef09cd27c8`
   (`fix(parser): address S2a review r1 provenance and status precedence`),
   local only, not pushed.
+
+## Phase 1.4 S2a — Reviewer round r2 primitive audit (2026-11-06)
+
+**Status:** provenance authenticity audited; ready for final review.  No parser,
+visual-algorithm, validator, Gold or threshold change; S2b/S2c not started;
+not pushed to Codeup.
+
+- **New read-only tool.** `tools/audit_visual_primitives.py` re-opens the
+  source PDF, re-runs `collect_primitives(page, page_number, geometry)`,
+  resolves every `primitive_indices` entry, checks component ownership,
+  vertical orientation, x within 2.5pt, primitive span inside the segment span,
+  rebuilds segment envelopes and recomputes coverage from raw primitives.
+  Reports `PRIMITIVE_INDEX_OUT_OF_RANGE`, `PRIMITIVE_NOT_VERTICAL`,
+  `PRIMITIVE_X_MISMATCH`, `PRIMITIVE_NOT_IN_COMPONENT`,
+  `PRIMITIVE_OUTSIDE_SEGMENT`, `SEGMENT_SPAN_MISMATCH`, `COVERAGE_MISMATCH`,
+  `DRAWN_WITHOUT_SEGMENTS`, etc.  CLI audits a frozen run's `tables.json` with
+  `--run/--gold/--item-id/--out`; exit 1 on issues.
+- **Index space.** `primitive_indices` are positions in the page-level
+  `collect_primitives` list, explicitly not `drawing_index` (DS10 p4: 79/442
+  differ; MICRF p3: 23/58; CY29 p5: 333/334).  Docstrings in `domain/visual.py`
+  and `visual_structure.py` state this.
+- **New tests.** `tests/integration/test_phase14_primitive_audit.py` (7):
+  DS10CP152 P04 internal partial, MICRF103 P03 implied outer (no primitive
+  backing), CY29FCT520 P05 multiple partials, index-space proof, tampered
+  out-of-range index, horizontal primitive, stretched/shifted segment span,
+  faked drawn outer with no segments.  PDFs absent → skip.
+- **Audit results.** Persisted review-r1 evidence, 0 issues each:
+  DS10CP152-P04-T01 (9 boundaries; x=346.15 coverage 0.108187 from primitives
+  278+295), MICRF103-P03-T01 (7 boundaries; implied outers 0 segments /
+  0 primitives), CY29FCT520-P05-T01 (8 boundaries; partials 193.946/265.958
+  coverage 0.555596).  Artifacts:
+  `runs/phase14_s2a/review_r2/audit_{ds10_p04,micrf103_p03,cy29_p05}.json`.
+- **Tests.** `153 passed, 2 xfailed`; prior six-run validator results and all
+  Gold/physical-diff evidence unchanged (validator source untouched).
+- **Implementation commit.** `PENDING_R2_SHA` (local only, not pushed).

@@ -1,8 +1,14 @@
 # Phase 1.4 S2a — VisualBoundary (visual boundary lattice)
 
-Status: S2a implementation + Reviewer-round r1 clarification, local commit
-only, **awaiting Reviewer**.  S2b (logical boundary / logical projection) and
-S2c (`ConditionContext`) are not started.  No acceptance is self-declared.
+Status: S2a implementation + Reviewer-round r1 clarification + r2 primitive
+audit, local commits only, **awaiting Reviewer**.  S2b (logical boundary /
+logical projection) and S2c (`ConditionContext`) are not started.  No
+acceptance is self-declared.
+
+Round r2 adds an independent integration audit that re-opens the source PDFs,
+re-runs `collect_primitives()` and resolves every recorded `primitive_indices`
+entry to the real `RulePrimitive`; it does not touch the validator, the visual
+algorithm or any threshold.  See §5.2 and §7.4.
 
 This revision answers the three S2a review items without widening scope:
 
@@ -57,8 +63,10 @@ SHA `ab9f12527767c7dffe670f4b49e516202f224902af996a73eb155aaa420d3d5c`.
 | `src/icpdf/parser/pipeline.py` | writes `table_params` and `table_params_sha256` into both `run_config.json` and `run_manifest.json` |
 | `tools/goldset/evaluate.py` | visual prediction/status metrics, separate denominator, legacy fallback, CSV columns, Markdown rows |
 | `tools/validate_evidence.py` | visual checks and parameter-snapshot verification |
+| `tools/audit_visual_primitives.py` | **new (r2)**; read-only audit of persisted visual evidence against a fresh `collect_primitives()` run |
 | `tests/unit/test_visual_structure.py` | **new**, 21 tests |
 | `tests/integration/test_phase14_s2.py` | **new**, 11 tests (skipped when the PDFs are absent) |
+| `tests/integration/test_phase14_primitive_audit.py` | **new (r2)**, 7 audit/negative tests (skipped when the PDFs are absent) |
 | `tests/unit/test_evidence_validation.py` | extended to 40 tests, including one negative case per visual validator code |
 | `docs/PHASE1_4_S2A.md` | this report |
 
@@ -75,6 +83,15 @@ VisualBoundary
   drawn, coverage (0..1), component_ids, segment_count,
   segments: VisualSegment[]
 ```
+
+**Index space.**  `primitive_indices` are positions in the list returned by
+`collect_primitives(page, page_number, geometry)` — **not**
+`RulePrimitive.drawing_index` values.  One drawing can yield zero, one or four
+primitives (`quad_edge`), and non-ruling items are skipped, so the two
+numberings diverge.  On DS10CP152 page 4, 79 of the 442 primitives already have
+`index != drawing_index` (e.g. index 363 is drawing 362, two lines from one
+item); resolving an index therefore requires that page's primitive list, which
+is exactly what the r2 audit does.
 
 `drawn` has a role-dependent meaning, matching the evidence:
 
@@ -262,15 +279,48 @@ re-parsing.  Integration tests
 (`test_visual_evidence_traces_to_components_and_primitives`) re-derive coverage
 from the emitted segments on real PDFs.
 
+### 5.2 Independent primitive audit (r2, outside the validator)
+
+`tools/audit_visual_primitives.py` is a separate read-only audit; the formal
+validator and the visual algorithm are unchanged.  For one table it:
+
+1. re-opens the source PDF and re-runs
+   `collect_primitives(page, page_number, geometry)`;
+2. resolves every `primitive_indices` entry as a list position on that page;
+3. checks the primitive belongs to the recorded `RuleComponent`
+   (`primitive_index ∈ component.primitive_indices`) and that the component is
+   listed in `region_components`;
+4. checks `orientation == "v"`, `abs(primitive.c - boundary.x) <= 2.5`, and that
+   the clipped primitive span lies inside the segment's `[y0, y1]`;
+5. rebuilds each segment envelope from its raw primitives and recomputes the
+   boundary coverage from the union of primitive spans divided by table height;
+6. reports issues (`PRIMITIVE_INDEX_OUT_OF_RANGE`, `PRIMITIVE_NOT_VERTICAL`,
+   `PRIMITIVE_X_MISMATCH`, `PRIMITIVE_NOT_IN_COMPONENT`,
+   `PRIMITIVE_OUTSIDE_SEGMENT`, `SEGMENT_SPAN_MISMATCH`, `COVERAGE_MISMATCH`,
+   `DRAWN_WITHOUT_SEGMENTS`, `DRAWN_BELOW_FULL`, `IMPLIED_WITH_SEGMENTS`, …).
+
+It can audit either an in-memory `DetectedTable` (integration tests) or the
+persisted `tables.json` of a frozen run:
+
+```text
+python -m tools.audit_visual_primitives --run <run dir> \
+  --gold gold/generalization/gold_table_set.jsonl \
+  --item-id DS10CP152-P04-T01 --out <audit.json>
+```
+
+Exit status is 1 if any issue is found.  The audit never writes into a run
+directory; `--out` is explicit.
+
 ## 6. Tests
 
 ```text
 python -m pytest
-146 passed, 2 xfailed in 10.59s
+153 passed, 2 xfailed in 10.05s
 ```
 
 Per-file counts: `tests/unit/test_visual_structure.py` (21),
-`tests/integration/test_phase14_s2.py` (11), and
+`tests/integration/test_phase14_s2.py` (11),
+`tests/integration/test_phase14_primitive_audit.py` (7), and
 `tests/unit/test_evidence_validation.py` (40, one negative case per validator
 code).  The other 74 tests are unchanged.
 
@@ -290,6 +340,15 @@ headerless; CY29 P10 package outline vs the nested dimension table
 (maximum-IoU matching).  Two r1 cases additionally recompute coverage from the
 emitted segments on DS10 P04-T01 and prove that MICRF103 P03's implied outers
 carry no segment, `component_ids=[]` and `coverage=0`.
+
+The r2 audit file adds the three required samples: DS10CP152 P04 internal
+partial (9 boundaries, primitive-level coverage 0.108187 reproduced),
+MICRF103 P03 implied outer (no primitive backing at either outer edge), and
+CY29FCT520 P05 multiple partials (0.555596 reproduced from raw primitives).  It
+also proves the primitive index space is `collect_primitives` order rather than
+`drawing_index`, and includes negative cases for an out-of-range index, a
+horizontal primitive, a stretched/shifted segment span, and a drawn outer with
+no segments.
 
 ## 7. Runs
 
@@ -387,6 +446,28 @@ physical columns but four drawn visual separators; ADC12DJ5200 P98/P100 and
 ADS1299 P76 have no internal vertical ruling (`not_printed`) although the
 structure layer recovered columns from text alignment.
 
+### 7.4 Primitive authenticity audit (r2)
+
+`python -m tools.audit_visual_primitives --run <review-r1 run> --gold
+gold/generalization/gold_table_set.jsonl --item-id <id> --out
+runs/phase14_s2a/review_r2/audit_<item>.json`:
+
+| Sample | Table | Page | Status | Boundaries | Result |
+| --- | --- | --- | --- | --- | --- |
+| DS10CP152 | `DS10CP152-P04-T01` | 4 | partial | 9 | **0 issues**; internal x=346.15 recomputes 0.108187 from primitives 278+295 |
+| MICRF103 | `MICRF103-P03-T01` | 3 | implied_outer | 7 | **0 issues**; both outers have 0 segments / 0 primitives, raw coverage 0 |
+| CY29FCT520 | `CY29FCT520-P05-T01` | 5 | partial | 8 | **0 issues**; partials 193.946 / 265.958 recompute 0.555596 from raw primitives |
+
+Primitive index space on those pages: DS10 page 4 has 442 primitives, 79 with
+`index != drawing_index`; MICRF103 page 3 has 58 / 23; CY29FCT520 page 5 has
+334 / 333.  This confirms the evidence indices cannot be treated as
+`drawing_index`.
+
+Negative controls (integration tests) inject a tampered primitive index
+(out-of-range and a horizontal primitive) and tampered segment spans (stretched
+and shifted); the audit rejects each with the expected code.  A faked drawn
+outer with no segments is also rejected.
+
 ## 8. Physical-structure diff evidence
 
 Two artifacts under `runs/phase14_s2a/review_r1/`:
@@ -435,6 +516,8 @@ Minor coordinate note: CY29FCT520-P06-T01 partial boundary x = 290.2 vs gold
   checks.
 * Parameter values are the approved defaults; no LLM or automatic parameter
   generation was used.
+* r2 adds only a read-only audit tool and integration tests; the parser,
+  visual algorithm and `tools/validate_evidence.py` are unchanged.
 * This document is an evidence bundle for independent review; S2a is **not**
   declared passed here.
 
@@ -446,6 +529,8 @@ Minor coordinate note: CY29FCT520-P06-T01 partial boundary x = 290.2 vs gold
 | P2 evidence provenance | `segments` per boundary with `component_id`, clipped span, `primitive_indices`; implied outer has no segment | `domain/visual.py`, `parser/visual_structure.py` | `test_segment_evidence_links_components_and_primitives`, `test_implied_outer_has_no_fabricated_segment`; 2 integration cases | §3.3 real sample; `review_r1/visual_evidence_sample.json` |
 | Validator independence | Recomputes coverage from recorded segment geometry and re-checks outer `drawn`; never trusts the stored aggregate | `tools/validate_evidence.py` (`_validate_visual_segments`) | 9 new negative tests | §5.1; six runs 0 errors / 0 warnings |
 | P3 determinism | Total sort order + fixed-anchor grouping, group mean computed after close | `_group_segments` | `test_grouping_is_order_independent`, `test_anchor_grouping_prevents_chain_merge` | §3.2; zero visual-field diffs vs first pass |
+| Primitive authenticity (r2) | Reopen PDF, re-run `collect_primitives`, resolve indices, check ownership/orientation/x/span, recompute coverage, tamper negatives | `tools/audit_visual_primitives.py` | `test_phase14_primitive_audit.py` (7) | §5.2, §7.4; 3 samples 0 issues |
+| Index space (r2) | `primitive_indices` = `collect_primitives` position, not `drawing_index` | docstring + audit | index-space test | §2; DS10 79/442 differ |
 | DS10CP152-P03-T01 | Kept as reported known limitation; thresholds untouched | – | – | §9 |
 | Scope boundaries | Gold v1/v2, S1 physical rules, thresholds, S2b/S2c all untouched; no Codeup push | – | – | §10 |
 
