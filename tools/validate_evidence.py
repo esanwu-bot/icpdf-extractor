@@ -17,7 +17,16 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from icpdf.domain.visual import VISUAL_BOUNDARY_ROLES, VISUAL_BOUNDARY_STATUSES
-from icpdf.parser.config import snapshot_sha256
+from icpdf.eval.jsonio import (
+    JsonMemberDuplicate,
+    JsonMemberMissing,
+    JsonMemberParseError,
+    extract_json_member_bytes,
+)
+from icpdf.parser.config import (
+    snapshot_sha256,
+    validate_table_params_snapshot,
+)
 from icpdf.parser.header_semantics import role_for_header
 
 TOL = 0.75
@@ -303,7 +312,8 @@ def validate_run(run_dir: str | Path) -> dict:
     candidate_set = _load(run_dir / "candidates.json")
     geometries = {item["page_number"]: item
                   for item in _load(run_dir / "pages" / "geometry.json")}
-    manifest = _load(run_dir / "run_manifest.json")
+    manifest_path = run_dir / "run_manifest.json"
+    manifest = _load(manifest_path)
     candidates = candidate_set.get("candidates") or []
     report = _Report()
 
@@ -312,10 +322,29 @@ def validate_run(run_dir: str | Path) -> dict:
     visual_tol = float(visual_params.get("visual_boundary_tol_pt", DEFAULT_VISUAL_TOL))
     visual_full = float(visual_params.get("visual_full_height_coverage",
                                           DEFAULT_VISUAL_FULL))
+    if params_snapshot is None:
+        report.error("table_params_snapshot_missing",
+                     "run_manifest.json has no table_params member")
     if params_snapshot is not None:
         if manifest.get("table_params_sha256") != snapshot_sha256(params_snapshot):
             report.error("PARAM_SNAPSHOT_HASH",
                          "table_params_sha256 does not match the parameter snapshot")
+        try:
+            snapshot_raw = extract_json_member_bytes(
+                manifest_path.read_bytes(), "table_params")
+        except JsonMemberDuplicate as exc:
+            report.error("table_params_snapshot_duplicate_key", str(exc))
+        except JsonMemberMissing as exc:
+            report.error("table_params_snapshot_missing", str(exc))
+        except JsonMemberParseError as exc:
+            report.error("table_params_snapshot_parse_error", str(exc))
+        else:
+            expected_version = (params_snapshot.get("snapshot_version")
+                                if isinstance(params_snapshot, dict) else None)
+            for code in validate_table_params_snapshot(
+                    snapshot_raw, expected_version=expected_version,
+                    expected_sha256=manifest.get("table_params_sha256")):
+                report.error(code, "raw table_params snapshot rejected")
         config_path = run_dir / "run_config.json"
         if config_path.exists():
             config = _load(config_path)

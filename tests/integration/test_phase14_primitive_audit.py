@@ -22,7 +22,7 @@ import pymupdf as fitz
 import pytest
 import yaml
 
-from icpdf.parser.config import TableParams
+from icpdf.parser.config import TableParams, snapshot_sha256
 from icpdf.parser.pdf_loader import load_pdf
 from icpdf.parser.rule_primitives import (
     GRID_TOL,
@@ -356,6 +356,61 @@ def test_wrong_version_pdf_is_refused(tmp_path):
     with pytest.raises(AuditIdentityError) as raised:
         verify_identity(staged)
     assert any("source.pdf sha256" in error for error in raised.value.errors)
+
+
+def _staged_run(tmp_path, key: str = "micrf103") -> Path:
+    staged = tmp_path / "run"
+    shutil.copytree(_run_for(key), staged)
+    return staged
+
+
+def _rewrite_manifest(run: Path, mutate) -> None:
+    path = run / "run_manifest.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    mutate(payload)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8", newline="\n")
+
+
+def test_tampered_v1_snapshot_is_refused(tmp_path):
+    staged = _staged_run(tmp_path)
+
+    def tamper(payload):
+        payload["table_params"]["params"]["cell_gap_pt"] = 9.0
+
+    _rewrite_manifest(staged, tamper)
+    with pytest.raises(AuditIdentityError) as raised:
+        verify_identity(staged)
+    assert any("table_params_snapshot_sha_mismatch" in error
+               for error in raised.value.errors)
+
+
+def test_unknown_snapshot_version_is_refused_by_the_audit(tmp_path):
+    staged = _staged_run(tmp_path)
+
+    def tamper(payload):
+        payload["table_params"]["snapshot_version"] = "table-params/v9"
+        payload["table_params_sha256"] = snapshot_sha256(payload["table_params"])
+
+    _rewrite_manifest(staged, tamper)
+    with pytest.raises(AuditIdentityError) as raised:
+        verify_identity(staged)
+    assert any("unsupported_table_params_snapshot_version" in error
+               for error in raised.value.errors)
+
+
+def test_duplicate_top_level_table_params_member_is_refused(tmp_path):
+    staged = _staged_run(tmp_path)
+    path = staged / "run_manifest.json"
+    text = path.read_text(encoding="utf-8")
+    member = json.dumps(json.loads(text)["table_params"], ensure_ascii=False)
+    assert text.startswith("{")
+    path.write_text('{"table_params":' + member + "," + text[1:],
+                    encoding="utf-8", newline="\n")
+    with pytest.raises(AuditIdentityError) as raised:
+        verify_identity(staged)
+    assert any("table_params_snapshot_duplicate_key" in error
+               for error in raised.value.errors)
 
 
 def test_duplicate_primitive_in_one_boundary_fails_the_audit():

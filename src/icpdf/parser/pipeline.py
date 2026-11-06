@@ -14,6 +14,7 @@ from icpdf.domain import Product
 from icpdf.domain.candidate import ColumnRole
 from icpdf.parser.candidate_registry import build_candidates
 from icpdf.parser.config import (
+    TABLE_PARAMS_SNAPSHOT_VERSION,
     load_config,
     table_params_sha256,
     table_params_snapshot,
@@ -35,8 +36,10 @@ def _sanitized_config(requested_mpn: str, dpi: float, config, config_sha: str) -
         "dpi": dpi,
         "parser_config": config.model_dump(mode="json"),
         "parser_config_sha256": config_sha,
-        "table_params": table_params_snapshot(config.tables),
-        "table_params_sha256": table_params_sha256(config.tables),
+        "table_params": table_params_snapshot(
+            config.tables, version=TABLE_PARAMS_SNAPSHOT_VERSION),
+        "table_params_sha256": table_params_sha256(
+            config.tables, version=TABLE_PARAMS_SNAPSHOT_VERSION),
         "llm": {
             "provider": "dashscope",
             "model": os.getenv("ICPDF_LLM_MODEL", ""),
@@ -115,8 +118,10 @@ def parse_pdf(pdf_path: str | Path, requested_mpn: str,
         "contract_version": CONTRACT_VERSION,
         "parser_config": config.model_dump(mode="json"),
         "parser_config_sha256": config_sha,
-        "table_params": table_params_snapshot(config.tables),
-        "table_params_sha256": table_params_sha256(config.tables),
+        "table_params": table_params_snapshot(
+            config.tables, version=TABLE_PARAMS_SNAPSHOT_VERSION),
+        "table_params_sha256": table_params_sha256(
+            config.tables, version=TABLE_PARAMS_SNAPSHOT_VERSION),
         "platform": platform.platform(),
         "dpi": effective_dpi,
         "page_count": document.page_count,

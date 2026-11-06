@@ -28,7 +28,17 @@ from pathlib import Path
 import pymupdf as fitz
 
 import icpdf.parser.rule_primitives as rule_primitives_module
-from icpdf.parser.config import TableParams, snapshot_sha256
+from icpdf.eval.jsonio import (
+    JsonMemberDuplicate,
+    JsonMemberMissing,
+    JsonMemberParseError,
+    extract_json_member_bytes,
+)
+from icpdf.parser.config import (
+    TableParams,
+    snapshot_sha256,
+    validate_table_params_snapshot,
+)
 from icpdf.parser.layout import rule_components
 from icpdf.parser.pdf_loader import file_sha256, load_pdf
 from icpdf.parser.rule_primitives import (
@@ -417,6 +427,22 @@ def verify_identity(run: Path) -> dict:
                       f"{manifest.get('table_params_sha256')}")
     if config.get("table_params_sha256") != manifest.get("table_params_sha256"):
         errors.append("run_config table_params_sha256 differs from the manifest")
+    if snapshot:
+        try:
+            snapshot_raw = extract_json_member_bytes(
+                (run / "run_manifest.json").read_bytes(), "table_params")
+        except JsonMemberDuplicate as exc:
+            errors.append(f"table_params_snapshot_duplicate_key: {exc}")
+        except JsonMemberMissing as exc:
+            errors.append(f"table_params_snapshot_missing: {exc}")
+        except JsonMemberParseError as exc:
+            errors.append(f"table_params_snapshot_parse_error: {exc}")
+        else:
+            for code in validate_table_params_snapshot(
+                    snapshot_raw,
+                    expected_version=snapshot.get("snapshot_version"),
+                    expected_sha256=manifest.get("table_params_sha256")):
+                errors.append(f"{code}: raw table_params snapshot rejected")
     if config.get("parser_config_sha256") != manifest.get("parser_config_sha256"):
         errors.append("run_config parser_config_sha256 differs from the manifest")
     if config.get("parser_config") != manifest.get("parser_config"):

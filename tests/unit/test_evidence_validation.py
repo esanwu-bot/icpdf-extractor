@@ -8,6 +8,7 @@ from pathlib import Path
 
 from icpdf.parser.config import (
     TableParams,
+    snapshot_sha256,
     table_params_sha256,
     table_params_snapshot,
 )
@@ -435,6 +436,47 @@ def test_run_config_parameters_differ_from_manifest(tmp_path):
     }
     (run / "run_config.json").write_text(json.dumps(config), encoding="utf-8")
     assert "CONFIG_PARAMS_MISMATCH" in _codes(validate_run(run))
+
+
+def test_duplicate_top_level_table_params_member_is_refused(tmp_path):
+    data = _base_run()
+    run = _write_run(tmp_path / "run", data)
+    manifest = data["manifest"]
+    member = json.dumps(manifest["table_params"], separators=(",", ":"))
+    raw = (f'{{"run_id":"run-1","document_id":"doc-1","table_count":1,'
+           f'"candidate_count":4,"table_params":{member},'
+           f'"table_params":{member},'
+           f'"table_params_sha256":"{manifest["table_params_sha256"]}"}}')
+    (run / "run_manifest.json").write_text(raw, encoding="utf-8")
+    assert "table_params_snapshot_duplicate_key" in _codes(validate_run(run))
+
+
+def test_missing_top_level_table_params_member_is_refused(tmp_path):
+    data = _base_run()
+    run = _write_run(tmp_path / "run", data)
+    manifest = data["manifest"]
+    raw = (f'{{"run_id":"run-1","document_id":"doc-1","table_count":1,'
+           f'"candidate_count":4,'
+           f'"table_params_sha256":"{manifest["table_params_sha256"]}"}}')
+    (run / "run_manifest.json").write_text(raw, encoding="utf-8")
+    assert "table_params_snapshot_missing" in _codes(validate_run(run))
+
+
+def test_unknown_snapshot_version_with_recomputed_hash_is_refused(tmp_path):
+    def mutate(data):
+        snapshot = data["manifest"]["table_params"]
+        snapshot["snapshot_version"] = "table-params/v9"
+        data["manifest"]["table_params_sha256"] = snapshot_sha256(snapshot)
+    assert "unsupported_table_params_snapshot_version" in _codes(
+        _validated(tmp_path, mutate))
+
+
+def test_tampered_parameter_with_stale_hash_is_refused(tmp_path):
+    def mutate(data):
+        data["manifest"]["table_params"]["params"]["cell_gap_pt"] = 9.0
+    codes = _codes(_validated(tmp_path, mutate))
+    assert "PARAM_SNAPSHOT_HASH" in codes
+    assert "table_params_snapshot_sha_mismatch" in codes
 
 
 def test_cli_exit_code_and_json(tmp_path, capsys):
