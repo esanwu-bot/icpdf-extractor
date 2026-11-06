@@ -610,3 +610,35 @@ not pushed to Codeup.
 - **Implementation commit.** `4246c41d208467a3e0d5537f6fbcb2675c9a13bb`
   (`test(parser): audit S2a visual evidence against raw PDF primitives`),
   local only, not pushed.
+
+## Phase 1.4 S2a — Reviewer round r2 identity/rebuild hardening (2026-11-06)
+
+**Status:** r2 audit now fails closed on identity and proves the component
+rebuild; parser, visual algorithm, validator, Gold and thresholds untouched;
+S2b/S2c not started; not pushed to Codeup.
+
+- **Identity gate (P1/P4).** `verify_identity()` checks artifact SHA-256
+  (`document.json`, `pages/geometry.json`, `tables.json`, `run_config.json`),
+  `source.pdf` SHA-256 against both the manifest and `document.json`,
+  page count / DPI agreement, fresh `load_pdf(dpi=manifest)` page sizes,
+  rotations, CropBox, MediaBox and display rect, and the table-parameter
+  snapshot hash recomputed with `snapshot_sha256()`.  `AuditIdentityError`
+  refuses the run (CLI exit 2); a same-product wrong-version PDF is rejected.
+- **Snapshot binding (P4).** Audit thresholds are read from
+  `manifest.table_params`; no visual-threshold literal is used.
+- **Component rebuild (P2).** The audit re-runs
+  `collect_primitives()` → `build_components()` and only accepts the fresh
+  component set; it checks bbox containment, a vertical ruling at x, and
+  primitive ownership, and reports the rebuilt counts in a `rebuild` block.
+- **Strict segment rebuild (P3).** Stored `y0`/`y1` must equal the min/max of
+  clipped raw primitive spans; coverage comes from the union of raw primitive
+  spans; duplicate and cross-component primitive references are rejected.
+- **New tests.** `tests/integration/test_phase14_primitive_audit.py` now has 11
+  tests, adding spec/manifest identity, wrong-version refusal, duplicate
+  primitive and cross-component negatives.
+- **Results.** `157 passed, 2 xfailed`; six review-r1 runs still pass the strict
+  validator with 0 errors / 0 warnings; three audit artifacts regenerated with
+  0 issues.  Artifacts:
+  `runs/phase14_s2a/review_r2/audit_{ds10_p04,micrf103_p03,cy29_p05}.json`.
+- **Implementation commit.** `ff38d2e` (`fix(parser): harden S2a primitive
+  audit identity and rebuild checks`), local only, not pushed.
