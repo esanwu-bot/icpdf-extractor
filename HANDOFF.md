@@ -607,4 +607,6 @@ not pushed to Codeup.
   `runs/phase14_s2a/review_r2/audit_{ds10_p04,micrf103_p03,cy29_p05}.json`.
 - **Tests.** `153 passed, 2 xfailed`; prior six-run validator results and all
   Gold/physical-diff evidence unchanged (validator source untouched).
-- **Implementation commit.** `PENDING_R2_SHA` (local only, not pushed).
+- **Implementation commit.** `4246c41d208467a3e0d5537f6fbcb2675c9a13bb`
+  (`test(parser): audit S2a visual evidence against raw PDF primitives`),
+  local only, not pushed.
