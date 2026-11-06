@@ -66,6 +66,9 @@ class DetectedTable(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     reconstruction_status: ReconstructionStatus
     uncertainty_reason: str | None = None
+    region_components: list[int] = Field(default_factory=list)
+    boundary_source: str = "ruled"
+    merge_evidence: list[str] = Field(default_factory=list)
 
 
 def _ragged_rows(grid: TableGrid, header_rows: int) -> list[int]:
@@ -161,5 +164,10 @@ def detect_tables(blocks: list[TextBlock], page_number: int,
             confidence=confidence,
             reconstruction_status=status,
             uncertainty_reason=uncertainty,
+            region_components=[component.component_id
+                               for component in region.components],
+            boundary_source=region.boundary_source,
+            merge_evidence=[f"{item.kind}: {item.detail}"
+                            for item in region.evidence],
         ))
     return detected

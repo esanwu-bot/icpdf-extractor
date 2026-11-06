@@ -120,6 +120,12 @@ class Table(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     reconstruction_status: ReconstructionStatus
     uncertainty_reason: str | None = None
+    # Physical ruling components aggregated into this region, and how its
+    # outer boundary was obtained: ruled | implied_horizontal |
+    # implied_alignment | mixed.
+    region_components: list[int] = Field(default_factory=list)
+    boundary_source: NonEmptyStr = "ruled"
+    merge_evidence: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _check_table(self) -> "Table":

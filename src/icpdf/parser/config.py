@@ -30,6 +30,17 @@ class TableParams(BaseModel):
     rule_min_width_pt: float = Field(default=70.0, gt=0)
     rule_min_height_pt: float = Field(default=15.0, gt=0)
     alignment_min_rows: int = Field(default=3, ge=2)
+    # Phase 1.4 S1 - region aggregation.  Additive defaults: they only govern
+    # whether physical components are merged, never how a single lattice is
+    # parsed, so Phase 1.2 detections keep their existing behaviour.
+    merge_min_gap_pt: float = Field(default=2.0, ge=0)
+    merge_max_gap_pt: float = Field(default=24.0, gt=0)
+    merge_column_tol_pt: float = Field(default=2.5, gt=0)
+    merge_min_shared_columns: int = Field(default=2, ge=1)
+    merge_shared_ratio: float = Field(default=0.6, gt=0, le=1)
+    merge_extent_tol_pt: float = Field(default=3.0, ge=0)
+    merge_min_x_overlap_ratio: float = Field(default=0.6, gt=0, le=1)
+    merge_caption_scale: float = Field(default=1.15, gt=1)
 
 
 class ParserConfig(BaseModel):

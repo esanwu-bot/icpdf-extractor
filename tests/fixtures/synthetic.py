@@ -147,3 +147,67 @@ def marker_pdf(path: Path, *, rotation: int = 0,
     doc.save(str(path))
     doc.close()
     return path
+
+
+def quad_ruled_grid(path: Path, *, rows: int = 5, columns: int = 2,
+                    x0: float = 80.0, y0: float = 100.0,
+                    cell_width: float = 120.0, cell_height: float = 14.0,
+                    diagonal: bool = False) -> Path:
+    """A grid whose cells are outlined by stroked quadrilaterals (``qu``).
+
+    The invisible-ruling style of TI tape-dimension tables: each cell is its
+    own drawing, so no long horizontal or vertical line exists.
+    """
+    doc = fitz.open()
+    page = _new_page(doc)
+    for row in range(rows):
+        for column in range(columns):
+            left = x0 + column * cell_width
+            top = y0 + row * cell_height
+            if diagonal and row == 0 and column == 0:
+                quad = fitz.Quad(fitz.Point(left, top),
+                                 fitz.Point(left + cell_width + 8, top + 6),
+                                 fitz.Point(left + 6, top + cell_height + 8),
+                                 fitz.Point(left + cell_width, top + cell_height))
+            else:
+                quad = fitz.Quad(fitz.Point(left, top),
+                                 fitz.Point(left + cell_width, top),
+                                 fitz.Point(left, top + cell_height),
+                                 fitz.Point(left + cell_width, top + cell_height))
+            page.draw_quad(quad, color=(0, 0, 0), width=0.6)
+            _write(page, left + 3, top + cell_height - 4,
+                   f"R{row}C{column}", size=7)
+    doc.save(str(path))
+    doc.close()
+    return path
+
+
+def stacked_line_sections(path: Path, *, sections: int = 3,
+                          x0: float = 60.0, y0: float = 80.0,
+                          width: float = 440.0,
+                          rows_per_section: int = 3,
+                          row_height: float = 18.0, gap: float = 12.0,
+                          inner_columns: tuple[float, ...] = (0.45, 0.9),
+                          body_size: float = 8.0,
+                          gap_caption_size: float | None = None) -> Path:
+    """Vertically stacked ruled sections sharing one inner column lattice."""
+    doc = fitz.open()
+    page = _new_page(doc)
+    top = y0
+    for section in range(sections):
+        if section and gap_caption_size:
+            _write(page, x0, top - 3.0, f"Section {section}", size=gap_caption_size)
+        bottom = top + rows_per_section * row_height
+        for column in inner_columns:
+            _write(page, x0 + 4, top + row_height - 5,
+                   f"S{section} label {column:.0f}", size=body_size)
+            page.draw_line((x0 + width * column, top),
+                           (x0 + width * column, bottom),
+                           color=(0, 0, 0), width=0.6)
+        for row in range(rows_per_section + 1):
+            y = top + row * row_height
+            page.draw_line((x0, y), (x0 + width, y), color=(0, 0, 0), width=0.6)
+        top = bottom + gap
+    doc.save(str(path))
+    doc.close()
+    return path

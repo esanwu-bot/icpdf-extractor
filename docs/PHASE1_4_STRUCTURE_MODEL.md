@@ -1,7 +1,8 @@
 # Phase 1.4 structure model — design only
 
-Status: design proposal.  **No detector code has been written for this
-document.**  Parser parameters remain frozen and Phase 2 stays frozen.  The
+Status: design proposal.  **S1 (sections 2.1–2.2 and the region-aggregation
+part of 2.3) is implemented** — see `docs/PHASE1_4_S1.md`.  S2/S3/S4 remain
+design only.  Parser parameters are frozen and Phase 2 stays frozen.  The
 purpose is to agree on the object model and decision order before any change
 to `icpdf.parser.table_detector`.
 

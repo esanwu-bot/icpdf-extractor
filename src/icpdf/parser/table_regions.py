@@ -1,21 +1,32 @@
 """Layer 2 - table region detection.
 
 Proposes table regions from evidence, without deciding structure or semantics.
-Ruled pages use vector-rule components only.  On pages with no ruling at all, a
-strict baseline-alignment fallback keeps text-only tables (including the
-synthetic fixtures) working.  Text-alignment candidates are deliberately not
-proposed on ruled pages: that was the source of the Phase 1.1 over-detection.
+
+Ruled pages first collect physical :class:`RuleComponent` objects (Layer 1).
+Components that share a column lattice and stack vertically with a title or
+whitespace gap are aggregated into one :class:`TableRegion`; the merge,
+absorption and implied outer boundary are all recorded as evidence.  A single
+component remains exactly the region it always was, so Phase 1.2 detection is
+unchanged.
+
+On pages with no ruling at all, a strict baseline-alignment fallback keeps
+text-only tables (including the synthetic fixtures) working.  Text-alignment
+candidates are deliberately not proposed on ruled pages: that was the source of
+the Phase 1.1 over-detection.
 """
 
 from __future__ import annotations
 
 import statistics
+from dataclasses import dataclass, field
 
 from icpdf.domain.common import BBox
 from icpdf.parser.config import TableParams
 from icpdf.parser.layout import PageLayout, RuleComponent
-from icpdf.parser.structure import TableRegion
+from icpdf.parser.structure import RegionEvidence, TableRegion
 from icpdf.parser.text_blocks import TextWord
+
+TOL = 2.5
 
 
 def _bbox_union(boxes: list[BBox]) -> BBox:
@@ -64,7 +75,8 @@ def _alignment_regions(layout: PageLayout, params: TableParams) -> list[TableReg
             rows = tuple(tuple(row) for row in current)
             bbox = _bbox_union([_bbox_union([w.bbox for w in row]) for row in current])
             regions.append(TableRegion(layout.page_number, bbox, "text_alignment",
-                                       rows_words=rows))
+                                       rows_words=rows,
+                                       boundary_source="implied_alignment"))
         current = []
 
     for words in layout.row_bands:
@@ -88,15 +100,218 @@ def _alignment_regions(layout: PageLayout, params: TableParams) -> list[TableReg
     return regions
 
 
-def _component_region(layout: PageLayout, component: RuleComponent) -> TableRegion:
-    return TableRegion(layout.page_number, component.bbox, "rule_lattice",
-                       component=component)
+def _component_columns(component: RuleComponent) -> list[float]:
+    return sorted({round(segment.c, 2) for segment in component.vertical})
+
+
+def _horizontal_extent(component: RuleComponent) -> tuple[float, float] | None:
+    """The widest horizontal span of a component, i.e. its printed width."""
+    if not component.horizontal:
+        return None
+    widest = max(component.horizontal, key=lambda segment: segment.length)
+    return (widest.a, widest.b)
+
+
+def _body_font_size(layout: PageLayout,
+                    components: list[RuleComponent]) -> float | None:
+    sizes: list[float] = []
+    for block in layout.blocks:
+        for span in block.spans:
+            if span.size is None or not span.text.strip():
+                continue
+            cx = (span.bbox[0] + span.bbox[2]) / 2.0
+            cy = (span.bbox[1] + span.bbox[3]) / 2.0
+            if any(component.bbox[0] - 1.0 <= cx <= component.bbox[2] + 1.0
+                   and component.bbox[1] - 1.0 <= cy <= component.bbox[3] + 1.0
+                   for component in components):
+                sizes.append(span.size)
+    return statistics.median(sizes) if sizes else None
+
+
+def _gap_has_caption(layout: PageLayout, y0: float, y1: float,
+                     x0: float, x1: float, body_size: float | None,
+                     params: TableParams) -> bool:
+    """A larger-than-body label in the gap is a new table caption, not a row.
+
+    Datasheets separate stacked tables with a bold caption ("Table 6-28. ...")
+    set at a larger size than the table body, while an in-table section band
+    ("Power Supply") uses the body size.  Only the typographic signal is used.
+    """
+    if body_size is None or y1 - y0 <= 0:
+        return False
+    limit = body_size * params.merge_caption_scale
+    for block in layout.blocks:
+        for span in block.spans:
+            if span.size is None or not span.text.strip():
+                continue
+            if not (y0 - 1.0 <= span.bbox[1] and span.bbox[3] <= y1 + 1.0):
+                continue
+            cx = (span.bbox[0] + span.bbox[2]) / 2.0
+            if not (x0 <= cx <= x1):
+                continue
+            if span.size > limit:
+                return True
+    return False
+
+
+def _x_overlap_ratio(upper: RuleComponent, lower: RuleComponent) -> float:
+    overlap = (min(upper.bbox[2], lower.bbox[2])
+               - max(upper.bbox[0], lower.bbox[0]))
+    width = min(upper.bbox[2] - upper.bbox[0],
+                lower.bbox[2] - lower.bbox[0])
+    if width <= 0:
+        return 0.0
+    return overlap / width
+
+
+def _shared_columns(upper: RuleComponent, lower: RuleComponent,
+                    tol: float) -> list[float]:
+    lower_columns = _component_columns(lower)
+    return [column for column in _component_columns(upper)
+            if any(abs(column - other) <= tol for other in lower_columns)]
+
+
+def _merge_pair(layout: PageLayout, upper: RuleComponent, lower: RuleComponent,
+                gap: float, params: TableParams
+                ) -> tuple[bool, dict | None, str | None]:
+    """Structural test for merging two vertically adjacent components."""
+    if _x_overlap_ratio(upper, lower) < params.merge_min_x_overlap_ratio:
+        return False, None, "components do not overlap horizontally"
+    upper_columns = _component_columns(upper)
+    lower_columns = _component_columns(lower)
+    shared = _shared_columns(upper, lower, params.merge_column_tol_pt)
+    if len(shared) < params.merge_min_shared_columns:
+        return False, None, "components share fewer than two column rules"
+    if (len(shared) / len(upper_columns) < params.merge_shared_ratio
+            or len(shared) / len(lower_columns) < params.merge_shared_ratio):
+        return False, None, "column lattices differ"
+    upper_extent = _horizontal_extent(upper)
+    lower_extent = _horizontal_extent(lower)
+    if upper_extent is None or lower_extent is None:
+        return False, None, "component has no horizontal rule extent"
+    if (abs(upper_extent[0] - lower_extent[0]) > params.merge_extent_tol_pt
+            or abs(upper_extent[1] - lower_extent[1]) > params.merge_extent_tol_pt):
+        return False, None, "horizontal rule extents do not align"
+    gap_x0 = min(upper.bbox[0], lower.bbox[0],
+                 upper_extent[0], lower_extent[0])
+    gap_x1 = max(upper.bbox[2], lower.bbox[2],
+                 upper_extent[1], lower_extent[1])
+    body_size = _body_font_size(layout, [upper, lower])
+    if _gap_has_caption(layout, upper.bbox[3], lower.bbox[1],
+                        gap_x0, gap_x1, body_size, params):
+        return False, None, "gap contains a caption-sized label"
+    evidence = {
+        "shared": tuple(shared),
+        "gap": gap,
+        "extents": (min(upper_extent[0], lower_extent[0]),
+                    max(upper_extent[1], lower_extent[1])),
+    }
+    return True, evidence, None
+
+
+@dataclass
+class _Cluster:
+    members: list[RuleComponent] = field(default_factory=list)
+    evidence: list[RegionEvidence] = field(default_factory=list)
+
+    @property
+    def bottom(self) -> float:
+        return max(member.bbox[3] for member in self.members)
+
+
+def _cluster_components(layout: PageLayout, components: list[RuleComponent],
+                        params: TableParams) -> list[_Cluster]:
+    ordered = sorted(components, key=lambda c: (round(c.bbox[1], 1),
+                                                round(c.bbox[0], 1)))
+    clusters: list[_Cluster] = []
+    for component in ordered:
+        for cluster in clusters:
+            gap = component.bbox[1] - cluster.bottom
+            if gap < params.merge_min_gap_pt or gap > params.merge_max_gap_pt:
+                continue
+            seed = cluster.members[0]
+            merged, evidence, _ = _merge_pair(layout, seed, component,
+                                              gap, params)
+            if not merged:
+                continue
+            cluster.members.append(component)
+            cluster.evidence.append(RegionEvidence(
+                "merge",
+                (f"component {seed.component_id} and component "
+                 f"{component.component_id} share {len(evidence['shared'])} "
+                 f"column rule(s) across a {gap:.1f}pt band"),
+                (seed.component_id, component.component_id),
+                tuple(evidence["shared"]) + (gap,),
+            ))
+            cluster.evidence.append(RegionEvidence(
+                "absorbed",
+                (f"component {component.component_id} is emitted through "
+                 f"region seed {seed.component_id}"),
+                (component.component_id,),
+            ))
+            break
+        else:
+            clusters.append(_Cluster([component], []))
+    return clusters
+
+
+def _union_component(page_number: int, members: list[RuleComponent],
+                     bbox: BBox) -> RuleComponent:
+    horizontal = tuple(segment for member in members
+                       for segment in member.horizontal)
+    vertical = tuple(segment for member in members
+                     for segment in member.vertical)
+    primitives = tuple(primitive for member in members
+                       for primitive in member.primitives)
+    indices = tuple(sorted({index for member in members
+                            for index in member.primitive_indices}))
+    return RuleComponent(bbox, horizontal, vertical, primitives, indices,
+                         page_number, -1)
+
+
+def _region_from_cluster(layout: PageLayout, cluster: _Cluster) -> TableRegion:
+    members = cluster.members
+    bbox = _bbox_union([member.bbox for member in members])
+    evidence = list(cluster.evidence)
+    boundary_source = "ruled"
+    if len(members) > 1:
+        extents = [extent for member in members
+                   if (extent := _horizontal_extent(member)) is not None]
+        if extents:
+            left = statistics.median(extent[0] for extent in extents)
+            right = statistics.median(extent[1] for extent in extents)
+            if left < bbox[0] - TOL or right > bbox[2] + TOL:
+                bbox = (max(layout.rect[0], min(bbox[0], left)),
+                        bbox[1],
+                        min(layout.rect[2], max(bbox[2], right)),
+                        bbox[3])
+                boundary_source = "implied_horizontal"
+                evidence.append(RegionEvidence(
+                    "implied_outer",
+                    (f"left/right boundaries {left:.1f}/{right:.1f} come from "
+                     "the common horizontal-rule extent"),
+                    tuple(member.component_id for member in members),
+                    (left, right),
+                ))
+    component = (_union_component(layout.page_number, members, bbox)
+                 if len(members) > 1 else members[0])
+    return TableRegion(
+        page_number=layout.page_number,
+        bbox=bbox,
+        source="rule_lattice",
+        component=component,
+        components=tuple(members),
+        boundary_source=boundary_source,
+        evidence=tuple(evidence),
+    )
 
 
 def detect_table_regions(layout: PageLayout,
                          params: TableParams | None = None) -> list[TableRegion]:
     params = params or TableParams()
-    regions = [_component_region(layout, component) for component in layout.components]
+    regions = [_region_from_cluster(layout, cluster)
+               for cluster in _cluster_components(layout, layout.components,
+                                                  params)]
     if not layout.components:
         regions.extend(_alignment_regions(layout, params))
     regions.sort(key=lambda region: (round(region.bbox[1], 1), round(region.bbox[0], 1)))

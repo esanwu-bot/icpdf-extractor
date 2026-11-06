@@ -3,7 +3,8 @@
 Header depth, per-column labels, coarse column roles and a table-type hypothesis
 are inferred here.  None of these decisions can create or delete a table; a
 region with no header is still reported (as a partial table) when it contains
-structured numeric data.
+structured numeric data or a ruled short-label/description grid (tape
+dimension codes and similar headerless key tables).
 """
 
 from __future__ import annotations
@@ -139,6 +140,43 @@ def _leading_role(header: str, role: ColumnRole) -> ColumnRole:
 def _is_numeric(text: str) -> bool:
     token = (text or "").strip()
     return bool(token) and bool(_NUMERIC.match(token))
+
+
+_LABEL_MAX_CHARS = 12
+_LABEL_PUNCTUATION = ".:;!?,"
+
+
+def _is_short_label(text: str) -> bool:
+    token = (text or "").strip()
+    if not token or len(token) > _LABEL_MAX_CHARS:
+        return False
+    return len(token.split()) <= 2 and not any(ch in token for ch in _LABEL_PUNCTUATION)
+
+
+def _is_label_grid(grid: TableGrid) -> bool:
+    """A fully ruled key/description grid (e.g. tape dimension codes) is a
+    table without a header row or numeric values.  Drawings and prose fail
+    because their rows are sparse or their leading cell is a sentence."""
+    if grid.source != "rule_lattice" or grid.n_rows < 3 or grid.n_columns < 2:
+        return False
+    populated: list[list[GridCell]] = []
+    for row in range(grid.n_rows):
+        cells = _nonempty(_row_cells(grid, row))
+        if len(cells) >= 2:
+            populated.append(cells)
+        elif cells:
+            return False                      # sparse label band, not a grid
+    if len(populated) < 3:
+        return False
+    for cells in populated:
+        leading = min(cells, key=lambda cell: cell.column)
+        if leading.column != 0 or leading.column_span != 1:
+            return False
+        if not _is_short_label(leading.text):
+            return False
+        if len(_nonempty(_row_cells(grid, leading.row))) < 2:
+            return False
+    return True
 
 
 def _row_cells(grid: TableGrid, row: int) -> list[GridCell]:
@@ -583,7 +621,7 @@ def assess_region(grid: TableGrid, semantics: HeaderSemantics,
     first = _row_cells(grid, 0)
     if semantics.header_rows == 0:
         numeric = sum(1 for cell in grid.cells if _is_numeric(cell.text))
-        if numeric < params.min_numeric_cells:
+        if numeric < params.min_numeric_cells and not _is_label_grid(grid):
             return False, "no header and too few numeric cells"
         # Only shallow all-numeric grids are bit-field diagrams; register maps
         # ("OCTET / NIBBLE" grids) can also start with numbers but span many

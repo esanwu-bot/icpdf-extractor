@@ -67,4 +67,7 @@ def build_table(detected: DetectedTable, document_id: str, table_index: int) -> 
         confidence=detected.confidence,
         reconstruction_status=detected.reconstruction_status,
         uncertainty_reason=detected.uncertainty_reason,
+        region_components=detected.region_components,
+        boundary_source=detected.boundary_source,
+        merge_evidence=detected.merge_evidence,
     )

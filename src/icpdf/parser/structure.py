@@ -25,12 +25,32 @@ TOL = 2.5
 
 
 @dataclass(frozen=True)
+class RegionEvidence:
+    """One auditable step behind a :class:`TableRegion`.
+
+    ``kind`` is ``merge`` (two stacked components share a column lattice),
+    ``absorbed`` (a member is carried by the region instead of emitted on its
+    own) or ``implied_outer`` (a left/right boundary comes from the common
+    horizontal-rule extent rather than a vertical rule).
+    """
+
+    kind: str
+    detail: str
+    component_ids: tuple[int, ...] = ()
+    values: tuple[float, ...] = ()
+
+
+@dataclass(frozen=True)
 class TableRegion:
     page_number: int
     bbox: BBox
     source: str                       # "rule_lattice" | "text_alignment"
     component: RuleComponent | None = None
     rows_words: tuple[tuple[TextWord, ...], ...] = ()
+    components: tuple[RuleComponent, ...] = ()
+    boundary_source: str = "ruled"    # ruled | implied_horizontal |
+                                      # implied_alignment | mixed
+    evidence: tuple[RegionEvidence, ...] = ()
 
 
 @dataclass
@@ -331,6 +351,33 @@ def _words_to_text(words: list[TextWord]) -> str:
     return "\n".join(rendered).strip()
 
 
+def _member_ys(member: RuleComponent) -> list[float]:
+    return _unique([member.bbox[1], member.bbox[3]]
+                   + [segment.c for segment in member.horizontal
+                      if segment.length >= 2.0
+                      and member.bbox[1] - TOL <= segment.c <= member.bbox[3] + TOL])
+
+
+def _member_column_support(member: RuleComponent, x: float, layout: PageLayout,
+                           params: TableParams) -> bool:
+    """Whether one physical component backs ``x`` as a column boundary.
+
+    A merged region is taller than any of its components, so whole-region
+    coverage would reject every section-local rule.  Each component is judged
+    against its own row bands instead.
+    """
+    ys = _member_ys(member)
+    if len(ys) < 2:
+        return False
+    coverage = _band_coverage(member.vertical, x, ys, layout)
+    if coverage < 0.7:
+        return False
+    if coverage >= 0.999:
+        return True
+    return _crossing_ratio(_band_runs(layout, ys, params.cell_gap_pt),
+                           x)[0] < 0.4
+
+
 def _rule_grid(layout: PageLayout, region: TableRegion, params: TableParams) -> TableGrid:
     component = region.component
     assert component is not None
@@ -353,8 +400,12 @@ def _rule_grid(layout: PageLayout, region: TableRegion, params: TableParams) -> 
         ys = _unique(ys + additions, 3.0)
 
     body_runs = _band_runs(layout, ys, params.cell_gap_pt)
+    members = region.components if len(region.components) > 1 else ()
 
     def _is_column_rule(x: float) -> bool:
+        if members:
+            return any(_member_column_support(member, x, layout, params)
+                       for member in members)
         # Nested TEST CONDITIONS boxes have enough total length but run through
         # only part of the table; logical columns run through most row bands
         # (bands where text crosses the boundary count as merged-cell support).
@@ -521,4 +572,5 @@ def recognize_structure(layout: PageLayout, region: TableRegion,
     return _alignment_grid(layout, region, params)
 
 
-__all__ = ["GridCell", "TableGrid", "TableRegion", "recognize_structure"]
+__all__ = ["GridCell", "RegionEvidence", "TableGrid", "TableRegion",
+           "recognize_structure"]

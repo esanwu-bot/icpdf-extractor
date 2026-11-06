@@ -340,3 +340,42 @@ Detector code untouched.
   stays open, and no unreviewed metric is packaged as a pass.  Detector
   parameters are frozen; no MICRF-specific special case was written.
 - Not pushed to Codeup.
+
+## Phase 1.4 S1 — RulePrimitive / RuleComponent / TableRegion
+
+**Status:** S1 implemented and locally committed; awaiting Reviewer.  Phase 2
+and S2/S3/S4 remain frozen.
+
+- **Files.** New `src/icpdf/parser/rule_primitives.py`.  Rewritten
+  `table_regions.py` (component aggregation).  `layout.py` re-exports the new
+  model.  `structure.py` gains `RegionEvidence` and region fields.
+  `header_semantics.py` accepts headerless ruled label grids.
+  `table_detector.py` / `table_rebuilder.py` / `domain/table.py` carry
+  `region_components`, `boundary_source`, `merge_evidence`.
+  `config.py` only adds merge-threshold defaults; the YAML config SHA stays
+  `ab9f1252…`.
+- **Behaviour.** `line` + `thin_rect` + stroked `qu` edges are primitives with
+  drawing provenance.  Components are connected physical lattices.  Regions
+  merge stacked components with shared lattice (gap 2–24pt, extent within 3pt,
+  no larger-than-body caption in the gap) and imply outer boundaries from
+  common horizontal-rule extents.  Absorbed components are not emitted twice.
+  A headerless fully ruled key/description grid is accepted as a table.
+- **Tests.** `tests/unit/test_rule_primitives.py`,
+  `tests/unit/test_table_regions.py`, `tests/integration/test_phase14_s1.py`;
+  full suite `78 passed, 2 xfailed` (CY29 block diagram / package drawing are
+  S3 xfails).
+- **Runs (git-ignored).** `runs/phase14_s1/final_phase12/` (3 PDFs),
+  `runs/phase14_s1/final_generalization/` (3 PDFs); all six pass
+  `tools.validate_evidence --strict` with 0 errors.
+- **Gold v2.** TP 21 / FP 4 / FN 0, P 0.8400, R 1.0000, F1 0.9130 (was
+  19/7/2).  MICRF103-P03-T01 now IoU 1.0 (30×6, implied outer); DS10CP152-P13-T02
+  now IoU 0.9812 (5×2).  Negative FPs unchanged at 4.
+- **Phase 1.2.** TP 46 / FP 0 / FN 0 unchanged item-by-item; 8 out-of-scope
+  predictions unchanged; 0 negative FP.  Two unannotated pages (LM358 P42,
+  ADS1299 P78) now expose the same tape-dimension table; no metric impact.
+- **Docs/evidence.** `docs/PHASE1_4_S1.md`;
+  `docs/evidence/phase14_s1/{micrf103_p03,ds10cp152_p13}_detected.png` rendered
+  by the new `tools/render_detection_crops.py`.
+- **Left over.** S3 drawing gate (4 negative FPs), S2 visual/logical columns
+  and `condition_path`, S4 roles, fill-only quad outlines, cross-page regions.
+- Not pushed to Codeup.
