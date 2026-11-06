@@ -31,6 +31,7 @@ from icpdf.parser.rule_primitives import (
 )
 from icpdf.parser.table_detector import detect_tables
 from icpdf.parser.text_blocks import extract_text_blocks
+import tools.audit_visual_primitives as audit_tool
 from tools.audit_visual_primitives import (
     AuditIdentityError,
     audit_table,
@@ -303,6 +304,19 @@ def test_run_identity_matches_spec_and_manifest():
     assert grid_tol["rule_components_default"] == GRID_TOL
     assert grid_tol["s1_defaults_match"] is True
     assert grid_tol["in_table_params"] is False
+    assert grid_tol["s1_frozen_commit"] == (
+        "3fc45195d8da20d95dd30ef87ef19859d3d2e002")
+    assert grid_tol["s1_frozen_sha256"] == grid_tol["source_sha256"]
+    assert grid_tol["frozen_baseline_match"] is True
+
+
+def test_s1_frozen_baseline_drift_is_refused(monkeypatch):
+    monkeypatch.setattr(audit_tool, "S1_FROZEN_RULE_PRIMITIVES_SHA256",
+                        "0" * 64)
+    with pytest.raises(AuditIdentityError) as raised:
+        verify_identity(_run_for("micrf103"))
+    assert any("does not match the S1 frozen baseline" in error
+               for error in raised.value.errors)
 
 
 def test_manifest_missing_required_artifact_is_refused(tmp_path):

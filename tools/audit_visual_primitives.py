@@ -42,6 +42,14 @@ from icpdf.parser.rule_primitives import (
 STATUSES = ("printed", "partial", "implied_outer", "not_printed")
 REQUIRED_ARTIFACTS = ("document.json", "pages/geometry.json",
                       "tables.json", "run_config.json")
+# S1 freeze: last S1 code commit before the S2 design commits.  The hash is the
+# content SHA-256 of src/icpdf/parser/rule_primitives.py at that commit
+# (``git cat-file blob <commit>:<path> | sha256sum``); the blob is unchanged
+# across 003311f..HEAD, so this also identifies the code that generated the
+# runs.
+S1_FROZEN_COMMIT = "3fc45195d8da20d95dd30ef87ef19859d3d2e002"
+S1_FROZEN_RULE_PRIMITIVES_SHA256 = (
+    "49e85b601e405b05e585c05a38030b6116b1002e78dab4c2156786ee5a279ab6")
 
 
 @dataclass(frozen=True)
@@ -322,13 +330,17 @@ def grid_tol_binding() -> dict:
     ``build_components`` and ``rule_components`` still default to it.
     """
     source = Path(rule_primitives_module.__file__)
+    source_sha = file_sha256(source)
     build_default = inspect.signature(build_components).parameters["tol"].default
     region_default = inspect.signature(rule_components).parameters["tol"].default
     return {
         "symbol": "icpdf.parser.rule_primitives.GRID_TOL",
         "value": GRID_TOL,
         "source_file": str(source),
-        "source_sha256": file_sha256(source),
+        "source_sha256": source_sha,
+        "s1_frozen_commit": S1_FROZEN_COMMIT,
+        "s1_frozen_sha256": S1_FROZEN_RULE_PRIMITIVES_SHA256,
+        "frozen_baseline_match": source_sha == S1_FROZEN_RULE_PRIMITIVES_SHA256,
         "build_components_default": build_default,
         "rule_components_default": region_default,
         "s1_defaults_match": build_default == GRID_TOL and region_default == GRID_TOL,
@@ -443,6 +455,11 @@ def verify_identity(run: Path) -> dict:
             f"constant={grid_tol['value']}, "
             f"build_components={grid_tol['build_components_default']}, "
             f"rule_components={grid_tol['rule_components_default']}")
+    if not grid_tol["frozen_baseline_match"]:
+        errors.append(
+            f"rule_primitives.py sha256 {grid_tol['source_sha256']} does not "
+            f"match the S1 frozen baseline {S1_FROZEN_COMMIT} "
+            f"({S1_FROZEN_RULE_PRIMITIVES_SHA256})")
 
     if errors:
         raise AuditIdentityError(errors)
