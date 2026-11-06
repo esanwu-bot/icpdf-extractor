@@ -1,10 +1,12 @@
 # Phase 1.4 structure model — design only
 
 Status: design proposal.  **S1 (sections 2.1–2.2 and the region-aggregation
-part of 2.3) is implemented** — see `docs/PHASE1_4_S1.md`.  S2/S3/S4 remain
-design only.  Parser parameters are frozen and Phase 2 stays frozen.  The
-purpose is to agree on the object model and decision order before any change
-to `icpdf.parser.table_detector`.
+part of 2.3) is implemented** — see `docs/PHASE1_4_S1.md`.  **The S2 design and
+data-model change proposal is `docs/PHASE1_4_S2.md`; it is submitted for
+Reviewer confirmation and no S2 code has been written.**  S3/S4 remain design
+only.  Parser parameters are frozen and Phase 2 stays frozen.  The purpose is
+to agree on the object model and decision order before any change to
+`icpdf.parser.table_detector`.
 
 Inputs to this design:
 
@@ -165,9 +167,19 @@ stored on the cell as `condition_path`, counted in `visual_columns`, and
 excluded from `logical_columns`.  This directly encodes the observed
 CY29FCT520-P04/P05/P06 and DS10CP152-P04/P05 sub-rule bands.
 
-Invariant: `logical_columns <= visual_columns` for `printed` / `partial` /
-`implied_outer` tables; `not_printed` tables may have
-`visual_columns = null` and a decided logical mapping from labels only.
+Invariants (corrected in the S2 proposal; the earlier
+`logical_columns <= visual_columns` ordering is withdrawn because Gold v2 has
+8 logical / 4 visual on CY29FCT520-P04-T01 and 9 logical / 7 visual on P05):
+
+* `not_printed` tables have `visual_columns = null` and a decided logical
+  mapping from header/label evidence only;
+* otherwise every logical boundary is a visual boundary or carries
+  header/label evidence, and every visual column overlaps at least one logical
+  column while every logical column overlaps at least one visual column;
+* a visual column may overlap several logical columns (header canopy), and
+  several visual columns may map to one logical column (demoted sub-rule).
+
+See `docs/PHASE1_4_S2.md` §6 for the full set.
 
 ## 4. Decision order
 
@@ -244,12 +256,15 @@ concepts:
 
 Until the parser emits both representations, evaluation keeps comparing its
 single column count against the respective gold count, as documented in
-`docs/GOLD_SPEC.md`.
+`docs/GOLD_SPEC.md`.  The S2 proposal (`docs/PHASE1_4_S2.md` §10) replaces
+this with independent `pred_visual_columns` and `pred_logical_columns` while
+keeping the legacy physical count as a separate regression line.
 
 ## 8. Invariants and validation
 
 1. No table without a region; no candidate without a logical table.
-2. `logical_columns <= visual_columns` except `not_printed`.
+2. The evidence-based visual/logical invariants in §3.3 (the old
+   `logical_columns <= visual_columns` ordering is withdrawn).
 3. Every sub-rule demotion is recorded with its `span_ratio` and the covering
    logical column.
 4. Every role has a source; `unknown` is a valid terminal source.

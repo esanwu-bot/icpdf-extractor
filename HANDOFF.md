@@ -397,3 +397,44 @@ and S2/S3/S4 remain frozen.
   Gold v2 and Phase 1.2 per-item diffs are empty (`changed_items=[]`).
 - **Review artifacts.** `docs/reviews/phase14_s1/` (response, components/grid
   JSON + images, per-item diff JSON, commit patches).
+
+## Phase 1.4 S2 — design and data-model proposal (2026-11-06)
+
+**Status:** design only, submitted for Reviewer confirmation; **no S2 code has
+been written**.  S1 behaviour, Gold v2 (`gen-2026-11-06.2`), the config SHA and
+Phase 2 stay frozen.
+
+- **Docs.** New `docs/PHASE1_4_S2.md` (scope, measured current state, visual
+  and logical boundary rules, projection, section/condition bands, fail-closed
+  behaviour, additive data model, evaluation split, validator checks, tests,
+  slices, 12 open questions).  `docs/PHASE1_4_STRUCTURE_MODEL.md` status line
+  points to it; its old `logical_columns <= visual_columns` invariant is
+  withdrawn because Gold v2 contradicts it (CY29 P04-T01 8 logical / 4 visual).
+- **Measured basis (frozen S1 probe).** Full-height separator coverage is
+  0.871–1.000, body sub-rules 0.072–0.576; a 0.85 threshold separates them.
+  CY29 P05 `193.9`/`266.0` (0.556) demote; CY29 P06 `290.2` (0.576) promotes
+  on repeated short labels `Data`/`I`; DS10 P04 `346.1` (0.108) and P05
+  `363.1` (0.422) demote.  MICRF P03 section rows 1/9/15/19 are bold solo rows
+  with no crossing rules (gold span 6); DS10 section rows are crossed by
+  internal verticals (gold span 2).
+- **Proposed code (after approval only).** New `src/icpdf/domain/logical.py`
+  (shared models, parser-level `PhysicalCellRef` / `LogicalHeaderRef`) and
+  `src/icpdf/parser/logical_structure.py` (builder); `table_rebuilder`
+  resolves refs to existing domain cell/row ids without changing the S1 id
+  scheme.  Additive fields on `TextSpan`, `DetectedTable`/`DetectedCell`/
+  `DetectedRow`, domain `Table`/`Cell`/`TableRow`, `Candidate`
+  (+`CandidateType.SECTION`); additive `TableParams` defaults only (YAML
+  unchanged).  No change to `rule_primitives.py`, `table_regions.py`,
+  `structure.py` behaviour or `grid.xs`.
+- **Proposed evaluation.** Separate `pred_visual_columns` and
+  `pred_logical_columns`; visual denominator 19, logical denominator 21;
+  legacy physical `pred_columns` reported separately and required to be
+  item-by-item identical to S1 on the 46 + 21 frozen tables.
+- **Design-time expectation (not an acceptance claim).** Visual 19/19,
+  logical 20/21; CY29 P08 `not_printed` is a known 9-vs-12 undercount and is
+  reported as a miss, not forced.
+- **Awaiting.** Reviewer answers to the 12 open questions (section evidence,
+  invariant correction, section span rule, promoted-subcolumn role, fail-closed
+  granularity, thresholds, P08 deferral, status handling, field migration,
+  `SECTION` candidates, `TextSpan.flags`, `partial_condition_band` shape).
+- Not pushed to Codeup.
