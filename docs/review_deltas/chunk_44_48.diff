@@ -1,0 +1,99 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -1654,8 +2087,8 @@
+    checks `rule_primitives.py` and `GRID_TOL`, and still accepts
+    `TableParams(**document["params"])`. Adding fields to `config.py` does not
+    change `rule_primitives.py`, so the S2a identity gate is unchanged.
+-8. `tools/validate_evidence.py` recomputes the hash from the stored snapshot
+-   (`validate_evidence.py:316-324`), so old runs keep passing. It passes the
++8. `tools.validate_evidence::validate_run` recomputes the hash from the stored
++   snapshot, so old runs keep passing. It passes the
+    raw artifact bytes to `validate_table_params_snapshot`, which loads them and
+    recomputes the hash from the parsed document without a `TableParams`
+    round-trip, and it reads visual parameters from the stored `params`; new
+@@ -1766,8 +2199,9 @@
+ 6. An outer boundary is its own group and its x is the table bbox edge, never
+    the mean. A candidate within tolerance of an outer edge is folded into that
+    outer group as extra evidence and is never kept as an internal boundary.
+-7. Candidates outside the table bbox are discarded and recorded in the
+-   decision diagnostics.
++7. Candidates outside the table bbox are discarded before
++   `LogicalBoundaryDecision` construction and recorded only in runtime
++   diagnostic counters; they do not produce a decision record or a reason code.
+ 
+ This prevents several weak, non-coincident sources from being chained into one
+ strong boundary.
+@@ -1787,13 +2221,13 @@
+ | --- | --- | --- |
+ | within tolerance of an outer table edge | keep, `outer_*` | `structural` + `table_bbox` (+ `region_extent`) |
+ | S2a full-height printed rule (`coverage >= 0.85`) | keep | `printed_rule` |
+-| partial rule, short labels on the right in `>= 50%` of non-empty bands and `>= 2` bands | keep | `subrule_promoted` |
+-| partial rule, short-label ratio in `[0.25, 0.50)` and `>= 2` bands | **unresolved** | — |
++| partial rule, `short_label_ratio >= logical_subrule_promote_min_ratio` (0.50) and `short_label_bands >= logical_subrule_promote_min_bands` (2) | keep | `subrule_promoted` |
++| partial rule, `logical_subrule_ambiguous_min_ratio <= short_label_ratio < 0.50` and `nonempty_bands >= 2` | **unresolved** | — |
+ | partial rule, not promoted, and `condition_bands >= 1` | `demote_condition_path` | — |
+ | partial rule, not promoted, and `condition_bands == 0` | `demote_no_evidence` | — |
+ | no rule, aligned with a distinct header-cell gap/edge at `>= 1` header level | keep | `header_canopy` |
+-| no rule, stable body gutter meeting the label thresholds | keep | `label_aligned` |
+-| no rule/header, candidate aligned with a repeated physical cell edge in `>= 2` row bands | keep | `structural` |
++| no rule, stable body gutter with `len(grid_rows) >= logical_label_min_bands` and `gutter_ratio >= logical_label_min_band_ratio` | keep | `label_aligned` |
++| no rule/header, candidate aligned with a repeated physical cell edge in `>= 2` distinct body grid rows (section-like rows excluded) | keep | `structural` |
+ | none of the above: no allowed logical-boundary evidence at x | `demote_no_evidence` | — |
+ | an internal candidate whose every supporting band is crossed by a body data cell or word (§5.3, §8.1) | **unresolved** | — |
+ | sources disagree on keep vs demote after grouping | **unresolved** | — |
+@@ -1805,8 +2239,36 @@
+ make the table unresolved. `condition_bands` is the selected-run count of
+ §5.3/§6.5, never a scan of any right-side run.
+ 
++**D14 objects and denominators.** Three objects stay distinct and are never
++interchanged:
++
++1. `BoundarySupport` counts body rows. `band_count = n_rows - header_rows`.
++   `rule_bands` counts rows with `rule_at`; `gutter_bands` counts rows with a
++   body gutter; `crossing_bands` counts supporting rows with a crossing body
++   data cell or word. Header rows are outside `band_count`; section-like body
++   rows stay inside `band_count` but are removed before the supporting count
++   (§5.3.2) and never count as `rule_bands`, `gutter_bands` or a structural
++   source.
++2. `subrule_promoted` uses `nonempty_bands` = rows in `rule_bands` with at
++   least one right-side word, and
++   `short_label_ratio = short_label_bands / nonempty_bands`.
++3. `subrule_partial` uses the same denominator, with
++   `condition_bands` a subset of `rule_bands`.
++4. `label_aligned` uses `gutter_ratio = gutter_bands / nonempty_bands`, where
++   `nonempty_bands` counts body rows with at least one assigned word.
++   `gutter_bands <= band_count`; a row with no word may still carry a gutter,
++   so `gutter_ratio` may exceed 1.0 and is diagnostic, not an error.
++5. `support_ratio = supported_bands / nonempty_bands` is diagnostic, may
++   exceed 1.0 (including for `label_aligned`), and is `None` iff
++   `nonempty_bands == 0`.
++
++A `label_aligned` candidate that fails either threshold is `demote_no_evidence`
++with `boundary_no_evidence`, and its `BoundarySupport` record is retained
++unchanged. The failure is not `boundary_evidence_mismatch`.
++
+ A `colspan` body data cell is never evidence for a split. A crossing in a
+-header/section row does not veto a boundary supported in body rows. A full-height
++header row or in a section-like body row does not veto a boundary supported in
++ordinary body rows. A full-height
+ printed rule inside a body merged cell is conflicting physical evidence, not
+ proof of a split; when it is the only support and every supporting band is
+ crossed, the candidate is `unresolved` (`boundary_data_cell_crossing`).
+@@ -1825,10 +2287,13 @@
+    a tie-break by cell index;
+ 2. inside the source cell take the words whose center is strictly right of x,
+    sort them by `(x0, word_id)`, and start a new run whenever the gap to the
+-   previous word exceeds `cell_gap_pt` (`structure.py:551-553`);
+-3. select the run with the smallest left edge; runs whose left edges differ by
+-   at most `1e-6` are a tie (`subrule_run_tie`) and the candidate is
+-   `unresolved`; never pick a run by word count or text;
++   previous word strictly exceeds `cell_gap_pt`, per §5.3.1; the parser
++   `icpdf.parser.structure::_rule_grid` applies the same gap only when merging
++   cells, and is not the normative definition;
++3. let `m` be the smallest left edge among the right-side runs; select the run
++   at `m`. Any run with `run_left - m <= 1e-6` is tied with it, so the
++   candidate is `unresolved` (`subrule_run_tie`). The test is against `m` only
++   and is never chained between runs; never pick a run by word count or text;
+ 4. classify the selected run with §6.3.1; only `short_label` counts;
+ 5. `nonempty_bands` = the number of bands **in `rule_bands`** with at least one
+    word center strictly right of x inside the table, computed before

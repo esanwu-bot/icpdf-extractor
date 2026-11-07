@@ -1,0 +1,252 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -1065,9 +1444,9 @@
+ `role_header_cell_id` are `None` per the matrix below. A `demote_*` or
+ `unresolved` candidate confers no role, even when its short labels matched.
+ 
+-`role_source` is the existing free-form `str` on `Candidate`
+-(`domain/candidate.py:65`); `candidate_registry.py` currently emits
+-`header_text`, `heuristic` and `fail_closed`. The approved S2 design already
++`role_source` is the existing free-form `str` on
++`icpdf.domain.candidate::Candidate`; `icpdf.parser.candidate_registry` currently
++emits `header_text`, `heuristic` and `fail_closed`. The approved S2 design already
+ reserves `subrule_short_label` for a promoted sub-rule column, so S2b adopts it
+ as the fourth documented value rather than hiding it in a separate vocabulary.
+ `section_band` is not used in S2b; it belongs to S2c.
+@@ -1135,10 +1514,10 @@
+ `DetectedRow.cells` index are different:
+ 
+ - the flat index enumerates every `GridCell`, including empty ones, across all
+-  rows (`structure.py:322-326`);
++  rows, in `icpdf.parser.structure::_assign_words` order;
+ - the row-local index enumerates only cells with
+-  `cell.row == grid_row` and non-empty text, in flat order
+-  (`table_detector.py:142-151`).
++  `cell.row == grid_row` and non-empty text, in flat order, in
++  `icpdf.parser.table_detector::detect_tables`.
+ 
+ The conversion from a row-local position `j` in row `r` back to a flat index
+ is therefore
+@@ -1155,34 +1534,62 @@
+ attached at enumeration time from the flat key, and no flat index is
+ persisted on `DetectedCell`.
+ 
+-The capture itself is additive. `_assign_words` already builds `by_cell`
+-keyed by the flat index and now stores it as
+-`TableGrid.cell_words: dict[int, tuple[TextWord, ...]]`
+-(`structure.py:78`, `structure.py:338`); values keep the `_assign_words`
++The capture itself is additive. `icpdf.parser.structure::_assign_words`
++already builds `by_cell` keyed by the flat index and now stores it as
++`icpdf.parser.structure::TableGrid.cell_words`; values keep the `_assign_words`
+ traversal order, which is `layout.words` order, not reading order.
+-`_alignment_grid` never calls `_assign_words`; it now records each group as
+-`cell_words[len(cells)] = tuple(group)` immediately before appending the cell
+-(`structure.py:633`), so both grid builders fill the cache. `detect_tables`
+-reads `grid.cell_words.get(flat_index, ())` while it enumerates `grid.cells`
+-(`table_detector.py:142-151`) and copies the ids to
+-`DetectedCell.word_ids`; `build_table` copies them again to the domain
+-`Cell.word_ids` (`table_rebuilder.py:39`). No other consumer may treat this
++`icpdf.parser.structure::_alignment_grid` never calls `_assign_words`; it
++records each group as `cell_words[len(cells)] = tuple(group)` immediately
++before appending the cell, so both grid builders fill the cache.
++`icpdf.parser.table_detector::detect_tables` reads
++`grid.cell_words.get(flat_index, ())` while it enumerates `grid.cells` and
++copies the ids to `DetectedCell.word_ids`;
++`icpdf.parser.table_rebuilder::build_table` copies them again to the domain
++`Cell.word_ids`. No other consumer may treat this
+ cache as evidence, and an empty tuple means "this grid builder recorded no
+ words for that cell", never "the words were disproved".
+ 
+ **Persistence limitation (D5).** `detect_tables` emits a `DetectedCell` only
+-when `cell.text.strip()` is non-empty (`table_detector.py:151-153`). A grid
++when `cell.text.strip()` is non-empty in
++`icpdf.parser.table_detector::detect_tables`. A grid
+ cell that carries words but renders empty stripped text is therefore **not**
+ persisted, even though its ids remain in `TableGrid.cell_words`. No consumer
+ may read the absence of a `DetectedCell` (or of a `PhysicalCellRef`) as proof
+ that the cell has no words; the later mapping stage must fail closed instead
+-of inventing an empty cell. The capture is complete on the grid; the artifact
+-is intentionally narrower.
++of inventing an empty cell. The words remain in the §5.6 universe (they are
++assigned to `grid.cells`), so the table is unresolved with
++`mapping_word_not_assigned` (§10.2 code 18, §11.0 row 10.5a); an empty cell is
++never invented and the words are never silently dropped. The capture is
++complete on the grid; the artifact is intentionally narrower.
+ 
+ The physical→logical cell relation is many-to-many and lives on the logical
+ side. A reverse cache `logical_cell_ids` on `DetectedCell` is derived, never
+ authoritative.
+ 
++**Assignment identity (D12).** A `PhysicalCellAssignment` is a nested record,
++not a standalone row. Its owner is the containing `LogicalCell`; its identity is
++the pair `(logical_cell_id, ref)`, where `logical_cell_id` is the containing
++cell's field and `ref` is its `PhysicalCellRef`.
++
++- An assignment instance belongs to exactly one `logical_cell_id`: the logical
++  cell whose `physical_cells` tuple contains it. It is never shared by two
++  `LogicalCell` records, and no second owner field is stored on the assignment.
++- Within one `LogicalCell`, `(logical_cell_id, ref)` is unique; the same
++  `PhysicalCellRef` does not appear twice in that cell's tuple.
++- Across different `LogicalCell` records, the same `PhysicalCellRef` may appear
++  in several assignment instances. Each instance has its own `logical_cell_id`
++  and its own `word_ids` subset; those subsets are disjoint per this section.
++- `logical_cell_id` is not duplicated as a field on `PhysicalCellAssignment`.
++  The nesting is the single source of ownership; a duplicated field would be a
++  second source of truth.
++
++```text
++PhysicalCellAssignment
++  ref: PhysicalCellRef
++  word_ids: tuple[str, ...]   # subset of this physical cell's words
++  # owner is the containing LogicalCell; no duplicated logical_cell_id field
++```
++
+ **LogicalCell reconstruction contract (N6).** The following rules are
+ normative; an independent reader must be able to rebuild each field.
+ 
+@@ -1238,8 +1645,9 @@
+ 
+ *3. text and word order.*
+ 
+-`LogicalCell.text` is exactly `_words_to_text(assigned_words)`
+-(`structure.py:335-351`), applied to the assigned words of the logical cell.
++`LogicalCell.text` is exactly
++`icpdf.parser.structure::_words_to_text(assigned_words)`, applied to the
++assigned words of the logical cell.
+ The function is normative; an independent reimplementation must match it
+ operation for operation:
+ 
+@@ -1283,8 +1691,9 @@
+ - An empty word list returns `""`. Duplicate entries are rendered once each
+   and are never de-duplicated here; a duplicated `word_id` is a partition
+   error (§5.6 item 5), not something this function repairs.
+-- The input order is the stored assignment order. The parser builds it by
+-  appending in `layout.words` order (`structure.py:315-329`), so a re-render
++- The input order is the stored assignment order. The parser builds it in
++  `icpdf.parser.structure::_assign_words` by appending in `layout.words` order,
++  so a re-render
+   from `word_ids` must resolve the ids and pass them in that same order;
+   otherwise words with equal `(center, x0)` keys could render differently.
+ 
+@@ -1295,7 +1704,8 @@
+ *4. logical_cell_id.*
+ 
+ `table_id` is the domain id built by `build_table`:
+-`f"p{page_number:03d}-t{table_index:02d}"` (`table_rebuilder.py:17`), where
++`f"p{page_number:03d}-t{table_index:02d}"` in
++`icpdf.parser.table_rebuilder::build_table`, where
+ `table_index` is the 1-based ordinal of the table on its page. The id is:
+ 
+ ```text
+@@ -1314,8 +1724,8 @@
+ excluding `grid.unassigned_words`:
+ 
+ - a word is assigned to the first cell in `grid.cells` enumeration order whose
+-  bbox contains its center with the existing 0.8pt inclusive tolerance
+-  (`_assign_words`, `structure.py:313-333`);
++  bbox contains its center with the existing 0.8pt inclusive tolerance in
++  `icpdf.parser.structure::_assign_words`;
+ - a word inside the table bbox but in no cell goes to `unassigned_words` and is
+   excluded from the partition; its count is reported, not silently dropped;
+ - S2b-Schema may extend `_assign_words` to return
+@@ -1340,6 +1750,8 @@
+ column_projection: tuple[ColumnProjection, ...] = ()
+ logical_columns_detail: tuple[LogicalColumn, ...] = ()
+ logical_cells: tuple[LogicalCell, ...] = ()
++logical_row_bands: tuple[BandObservation, ...] = ()      # projection partition
++logical_condition_paths: tuple[ConditionPathRecord, ...] = ()  # S2c input
+ logical_boundary_decisions: tuple[LogicalBoundaryDecision, ...] = ()  # diagnostic
+ grid_ys: tuple[float, ...] = ()                          # D6; grid.ys copied verbatim
+ n_rows: int = 0                                          # D6; grid.n_rows
+@@ -1350,6 +1762,21 @@
+ the approved umbrella interface; the detail tuple carries evidence. The
+ validator enforces the parallel order and rejects a length mismatch.
+ 
++`logical_row_bands` is derived only from `grid.ys`, `n_rows`, `header_rows` and
++the `DetectedCell` shape triples. It is populated whenever the table has a grid,
++including unresolved tables; on an unresolved table it is diagnostic data,
++never a logical lattice, and never consumed by extraction. A resolved table
++with an empty tuple is `mapping_row_band_not_canonical`.
++
++`logical_condition_paths` is populated only on a resolved table. It is the only
++condition-path list S2c may read; a `demote_condition_path` decision inside
++`logical_boundary_decisions` is diagnostic and not a second source. An
++unresolved table has an empty tuple (§6.5, §10.1).
++
++`logical_row_bands` and `logical_boundary_decisions` are the diagnostic payloads
++retained on an unresolved table; every accepted logical payload stays empty
++(§10).
++
+ `logical_boundary_decisions` is the only diagnostic payload retained on an
+ `unresolved` table; all accepted logical payloads stay empty (§10).
+ 
+@@ -1394,16 +1821,18 @@
+ Boundary alignment uses the existing `visual_boundary_tol_pt` (2.5pt); no new
+ geometry tolerance is introduced.
+ 
+-**Current v1 snapshot.** `src/icpdf/parser/config.py:14` defines
+-`TABLE_PARAMS_SNAPSHOT_VERSION = "table-params/v1"`. The v1 snapshot is
++**Current v1 snapshot.**
++`icpdf.parser.config::TABLE_PARAMS_SNAPSHOT_VERSION` names the snapshot version
++constant. The v1 snapshot is
+ `{"snapshot_version": "table-params/v1", "params": params.model_dump(mode="json")}`
+-(`config.py:70-75`), and `snapshot_sha256()` hashes canonical JSON with sorted
+-keys (`config.py:78-82`). The frozen v1 SHA is
++as produced by `icpdf.parser.config::table_params_snapshot`, and
++`icpdf.parser.config::snapshot_sha256` hashes canonical JSON with sorted
++keys. The frozen v1 SHA is
+ `82d4df4d1cb3cac9741831b0db36e19fa80c1829abc18b3f8b1ab4ee1c6b9f0a`
+ (`docs/S2A_FREEZE.md`).
+ 
+-The v1 field set is exactly the 20 fields currently declared
+-(`config.py:25-49`):
++The v1 field set is exactly the 20 fields in
++`icpdf.parser.config::V1_FIELDS`:
+ 
+ ```text
+ cell_gap_pt, row_gap_factor, column_tolerance, header_min_hits,
+@@ -1416,13 +1845,15 @@
+ 
+ **Field names verified (R10-N8FIELDS).** The r9 delivery showed
+ `merge_column_tol_ptl` inside the decoded §5.8 excerpt. The string is not in
+-the repository: `config.py:40` declares `merge_column_tol_pt`, the frozen v1
++the repository: `icpdf.parser.config::TableParams.merge_column_tol_pt` is
++declared, the frozen v1
+ snapshot in `docs/S2A_FREEZE.md` hashes a `params` object containing
+ `merge_column_tol_pt`, and the 20-name block above carries that name and no
+ other spelling of it. The defect
+ was in the delivered message, whose base64 was retyped instead of copied;
+-§16.6 records it. The 20 names below are copied from `config.py:25-49` in
+-declaration order, together with the Pydantic bound and the code default of
++§16.6 records it. The 20 names below are copied from
++`icpdf.parser.config::V1_FIELDS` in declaration order, together with the
++Pydantic bound and the code default of
+ each field. This table is the field-set authority, not the prose above it.
+ 
+ | Field | Declared | Accepted JSON | Bound | Default |
+@@ -1470,7 +1901,7 @@
+ **Hash semantics (R11-N8LOAD-2).** The canonical snapshot hash is SHA-256 over
+ the canonical JSON serialization of the stored snapshot object, with sorted
+ keys and no insignificant whitespace, computed by the unchanged
+-`snapshot_sha256()` at `config.py:78-82`. It is not a hash of the original raw
++`icpdf.parser.config::snapshot_sha256`. It is not a hash of the original raw
+ byte sequence. Whitespace, key order and JSON number spelling in the artifact
+ file therefore do not by themselves change the hash; only the parsed document
+ does. The validator hashes `document` exactly as the loader parsed it, without a
+@@ -1518,10 +1949,12 @@
+ 
+ `snapshot_sha256()` itself is unchanged. It hashes the stored snapshot object,
+ not a freshly dumped model, so replaying an old artifact is stable without
+-knowing the current field set. The producer (`src/icpdf/parser/pipeline.py:38-39`
+-and `:118-119`) passes the current version explicitly; consumers
+-(`audit_visual_primitives.py:414`, `validate_evidence.py:316`) hash the stored
+-snapshot and never re-dump the model.
++knowing the current field set. The producer
++(`icpdf.parser.pipeline::_sanitized_config` and the manifest written by
++`icpdf.parser.pipeline::parse_pdf`) passes the current version explicitly;
++consumers (`tools.audit_visual_primitives::verify_identity`,
++`tools.validate_evidence::validate_run`) hash the stored snapshot and never
++re-dump the model.
+ 
+ **Strict snapshot validation (N8, R11-N8LOAD-1).** A computable SHA does not
+ make a snapshot legal. The validator takes raw bytes and calls the loader

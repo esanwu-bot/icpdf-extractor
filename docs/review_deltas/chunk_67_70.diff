@@ -1,0 +1,81 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -3141,6 +4384,23 @@
+     v2 source), and an undeclared shared `(sha256, page, table_index)` fails.
+     Strict disjointness across all three manifests would forbid the v2 seeding
+     that §12.1 B allows.
++23. Resolve the gutter predicate. Neither r14 nor r15 defines the geometry of a
++    body gutter at x, yet `gutter_bands`, `label_aligned`, `gutter_ratio` and
++    the denominators of §6.2 depend on one. Two statements also conflict:
++    §5.3.1 says a gutter row cannot be a crossing row because the gutter
++    predicate requires that no word crosses x, while §9.2 says a word crossing
++    x in a gutter row is not an evidence error and only removes that row's
++    support. The ruling must name the exact geometry (which cells and words
++    are consulted, the tolerance, and whether a body data cell may overlap the
++    gutter) and choose which of the two statements governs. Until then the
++    gutter half of T13 and every gutter-based `label_aligned` construction
++    remain OPEN.
++24. Confirm the fail-closed code for T26(b), a grid cell with words but empty
++    stripped text: `mapping_word_not_assigned` (18) as derived from §5.6 item
++    5 and §11.0 row 10.5a, or `mapping_word_partition_mismatch` (20) as
++    suggested in the batch-5 review. Code 20 owns duplicates and extras
++    (§10.2), so adopting it here would require reopening the code closure and
++    T21.
+ 
+ ## 15. Acceptance checklist for the design gate
+ 
+@@ -3200,7 +4460,7 @@
+ - [ ] r7/N5-mult is closed: multipliers count only as standalone tokens, and
+       `10kΩ` is `10`, `kΩ` with class `value_with_unit`.
+ - [ ] r7/N6-verify is closed: §5.6 item 3 is delivered in full and matches
+-      `structure.py:335-351` operation for operation.
++      `icpdf.parser.structure::_words_to_text` operation for operation.
+ - [ ] r7/N7-N8 is closed: §16 records both input digests, unique heading
+       anchors, excerpt sizes and digests, exit codes and the 17-invariant
+       result.
+@@ -3250,8 +4510,32 @@
+       and raises for any other version; `table_params_sha256` shares that
+       dispatch.
+ - [ ] r10/R10-N8FIELDS is closed: §5.8 tabulates the 20 v1 names as declared in
+-      `config.py:25-49`, and the per-field rules reject `true`/`false` for an
++      `icpdf.parser.config::V1_FIELDS`, and the per-field rules reject
++      `true`/`false` for an
+       integer field.
++- [ ] r15/D1-D3 are closed: the projection bands and `BandObservation` carrier
++      of §5.4 are one partition, `row_bands` is defined once in §5.2, and the
++      four predicates of §5.3.1 are the only normative geometry.
++- [ ] r15/D7 is closed: §5.2, §5.3 and §6.3 states one
++      `run_left - m <= 1e-6` tie rule, compared against `m` only and never
++      chained, and any tie makes the whole candidate unresolved.
++- [ ] r15/D10-D12 are closed: the L set is exactly 27 codes, the five
++      namespaces never mix, the branch-to-code map is total in both directions,
++      and A failures never set logical status.
++- [ ] r15/D14 is closed: `BoundarySupport`, the projection bands and the
++      evidence records stay distinct; §6.2 names every keep threshold and
++      denominator; a failed `label_aligned` threshold demotes with
++      `boundary_no_evidence` and retains its support.
++- [ ] r15/D15 is closed: header references resolve in two ordered steps, with
++      `header_ref_ambiguous` for more than one identity match.
++- [ ] r15/D16 is closed: the geometric section-like predicate of §5.3.2 is
++      used by §5.2, §6.2, §8.1 and invariant 20, and section-like rows stay in
++      `band_count` and `row_bands`.
++- [ ] r15/T matrix is delivered: §13.1 revises T7, T13, T16, T20, T21, T22,
++      T25 and T26, and records the status of every other entry.
++- [ ] r15/OPEN items are settled or accepted as open: the gutter predicate and
++      the §5.3.1/§9.2 conflict (§14 item 23) and the T26 code choice (§14 item
++      24).
+ - [ ] Hard constraints in §4 are accepted.
+ - [ ] Proposed parameters and the v1/v2 snapshot dispatch are approved or
+       amended.
+@@ -3639,8 +4923,9 @@
+ 
+ **r9 delivery defect (R10-N8FIELDS).** §5.8 was carried as base64 for the first
+ time in the r9 message. The Reviewer decoded it and read
+-`merge_column_tol_ptl`. The string is not in the file: `config.py:40` declares
+-`merge_column_tol_pt`, and the §5.8 20-name block carries that name and no
++`merge_column_tol_ptl`. The string is not in the file:
++`icpdf.parser.config::TableParams.merge_column_tol_pt` is declared, and the
++§5.8 20-name block carries that name and no
+ other spelling of it. The extra character entered when the base64 was retyped
+ into the message rather than copied from the file. The same failure class as
+ the r7 and r8 drops applies in the other direction: a hand-carried channel can

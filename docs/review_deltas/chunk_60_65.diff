@@ -1,0 +1,580 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -2513,52 +3091,251 @@
+ column_projection = ()
+ logical_columns_detail = ()
+ logical_cells = ()
++logical_condition_paths = ()
+ ```
+ 
+-`logical_boundary_decisions` remains available for diagnosis, but it is marked
+-non-authoritative and is not consumed by extraction. The physical table, S2a
+-visual fields and candidates remain exactly as before.
++`logical_row_bands` and `logical_boundary_decisions` remain available for
++diagnosis, but both are non-authoritative and are not consumed by extraction.
++No `demote_condition_path` is retained in `logical_boundary_decisions`, and
++`logical_condition_paths` is empty (§6.5). The physical table, S2a visual
++fields and candidates remain exactly as before.
+ 
+ ### 10.2 Reason codes
+ 
+-Proposed stable codes:
++Codes are partitioned into five namespaces that never mix. Only namespace L
++enters `logical_mapping_reason`.
++
++1. **A-schema** (snapshot loader): `duplicate_key`, `parse_error`,
++   `schema_invalid`, `unsupported_version`, `version_mismatch`, `sha_mismatch`.
++2. **A-wrapper**: `table_params_snapshot_missing`.
++3. **A-audit** (existing read-only tools): `PARAM_SNAPSHOT_HASH`,
++   `CONFIG_PARAMS_MISMATCH`, and the other audit codes already in the
++   repository.
++4. **L** (logical structure): the closed set of 27 codes below.
++5. **Diagnostic**: `word_boundary_tie` and the other runtime counters; never a
++   reason code.
++
++The L namespace is closed. A code is emitted only through the branch that owns
++it, and every branch below names exactly one code.
++
++```text
++01 boundary_ambiguous_subrule_ratio
++02 boundary_conflicting_sources
++03 boundary_data_cell_crossing
++04 boundary_no_evidence
++05 boundary_condition_subrule
++06 boundary_evidence_missing_ref
++07 boundary_evidence_mismatch
++08 boundary_evidence_stale
++09 boundary_evidence_duplicate_ref
++10 subrule_run_tie
++11 subrule_source_cell_ambiguous
++12 mapping_physical_overlap_missing
++13 mapping_lattice_index_mismatch
++14 mapping_row_band_not_canonical
++15 mapping_row_band_overlap
++16 mapping_visual_interval_mismatch
++17 mapping_row_overlap
++18 mapping_word_not_assigned
++19 mapping_word_outside_logical_extent
++20 mapping_word_partition_mismatch
++21 logical_cell_kind_boundary
++22 logical_cell_id_collision
++23 header_level_tie
++24 header_missing_for_canopy
++25 header_role_source_invalid
++26 region_lattice_inconsistent
++27 header_ref_ambiguous
++```
++
++The former `boundary_header_gap_too_wide` and
++`boundary_partial_rule_not_condition` are **deleted**: neither had a producing
++branch. No historical code is renamed. The three
++`*_table_params_snapshot_*` names in r14 belong to namespaces 1 and 2 and are
++removed from the L list.
++
++**Code-to-branch closure.**
++
++```text
++01 boundary_ambiguous_subrule_ratio
++   branch: §6.2 row 4; partial rule, ratio in [0.25, 0.50), at least 2 bands
++   carrier: decision + table; inv21: (e)(f)
++
++02 boundary_conflicting_sources
++   branch: §6.2 last row; keep/demote disagreement after fixed-anchor grouping
++   carrier: decision + table; inv21: (e)(f)
++
++03 boundary_data_cell_crossing
++   branch: §5.3 + §6.2 crossing row + §8.1; internal candidate with
++   supporting_bands > 0 and crossing_bands == supporting_bands
++   carrier: decision + table; inv21: (e)(f)
++
++04 boundary_no_evidence
++   branch: §6.2 row 6 and row 10 (demote_no_evidence); §8.3 speculative split
++   carrier: decision only (excluded from table reason); inv21: (d)
++
++05 boundary_condition_subrule
++   branch: §6.2 row 5; non-promoted partial rule with condition_bands >= 1
++   carrier: decision only; inv21: (d)
++
++06 boundary_evidence_missing_ref
++   branch: §5.3/§9.2 required reference absent or resolving to zero records:
++   visual index or segment index out of range, empty required segment list,
++   missing subrule field, null header anchor, a declared header ref with zero
++   matches (HC-2), no evidence record at all (HC-12), structural ref that does
++   not resolve, missing table_bbox/region_extent record, zero region matches,
++   no implied_outer record
++   carrier: decision + table; inv21: (e)(i)
++
++07 boundary_evidence_mismatch
++   branch: §5.4 6.1a stored overlap_fraction outside (0, 1]; §5.3 HC-1b and
++   HC-3..HC-9 and HC-11; subrule short_label_ratio mismatch, selected_run_bbox
++   not the word union, word not right of x or not in the declared cell;
++   label_aligned gutter_ratio recompute beyond 1e-9; structural group span
++   beyond tolerance (chain membership); printed_rule role or segment geometry
++   contradiction; §5.5 role ref/id resolving to different cells
++   carrier: decision + table; inv21: (e)(i)
++
++08 boundary_evidence_stale
++   branch: table_bbox page or bbox not exactly equal to the fresh parse;
++   region_extent source, boundary_source, page or record content not equal to
++   the fresh region
++   carrier: decision + table; inv21: (e)
++
++09 boundary_evidence_duplicate_ref
++   branch: subrule grid_row/band repeated; structural (grid_row, cell_index,
++   edge) triple repeated
++   carrier: decision + table; inv21: (e)
++
++10 subrule_run_tie
++   branch: §5.3 selected run; two right-side runs in the same physical cell
++   whose left edges differ from the minimum by at most 1e-6
++   carrier: decision + table; inv21: (f)
++
++11 subrule_source_cell_ambiguous
++   branch: §5.3 source cell; x on a shared edge of two DetectedCells, so a band
++   has no unique source cell
++   carrier: decision + table; inv21: (f)
++
++12 mapping_physical_overlap_missing
++   branch: §5.4 6.1a authoritative overlap width zero or negative; §11.6 a
++   logical column with no positive physical overlap, or a physical column with
++   no positive logical overlap
++   carrier: table; inv21: (h)
++
++13 mapping_lattice_index_mismatch
++   branch: physical_column not a valid index into the table's one grid.xs;
++   physical_left/right not equal to grid.xs[i]/grid.xs[i+1]; LogicalCell
++   row_start/row_end not equal to the source cell's grid coverage (§11.12);
++   §11.18 accepted-payload logical row/column index outside its lattice
++   (bounds only, projection bands excluded); §11.19 fresh grid_ys or n_rows
++   different from the artifact
++   carrier: table; inv21: (h)
++   does not own: band range/shape failures (5.4a), band gap/overlap (5.4b/c),
++   logical_column/span equality with the word-bearing run (§11.12.2, A)
++
++14 mapping_row_band_not_canonical
++   branch: 5.4a; band_index out of range, row fields not equal to the band,
++   signature run not maximal, band order wrong, missing or duplicated band,
++   shape outside the lattice, overlap in an empty band, duplicate
++   (band_index, physical_column), missing E member, in-band column repeated or
++   not ascending
++   carrier: table; inv21: (h)
++
++15 mapping_row_band_overlap
++   branch: 5.4b uncovered row between two existing bands; 5.4c intersecting
++   band row ranges or a fully duplicated band
++   carrier: table; inv21: (h)
++   note: the code name includes gaps; testing only intersection is a defect
++
++16 mapping_visual_interval_mismatch
++   branch: len(visual_boundaries) != visual_columns + 1; visual_column_indices
++   out of range, unsorted, repeated, or without positive width overlap; the
++   tuple is non-empty iff visual_columns is None violated
++   carrier: table; inv21: (h)
++
++17 mapping_row_overlap
++   branch: §5.6/§11.12 two logical cells in one table with intersecting row
++   ranges
++   carrier: table; inv21: (h)
++
++18 mapping_word_not_assigned
++   branch: 10.4a word of cell.word_ids missing from that cell's assignment
++   union; 10.5a word of the §5.6 universe missing from the table union; empty
++   assignment word_ids; §7.3 item 2 non-finite word center
++   carrier: table; inv21: (h)
++
++19 mapping_word_outside_logical_extent
++   branch: W-1 word center outside the closed outer extent (no tolerance, no
++   clamp, no snap); W-2a word center outside the declared physical cell bbox
++   (0.8pt inclusive); W-2b word center outside the declared logical cell bbox
++   (0.8pt inclusive); 10.5b table union supplies a word outside the extent
++   carrier: table; inv21: (h)
++
++20 mapping_word_partition_mismatch
++   branch: 10.3 duplicate word id within one LogicalCell's assignments; 10.4b
++   assignment union carries a word not in cell.word_ids; 10.5c duplicate word
++   id across different LogicalCells
++   carrier: table; inv21: (h)
++
++21 logical_cell_kind_boundary
++   branch: §5.6 kind rule; word-bearing row range crosses header_rows, or kind
++   contradicts the row range
++   carrier: table; inv21: (h)
++
++22 logical_cell_id_collision
++   branch: §5.6/§7.3 two logical cells under one (page_number, table_index)
++   produce the same logical_cell_id
++   carrier: table; inv21: (h)
++
++23 header_level_tie
++   branch: §5.3 canopy, two same-level header cells touch x within tolerance;
++   §8.2 multi-level attribution, top two widths differ by at most 1e-6
++   carrier: canopy branch decision + table; §8.2 branch table only;
++   inv21: (e)(h)
++
++24 header_missing_for_canopy
++   branch: §5.3/§8.2 canopy, at least one side at that level has no header cell
++   at all (HC-1a)
++   carrier: decision + table; inv21: (f)
++
++25 header_role_source_invalid
++   branch: §5.5 role matrix; role_source header_text with both header refs
++   null, or role_source outside the four documented values
++   carrier: table; inv21: (h)
++
++26 region_lattice_inconsistent
++   branch: §5.3/§9.2 region_extent; more than one fresh region has a
++   component-id set equal to set(region_components)
++   carrier: decision + table; inv21: (i)
++
++27 header_ref_ambiguous
++   branch: §5.3/§9.2 header cell resolution (HC-2b); a declared HeaderCellRef
++   key (level, source_row, source_column, column) matches more than one
++   DetectedHeaderCell
++   carrier: decision + table; inv21: (e)(i)
++```
++
++**§6.2 branch-to-code map** (no branch without a code, no code without a
++branch):
+ 
+ ```text
+-boundary_ambiguous_subrule_ratio
+-boundary_conflicting_sources
+-boundary_data_cell_crossing
+-boundary_header_gap_too_wide
+-boundary_no_evidence
+-boundary_condition_subrule
+-boundary_partial_rule_not_condition
+-boundary_evidence_missing_ref
+-boundary_evidence_mismatch
+-boundary_evidence_stale
+-boundary_evidence_duplicate_ref
+-subrule_run_tie
+-subrule_source_cell_ambiguous
+-mapping_physical_overlap_missing
+-mapping_lattice_index_mismatch
+-mapping_row_band_not_canonical
+-mapping_row_band_overlap
+-mapping_visual_interval_mismatch
+-mapping_row_overlap
+-mapping_word_not_assigned
+-mapping_word_outside_logical_extent
+-mapping_word_partition_mismatch
+-logical_cell_kind_boundary
+-logical_cell_id_collision
+-header_level_tie
+-header_missing_for_canopy
+-header_role_source_invalid
+-region_lattice_inconsistent
+-unsupported_table_params_snapshot_version
+-table_params_snapshot_schema_invalid
+-table_params_snapshot_version_mismatch
++row 1  outer edge                         keep, no code
++row 2  full-height printed rule           keep, no code
++row 3  promoted subrule                   keep, no code
++row 4  ambiguous subrule ratio            boundary_ambiguous_subrule_ratio
++row 5  partial rule, condition_bands >= 1 boundary_condition_subrule (demote)
++row 6  partial rule, condition_bands == 0 boundary_no_evidence (demote)
++row 7  header canopy                      keep, no code; failures are HC-1..HC-12
++row 8  label aligned (both thresholds)    keep, no code
++row 9  structural (>= 2 body rows)        keep, no code
++row 10 none of the above                  boundary_no_evidence (demote)
++row 11 all supporting rows crossed        boundary_data_cell_crossing
++row 12 sources disagree                   boundary_conflicting_sources
+ ```
+ 
+-A table may carry several codes. Codes are evidence for review, not an
+-alternative decision mechanism.
++A keep row whose evidence validation fails is owned by the §11.8 evidence
++codes; a keep row never also produces a demote code.
+ 
+ `word_boundary_tie` is **not** a reason code and is **not** persisted on a
+ table, a logical cell, a `PhysicalCellAssignment` or a word. It is a
+@@ -2569,7 +3346,9 @@
+ §7.3, never changes `logical_mapping_status`, and never adds a reason code. An
+ unresolved table may report no count at all and a resolved table may report a
+ positive count; the number is reported by the validator alongside the table,
+-not stored in the parsed artifact.
++not stored in the parsed artifact. `word_boundary_tie` uses exact float
++equality; `subrule_run_tie` uses the `1e-6` left-edge comparison of §5.3. They
++are different objects and never share a rule.
+ 
+ ### 10.3 No guessing
+ 
+@@ -2587,6 +3366,94 @@
+ Proposed invariants, checked by a new read-only validator (not the S2a
+ validator):
+ 
++### 11.0 Check classification (A / L)
++
++Every check below appears exactly once. `L` means the failure is a logical
++structure failure: the table becomes unresolved and the code is written to
++`logical_mapping_reason`. `A` means the failure is an artifact-integrity or
++self-consistency failure: the validator fails hard and no L code is written.
++An `L` code is emitted only if §5.3–§9.2 already names it. Stages: C =
++construction, V = artifact validation, R = fresh-parse replay, G = frozen
++baseline gate.
++
++| check | stage | type | code or result |
++| --- | --- | --- | --- |
++| 1.1 unresolved iff columns null and payload empty | C+V | A | hard |
++| 2.1 boundary arrays equal length; x equal | V | A | hard |
++| 2.2 x sorted, unique, inside table bbox | V | A | hard |
++| 2.3 every internal boundary has a source | V | A | hard |
++| 3.1 logical_columns equals len(boundaries) minus 1 | V | A | hard |
++| 4.1 projection length and logical_column sequence | V | A | hard |
++| 4.2 every projection has non-empty physical_columns | V | A | hard |
++| 4.3 projection left/right equal adjacent boundaries | V | A | hard |
++| 5.1 physical_column index and grid.xs coordinates | V | L | mapping_lattice_index_mismatch |
++| 5.2 stored overlap is positive | V | L | mapping_physical_overlap_missing |
++| 5.3 band_index, band shape, occupancy, band row coverage | V | L | mapping_row_band_not_canonical |
++| 5.4a signature run is maximal | V | L | mapping_row_band_not_canonical |
++| 5.4b uncovered row between two bands | V | L | mapping_row_band_overlap |
++| 5.4c intersecting or duplicate bands | V | L | mapping_row_band_overlap |
++| 5.5 in-band columns unique and ascending | V | L | mapping_row_band_not_canonical |
++| 5.6 every logical column overlaps at least one physical column | V | L | mapping_physical_overlap_missing |
++| 6.1a authoritative width and stored overlap_fraction range | V | L | mapping_physical_overlap_missing or boundary_evidence_mismatch |
++| 6.1b stored overlap values do not recompute within 1e-6 | V | A | hard |
++| 6.2 overlap_fraction range on every projection record | V | L | boundary_evidence_mismatch |
++| 6.3 every physical column overlaps at least one logical column | V | L | mapping_physical_overlap_missing |
++| 7.1 visual boundary length equals visual_columns plus 1 | V | L | mapping_visual_interval_mismatch |
++| 7.2 visual indices valid, sorted, unique, positive width | V | L | mapping_visual_interval_mismatch |
++| 7.3 visual indices empty iff visual_columns is None | V | L | mapping_visual_interval_mismatch |
++| 8.1 every declared evidence ref resolves | C+V | L | boundary_evidence_missing_ref |
++| 8.2 evidence kind matches declared source | C+V | L | boundary_evidence_mismatch |
++| 8.3 header_canopy anchors, sides, labels, boundary_edge | C+V | L | header_level_tie / header_missing_for_canopy / boundary_evidence_mismatch |
++| 8.4 subrule source cell, bands, ratio recompute | C+V | L | subrule_source_cell_ambiguous / subrule_run_tie / boundary_evidence_mismatch |
++| 8.5 table_bbox equals the fresh DetectedTable | C+V | L | boundary_evidence_stale |
++| 8.6 region_extent resolves one region by components | C+V | L | boundary_evidence_missing_ref / region_lattice_inconsistent / boundary_evidence_stale |
++| 8.7 structural refs unique, group tolerance, distinct rows | C+V | L | boundary_evidence_duplicate_ref / boundary_evidence_mismatch |
++| 8.8 header ref key matches more than one DetectedHeaderCell | C+V | L | header_ref_ambiguous |
++| 9.1 anchor membership and tolerance | C+V | A | hard |
++| 9.2 group ranges disjoint; no source dropped | C+V | A | hard |
++| 9.3 outer x equals bbox edge, not mean | C+V | A | hard |
++| 10.1 logical_cells non-empty; every physical ref resolves | V | A | hard |
++| 10.2 assignment word_ids non-empty | V | L | mapping_word_not_assigned |
++| 10.3 assignment word ids pairwise disjoint | V | L | mapping_word_partition_mismatch |
++| 10.4a per-cell union is missing a word | V | L | mapping_word_not_assigned |
++| 10.4b per-cell union carries an extra word | V | L | mapping_word_partition_mismatch |
++| 10.5a table union is missing a word of §5.6 | V | L | mapping_word_not_assigned |
++| 10.5b table union supplies a word outside the extent | V | L | mapping_word_outside_logical_extent |
++| 10.5c table union duplicates a word | V | L | mapping_word_partition_mismatch |
++| 10.6 fresh parse equals grid builder cell_words capture | R | A | hard |
++| 11.1 bbox equals union of assigned word bboxes | V | A | hard |
++| 11.2 text equals _words_to_text over those words | V | A | hard |
++| 11.3 word_ids is in that reading order | V | A | hard |
++| 11.4 cell is not an unmodified copy of a shared physical cell | V | A | hard |
++| 12.1 row_start/row_end equal source grid coverage | V | L | mapping_lattice_index_mismatch |
++| 12.2 logical_column/span equal the word-bearing run | V | A | hard |
++| 12.3 kind follows header_rows | V | L | logical_cell_kind_boundary |
++| 12.4 logical_cell_id reproduces from the formula | V | A | hard |
++| 12.5 row ranges disjoint within one logical column | V | L | mapping_row_overlap |
++| 12.6 logical_cell_id unique within the table | V | L | logical_cell_id_collision |
++| 13.1 header refs exist, belong to table, levels in range | V | L | header_role_source_invalid |
++| 13.2 role_source is one of the four values | V | L | header_role_source_invalid |
++| 13.3 role matrix, sub-rule recipient, no double source | V | L | header_role_source_invalid |
++| 13.4 ref and id resolve to the same header cell | V | L | boundary_evidence_mismatch |
++| 14.1 grid.xs, grid.ys, cell and S2a fields unchanged | G | A | hard |
++| 15.1 candidate ids and counts unchanged | G | A | hard |
++| 15.2 candidate logical refs empty on unresolved tables | V | A | hard |
++| 16.1 legacy artifact classification | C+V | exempt | unresolved, empty reason |
++| 17.1 snapshot schema, hash and version | V | A | schema / audit hard error |
++| 18.1 resolved-table lattice audit | V | L | mapping_lattice_index_mismatch |
++| 19.1 fresh-parse lattice audit | R | L | mapping_lattice_index_mismatch |
++| 20.1 support arithmetic bounds | C+V | A | hard |
++| 20.2 all supporting body rows crossed, internal | C+V | L | boundary_data_cell_crossing |
++| 20.3 subrule band-count couplings | C+V | A | hard |
++
++Word-membership checks share one code but keep three distinct rules:
++
++| id | stage | type | rule | code |
++| --- | --- | --- | --- | --- |
++| W-1 | C+V | L | word centre inside the closed outer extent; no tolerance, clamp, snap or widening | mapping_word_outside_logical_extent |
++| W-2a | C+V | L | word centre inside its declared physical cell bbox; 0.8pt inclusive | mapping_word_outside_logical_extent |
++| W-2b | C+V | L | word centre inside the logical cell bbox; 0.8pt inclusive | mapping_word_outside_logical_extent |
++
+ 1. `logical_columns is null` iff `logical_mapping_status == "unresolved"`;
+    unresolved tables carry no accepted logical payload.
+ 2. `logical_boundaries` and `logical_boundary_detail` have equal length,
+@@ -2599,12 +3466,30 @@
+    `ColumnProjection` has a non-empty `physical_columns`, and `left` / `right`
+    equal `logical_boundaries[i]` / `logical_boundaries[i + 1]`.
+ 5. Every `PhysicalColumnOverlap.physical_column` is a valid index into the
+-   table's one `grid.xs`; `physical_left == grid.xs[i]`,
+-   `physical_right == grid.xs[i + 1]`; the overlap is positive; the row band is
+-   inside `[0, n_rows - 1]`. Per logical column, the bands are canonical
+-   (§5.4): they partition `[0, n_rows - 1]`, never overlap, never leave a gap,
+-   and adjacent bands never carry the same physical column set; within a band
+-   physical columns are unique and ascending.
++   table's one `grid.xs`; `physical_left == grid.xs[i]` and
++   `physical_right == grid.xs[i + 1]`; the overlap is positive. `band_index` is
++   in `0 .. len(logical_row_bands) - 1`; the referenced band has a non-empty
++   `shape`; `physical_column` is in
++   `occupied_columns(logical_row_bands[band_index])`; and
++   `grid_row_start` / `grid_row_end` equal that band's fields exactly. Within
++   one `(band_index, logical_column)` pair, `physical_column` is unique and
++   ascending. For each logical column and band, the emitted physical columns
++   are exactly the expected occupancy set `E` of §5.4: an empty band emits
++   none, an empty `E` is valid, and a band need not appear in every logical
++   column. Every logical column has at least one overlap across all bands;
++   otherwise `mapping_physical_overlap_missing`. The `logical_row_bands`
++   partition `0 .. n_rows - 1` exactly: a gap is 5.4b and an intersection or
++   duplicate band is 5.4c, both `mapping_row_band_overlap`.
++
++5b. `logical_condition_paths` is a bijection with the resolved table's
++   `demote_condition_path` decisions: every such decision has exactly one
++   record, every record references one such decision, no two records share a
++   decision, `condition_path_index` equals the position, `decision_index` is
++   strictly ascending, and `partial_rule` equals the unique `subrule_partial`
++   in that decision's `evidence` field for field. The record's `row_bands`
++   equals that evidence's `condition_bands` and is a subset of the decision's
++   `row_bands`. An unresolved table has an empty tuple and no
++   `demote_condition_path` decision.
+ 6. `overlap_left`, `overlap_right` and `overlap_fraction` recompute from the
+    authoritative interval and physical width within `1e-6`; every logical
+    column overlaps at least one physical column and every physical column
+@@ -2614,11 +3499,22 @@
+    `[0, visual_columns - 1]`, sorted, unique, and has positive width overlap by
+    §5.4; the tuple is empty iff `visual_columns is None`.
+ 8. Every kept boundary's evidence resolves per §5.3/§9.2; a missing reference
+-   is an error, not a warning. The evidence kind must match the declared
+-   source. `header_canopy` is directed: both anchors resolve, each anchor is the
+-   head of its nearest-first ref list, left/right lists are on the correct
+-   side, labels equal the anchor text, and the `boundary_edge` position rule
+-   holds. `subrule_promoted` has one unique source cell per band or is
++   is an error, not a warning, and the evidence kind must match the declared
++   source. `header_canopy` fails through exactly these branches, one code each:
++   HC-1, a required side holds no header cell, is `header_missing_for_canopy`;
++   HC-2, a ref whose key matches nothing, is `boundary_evidence_missing_ref`,
++   sharing that code with HC-12 under the mutual exclusion below; HC-2b, a ref
++   whose key matches more than one cell, is `header_ref_ambiguous`; HC-3 to
++   HC-9 and HC-11 — a non-head anchor, a list that is not nearest-first, a
++   wrong side, a level contradiction, a bbox outside the table, a label
++   failure, a `boundary_edge` position failure, and a wrong evidence kind — are
++   `boundary_evidence_mismatch`; HC-10, a same-level geometric tie, is
++   `header_level_tie`; a repeated ref inside one declared list is
++   `boundary_evidence_duplicate_ref`. HC-10 short-circuits HC-9 for that
++   boundary. HC-2 and HC-12 are mutually exclusive: no record means only HC-12
++   runs, a record with a zero-match ref means only HC-2 runs, and several
++   missing refs on one boundary collapse to one code.
++   `subrule_promoted` has one unique source cell per body row or is
+    `unresolved`, unique in-band assignments, and a recomputable ratio.
+    `table_bbox` matches the fresh `DetectedTable` exactly. `region_extent`
+    resolves its region by `region_components` equality before matching the
+@@ -2684,34 +3580,104 @@
+     `len(grid_ys) == n_rows + 1`, adjacent pairs are strictly ascending, and
+     every logical row index in the accepted payload is inside
+     `[0, n_rows - 1]`. The model-level rule is the shared
+-    `validate_grid_ys` (`domain/table.py:15`), called by both `Table` and
++    `validate_grid_ys` (`icpdf.domain.table::validate_grid_ys`), called by both `Table` and
+     `DetectedTable`; this invariant adds the logical-payload row check.
+     `rows` may be shorter than `n_rows` because empty grid rows are skipped; a
+     validator must never derive `n_rows` from `len(rows)` or require
+-    `len(rows) == n_rows`. This invariant reads persisted fields only and
++    `len(rows) == n_rows`. This row-index check does not cover
++    `PhysicalColumnOverlap.grid_row_start` or `grid_row_end`: those are
++    governed by invariant 5's band rules and use
++    `mapping_row_band_not_canonical`, never
++    `mapping_lattice_index_mismatch`. This invariant reads persisted fields only and
+     applies to resolved tables only; old artifacts were classified unresolved
+     in invariant 16 and are out of scope. A violation is
+     `mapping_lattice_index_mismatch`.
+ 19. **Fresh-parse lattice audit (separate replay).** A read-only replay that
+     re-parses the same PDF must find `tuple(detected.grid_ys) == tuple(grid.ys)`
+     and `detected.n_rows == grid.n_rows`, element for element and float for
+-    float; `grid_ys` is copied verbatim (`table_detector.py:192-193`), never
++    float; `grid_ys` is copied verbatim by
++    `icpdf.parser.table_detector::detect_tables`, never
+     recomputed or normalized. A mismatch is `mapping_lattice_index_mismatch`
+     and makes the artifact stale. Invariant 18 cannot detect this because it
+     sees only the artifact; invariant 19 cannot run without a fresh parse.
+     `grid.xs` and `grid.ys` themselves are never modified by S2b.
+ 20. **Boundary support audit.** For every decision,
+     `0 <= crossing_bands <= supporting_bands <= band_count`; `crossing_bands`
+-    counts only supporting bands (§5.3), so a header/section-row crossing
+-    cannot be counted. An internal decision is `unresolved` with
+-    `boundary_data_cell_crossing` iff `supporting_bands > 0` **and**
+-    `crossing_bands == supporting_bands`; an outer decision is never vetoed; a
+-    candidate with at least one uncrossed supporting band is not unresolved
+-    solely because of crossing, and its keep/demote outcome is still determined
+-    by §6.2. For non-subrule candidates
+-    `short_label_bands == condition_bands == 0`; for subrule candidates both
+-    counts use only the run selected by §6.3 for that band, and
+-    `short_label_bands + condition_bands <= nonempty_bands`.
++    counts only supporting body rows (§5.3), so a header-row crossing or a
++    section-like body row removed by §5.3.2 before counting cannot be counted.
++    An internal decision is `unresolved` with `boundary_data_cell_crossing` iff
++    `supporting_bands > 0` **and** `crossing_bands == supporting_bands`; an
++    outer decision is never vetoed. An internal candidate with at least one
++    uncrossed supporting row is not unresolved because of crossing, and its
++    keep/demote outcome is still determined by §6.2. For non-subrule
++    candidates `short_label_bands == condition_bands == 0`; for subrule
++    candidates both counts use only the run selected by §5.3.1 for that body
++    row, and `short_label_bands + condition_bands <= nonempty_bands`.
++    `supported_bands` and `nonempty_bands` have no required ordering;
++    `support_ratio = supported_bands / nonempty_bands` may exceed 1.0
++    (including for `label_aligned`), is diagnostic, and is `None` iff
++    `nonempty_bands == 0`. Every decision satisfies
++    `len(row_bands) == support.band_count`, and every section-like body row
++    removed in §5.3.2 stays inside `row_bands` and `band_count`.
++
++21. **Reason-code closure.** The following clauses govern every code listed
++    in §10.2 and every check classified in §11.0.
++
++    (a) **Namespace separation.** `logical_mapping_reason` contains only the
++        closed 27 L codes of §10.2. Namespace A — schema, wrapper and audit
++        codes — never enters it, and no A failure sets
++        `logical_mapping_status`.
++
++    (b) **Branch totality.** Every L code has at least one producing branch
++        named in §5.3–§9.2 and listed in the §10.2 closure table. No code is
++        emitted without a branch, and no branch emits a code outside the 27.
++
++    (c) **Branch uniqueness.** One branch emits exactly one code. Where two
++        checks inspect the same field, the earlier check in the stated order
++        owns the failure and the later check is skipped for that record.
++
++    (d) **Aggregation.** The table reason is the sorted, duplicate-free union
++        of unresolved decision codes and failed L-row codes of §11.0.
++        `demote_*` codes stay on their decision and never enter
++        `logical_mapping_reason`.
++
++    (e) **C+V single reason.** When construction (C) and validation (V)
++        inspect the same failure they use the same code and the same producer
++        branch. V adds no second code, does not relabel the failure, and does
++        not flip the table between resolved and unresolved. Precedence:
++        6.1a before 6.1b; HC-10 tie before HC-9 gap geometry; evidence
++        resolution before evidence shape.
++
++    (f) **Candidate independence.** Each unresolved candidate contributes its
++        own code. A failure of candidate i never suppresses, merges into, or
++        relabels a failure of candidate j. Identical codes from several
++        candidates collapse only by set union; each per-candidate failure
++        remains in the decision records.
++
++    (g) **Partial unresolved.** One unresolved candidate makes the table
++        unresolved and clears the logical payload (invariant 1). Resolved
++        candidates keep non-authoritative decisions for diagnosis, but no
++        projection, boundary, cell or condition-path payload is emitted.
++
++    (h) **Whole-table unresolved.** A table-level audit failure emits one
++        reason per failed invariant, not one per failing record. Several
++        records failing the same invariant collapse to one code; a different
++        failed invariant adds its own code.
++
++    (i) **Early evidence failure.** A boundary whose required evidence fails
++        resolution is unresolved with that code. Downstream evidence-shape
++        checks for that boundary do not run and add no code. Other boundaries
++        continue independently.
++
++    (j) **Legacy exemption.** An invariant 16 artifact is unresolved with an
++        empty `logical_mapping_reason` and is exempt from (a)–(i) and from
++        invariants 18 and 19.
++
++    The L rows of §11.0 are the closed list for (d) and (e): 5.1–5.6
++    (5.4a, 5.4b and 5.4c included), 6.1a, 6.2, 6.3, 7.1–7.3, 8.1–8.8, 10.2,
++    10.3, 10.4a, 10.4b, 10.5a, 10.5b, 10.5c, 12.1, 12.3, 12.5, 12.6,
++    13.1–13.4, 18.1, 19.1, 20.2, W-1, W-2a and W-2b. The A rows never set
++    `logical_mapping_status` and never enter `logical_mapping_reason`.
+ 
+ ## 12. Evaluation set and metrics
+ 

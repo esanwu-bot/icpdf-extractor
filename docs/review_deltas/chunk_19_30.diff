@@ -1,0 +1,560 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -629,7 +689,8 @@
+ **Selected right-side run (D13).** `short_label_bands` and `condition_bands`
+ are counted per band from **one** run only: the run §6.3 steps 2–3 select for
+ that band, namely the words strictly right of x inside the unique source cell,
+-split on `cell_gap_pt`, reduced to the run with the smallest left edge. A band
++split on `cell_gap_pt`, reduced to the run with the smallest left edge under
++the `run_left - m <= 1e-6` tie rule of §6.3 step 3. A band
+ with zero source cells selects no run and is neither a short-label nor a
+ condition band; more than one source cell (`subrule_source_cell_ambiguous`) or
+ a run tie (`subrule_run_tie`) already makes the candidate `unresolved` before
+@@ -648,12 +709,25 @@
+   decision: LogicalBoundaryDecisionKind
+   reasons: tuple[str, ...]                     # stable machine-readable codes
+   sources: tuple[LogicalBoundarySource, ...]
++  row_bands: tuple[int, ...]                   # every body grid row, absolute
+   boundary: LogicalBoundary | None             # only when decision == "keep"
+   demoted_to: "no_evidence" | "condition_path" | None
+   support: BoundarySupport
+   evidence: tuple[LogicalBoundaryEvidence, ...]  # all evidence seen at x
+ ```
+ 
++`row_bands` is the ordered tuple of every body grid row,
++`header_rows, header_rows + 1, ..., n_rows - 1`. It is not a per-decision
++subset, not a projection-band list, and not a body-relative index. Every
++decision, including outer, keep, demote and unresolved, carries the same tuple,
++so `len(row_bands) == support.band_count` always holds. Narrower evidence sets
++live on their own records: `SubrulePromotedEvidence.rule_bands`,
++`SubrulePartialEvidence.condition_bands`,
++`LabelAlignedEvidence.grid_rows`,
++`StructuralEdgeEvidence.physical_cell_edge_refs`. The projection bands of §5.4
++use an independent full-table index space; values from the two spaces are never
++compared.
++
+ `demoted_to` is `None` for `keep` and `unresolved`. It is `"no_evidence"` for
+ `demote_no_evidence` and `"condition_path"` only for
+ `demote_condition_path`.
+@@ -686,11 +760,28 @@
+   kind: "subrule_promoted"
+   visual_boundary_index: int
+   visual_segment_indices: tuple[int, ...]
+-  rule_bands: tuple[int, ...]        # sorted, unique
++  rule_bands: tuple[int, ...]        # absolute body grid rows, sorted, unique
+   nonempty_bands: int
+   label_assignments: tuple[SubruleLabelAssignment, ...]  # one per band at most
+   short_label_ratio: float
+ 
++SubrulePartialEvidence
++  kind: "subrule_partial"
++  visual_boundary_index: int
++  visual_segment_indices: tuple[int, ...]
++  coverage: float
++  rule_bands: tuple[int, ...]        # absolute body grid rows
++  nonempty_bands: int
++  condition_bands: tuple[int, ...]   # subset of rule_bands
++  condition_observations: tuple[ConditionObservation, ...]
++
++ConditionObservation
++  grid_row: int                      # member of condition_bands
++  physical_cell_ref: PhysicalCellRef
++  word_ids: tuple[str, ...]          # non-empty, reading order, exactly the selected run
++  lexical_class: str                 # one of the §6.3.1 classes
++  relational_markers: tuple[str, ...]  # non-empty, ordered, de-duplicated
++
+ HeaderCanopyEvidence
+   kind: "header_canopy"
+   level: int
+@@ -761,23 +852,23 @@
+   `DetectedHeaderCell` by `(level, source_row, source_column, column)`; its bbox
+   is inside the table bbox.
+ 
+-**`SubrulePromotedEvidence` is per band, per cell, per word (N2).**
++**`SubrulePromotedEvidence` is per body row, per cell, per word (N2/D14).**
+ 
+-- `rule_bands` is sorted and unique, inside `[0, n_rows - 1]`.
+-- The **source cell** of a band is the unique `DetectedCell` whose bbox contains
+-  `x` (`bbox[0] <= x <= bbox[2]`) and whose grid-row coverage includes that
+-  band. Containment is closed at both endpoints on purpose: when `x` lies
+-  exactly on an edge shared by two cells, both qualify, the band has no source
++- `rule_bands` is sorted and unique, inside `header_rows .. n_rows - 1`.
++- The **source cell** of a body row is the unique `DetectedCell` whose bbox
++  contains `x` (`bbox[0] <= x <= bbox[2]`) and whose grid-row coverage includes
++  that row. Containment is closed at both endpoints on purpose: when `x` lies
++  exactly on an edge shared by two cells, both qualify, the row has no source
+   cell, and the candidate is `unresolved` (`subrule_source_cell_ambiguous`).
+   This is a deliberate fail-closed boundary, not a rounding artefact. No
+   half-open rewrite and no epsilon are permitted, because either would silently
+   change physical cell ownership.
+-- `nonempty_bands` is the number of bands in `rule_bands` with at least one
+-  word center strictly right of x inside the table, counted before
+-  classification and regardless of whether a source cell was found. It is
+-  recomputable and never smaller than `len(label_assignments)`. A band with
+-  right-side words but an ambiguous source cell still counts in the
+-  denominator; the denominator is never "bands that produced a source cell".
++- `nonempty_bands` is the number of rows in `rule_bands` with at least one word
++  center strictly right of x, counted before classification and regardless of
++  whether a source cell was found. It is recomputable and never smaller than
++  `len(label_assignments)`. A row with right-side words but an ambiguous source
++  cell still counts in the denominator; the denominator is never "rows that
++  produced a source cell".
+ - At most one `SubruleLabelAssignment` per `grid_row`; `grid_row` is unique,
+   sorted, and a member of `rule_bands`.
+ - Each assignment's `physical_cell_ref` resolves to a real `DetectedCell`;
+@@ -785,27 +876,66 @@
+   and inside that cell (same 0.8pt tolerance as `_assign_words`);
+   `selected_run_bbox` is exactly the union of those word bboxes.
+ - The selected run is the nearest word run immediately right of x inside the
+-  same physical cell. Run splitting uses the existing `cell_gap_pt` rule from
+-  `_alignment_grid` (`structure.py:551-553`). Two runs at equal distance are a
+-  tie: `subrule_run_tie`, unresolved.
+-- Only runs classified as `short_label` by §6.3 appear. A band with no
++  same physical cell and inside that row's y interval. Run splitting is exactly
++  §5.3.1: the cell's words sorted by `(x0, word_id)`, split only when the gap is
++  strictly greater than `cell_gap_pt`. Let `m` be the smallest left edge among
++  that row's right-side runs. The selection is that minimum run; no run is
++  chosen by word count, text or list order. A run is tied iff
++  `run_left - m <= 1e-6`. The comparison is against `m` only and is never
++  chained from one run to the next, so a run farther than `1e-6` from `m`
++  cannot tie through an intermediate run. Any tie in any band is
++  `subrule_run_tie`, and the whole candidate is unresolved, not only that
++  band.
++- Only runs classified as `short_label` by §6.3 appear. A row with no
+   right-side word is excluded from numerator and denominator.
+ - `short_label_ratio = len(label_assignments) / nonempty_bands`, with
+-  `nonempty_bands > 0`. Missing, duplicate or out-of-band assignments are
++  `nonempty_bands > 0`. Missing, duplicate or out-of-row assignments are
+   errors. The validator recomputes both the count and the ratio.
+ 
++**`SubrulePartialEvidence` (D2/D14).**
++
++- `rule_bands` is the sorted, unique set of body rows where `rule_at(x, row)`
++  is true (§5.3.1).
++- `nonempty_bands` is the number of rows in `rule_bands` with at least one word
++  center strictly right of x; it uses the same denominator rule as promotion.
++- `condition_bands` is the sorted, unique subset of `rule_bands` whose
++  right-side selected run is condition-like by §6.5. It must be non-empty for a
++  `demote_condition_path` decision.
++- There is exactly one `ConditionObservation` per member of `condition_bands`,
++  with a unique `grid_row`, sorted by `grid_row`.
++- Each observation's `physical_cell_ref` resolves; `word_ids` is non-empty, in
++  reading order, every center strictly right of x and inside that cell, and is
++  exactly the selected run of that row. `lexical_class` must equal the §6.3.1
++  classification of that run, not merely be a legal enum member.
++  `relational_markers` is the ordered, de-duplicated list of markers actually
++  present in the selected run: first-occurrence order in reading order, exact
++  string de-duplication, non-empty; every entry must be findable in the run's
++  words. Any disagreement is `condition_path_decision_mismatch`.
++- If selected-run resolution produces `subrule_run_tie`, no observation is
++  emitted for that row, the row is not added to `condition_bands`, the
++  candidate is `unresolved`, and no `ConditionPathRecord` may reference it.
++  This is a selection failure, not a `condition_path_decision_mismatch`.
++- `coverage` is copied from the matching S2a internal boundary and must equal
++  it exactly; S2b never recomputes it.
++- Stage A may set `demote_condition_path` only when the decision's `evidence`
++  contains exactly one `subrule_partial`. Zero or several members is
++  `condition_path_decision_mismatch`.
++
+ **`LabelAlignedEvidence` ratio.**
+ 
+-- `grid_rows` is the sorted, unique set of body bands (`header_rows <= r <
++- `grid_rows` is the sorted, unique set of body rows (`header_rows <= r <
+   n_rows`) where a gutter exists at x; `gutter_bands = len(grid_rows)`. A word
+-  crossing x in one of these bands is not an evidence error: it is counted by
+-  `crossing_bands` and removes that band's support only (§5.3, §8.1).
+-- `nonempty_bands` is the number of body bands with at least one word anywhere
+-  in the table, recomputed from the fresh parse.
++  crossing x in one of these rows is not an evidence error: it is counted by
++  `crossing_bands` and removes that row's support only (§5.3, §8.1). This
++  sentence is in conflict with §5.3.1 and is OPEN until §14 item 23 is ruled.
++- `nonempty_bands` is the number of body rows with at least one word anywhere
++  in the table, recomputed from the fresh parse. An empty body row may carry a
++  gutter, so it counts in `gutter_bands` and not in `nonempty_bands`;
++  `gutter_ratio` may therefore exceed 1.0, which is diagnostic, not an error.
+ - `gutter_ratio = gutter_bands / nonempty_bands` with `nonempty_bands > 0`; a
+   stored ratio that does not recompute within `1e-9` is
+   `boundary_evidence_mismatch`.
+-- `word_ids` is the reading-order list of words in the gutter bands that do not
++- `word_ids` is the reading-order list of words in the gutter rows that do not
+   cross x; each id must resolve and lie inside the table.
+ 
+ **`StructuralEdgeEvidence` de-duplication (S3).**
+@@ -840,8 +970,8 @@
+ 
+ **`RegionExtentEvidence` has a defined encoding (N3).**
+ 
+-The current parser constructs `implied_outer` at
+-`table_regions.py:282-288` with `values = (left, right)` and
++The current parser constructs `implied_outer` in
++`icpdf.parser.table_regions::_region_from_cluster` with `values = (left, right)` and
+ `component_ids = tuple(member.component_id for member in members)`; a region
+ emits at most one such record. The evidence records that encoding instead of
+ relying on positional convention:
+@@ -850,7 +980,8 @@
+   from the table, never from geometry. The fresh parse runs the same
+   `detect_table_regions(layout, params)` pass; the target region is the one
+   whose component-id set equals `set(DetectedTable.region_components)`
+-  (`table_detector.py:176`). Exactly one region must match: zero matches is
++  as recorded by `icpdf.parser.table_detector::detect_tables`. Exactly one
++  region must match: zero matches is
+   `boundary_evidence_missing_ref`, two or more is `region_lattice_inconsistent`.
+   The matched region must also satisfy `region.source ==
+   table.detection_method`, `region.boundary_source == table.boundary_source`
+@@ -906,8 +1037,8 @@
+ | Kind | Required references | Validation / rejection |
+ | --- | --- | --- |
+ | `printed_rule` | `visual_boundary_index`, non-empty `visual_segment_indices` | index in range; `abs(visual_boundaries[i] - x) <= visual_boundary_tol_pt`; each segment index in range; each `VisualSegment.component_id` in `region_components`; each `y0 < y1` inside table bbox; `coverage >= visual_full_height_coverage`; role must be `internal` for an internal boundary, `outer_*` for an outer one. Missing/invalid -> `boundary_evidence_missing_ref` or `boundary_evidence_mismatch`. |
+-| `subrule_promoted` | `visual_boundary_index`, non-empty `rule_bands`, `nonempty_bands > 0`, `label_assignments` | same visual checks; coverage `< visual_full_height_coverage`; `rule_bands` inside grid rows; `grid_row`s unique and inside `rule_bands`; `len(label_assignments) >= logical_subrule_promote_min_bands`; `short_label_ratio` recomputed from the assignments equals the stored value and is `>= logical_subrule_promote_min_ratio`; every word id exists, is right of `x`, and is in its declared physical cell; `selected_run_bbox` is the word union. Missing/duplicate band -> `boundary_evidence_duplicate_ref`; ratio mismatch -> `boundary_evidence_mismatch`; run tie -> `subrule_run_tie`. |
+-| `header_canopy` | `level`, `boundary_edge`, both anchor refs, non-empty left/right ref lists, `left_label`, `right_label` | every ref resolves to a `DetectedHeaderCell` by `(level, source_row, source_column, column)`; all refs have `level == evidence.level`; `level < header_rows`; bbox inside the table; the left refs lie at or left of `x`, the right refs at or right; anchors are the nearest cells on their side and satisfy the `boundary_edge` position rule; labels equal the anchors' normalized text and are distinct; two same-level cells touching `x` -> `header_level_tie`; missing side -> `header_missing_for_canopy`. |
++| `subrule_promoted` | `visual_boundary_index`, non-empty `rule_bands`, `nonempty_bands > 0`, `label_assignments` | same visual checks; coverage `< visual_full_height_coverage`; `rule_bands` inside grid rows; `grid_row`s unique and inside `rule_bands`; `len(label_assignments) >= logical_subrule_promote_min_bands`; `short_label_ratio` recomputed from the assignments equals the stored value and is `>= logical_subrule_promote_min_ratio`; every word id exists, is right of `x`, and is in its declared physical cell; `selected_run_bbox` is the word union. Missing/duplicate band -> `boundary_evidence_duplicate_ref`; ratio mismatch -> `boundary_evidence_mismatch`; run tie -> `subrule_run_tie`, and a tied band emits no `ConditionObservation`, does not enter `condition_bands`, and makes the whole candidate unresolved. |
++| `header_canopy` | `level`, `boundary_edge`, both anchor refs, non-empty left/right ref lists, `left_label`, `right_label` | two ordered resolution steps. Step 1, identity: the key `(level, source_row, source_column, column)` must match exactly one `DetectedHeaderCell`; zero matches -> `boundary_evidence_missing_ref`, more than one -> `header_ref_ambiguous`. Step 2, content: `text` and `bbox` equal the matched cell, `level == evidence.level` and `level < header_rows`, bbox inside the table; failure is `boundary_evidence_mismatch`. The steps never swap. The left refs lie at or left of `x`, the right refs at or right; anchors are the nearest cells on their side and satisfy the `boundary_edge` position rule; labels equal the anchors' normalized text and are distinct. A repeated ref inside one declared list is `boundary_evidence_duplicate_ref`; two same-level cells touching `x` within tolerance is `header_level_tie`; an empty required side is `header_missing_for_canopy`; no evidence record at all is `boundary_evidence_missing_ref`. |
+ | `label_aligned` | non-empty `grid_rows`, non-empty `word_ids` | rows in `[header_rows, n_rows)`; every word id exists on the page and inside the table; `gutter_ratio` recomputes from `gutter_bands` and `nonempty_bands`; `gutter_ratio >= logical_label_min_band_ratio`; `len(grid_rows) >= logical_label_min_bands`; a crossing word is counted by `crossing_bands` at decision level (§5.3), not as an evidence error. |
+ | `structural` | non-empty `physical_cell_edge_refs` | each ref resolves to a real `DetectedCell`; refs are sorted and unique per `(grid_row, cell_index, edge)`; several refs for one `(grid_row, edge)` form a source group that keeps every ref and must satisfy `max(edge_xs) - min(edge_xs) <= visual_boundary_tol_pt`; the edge is within tolerance of `x`; at least two distinct `grid_row` values remain across groups; a crossing word is counted by `crossing_bands` at decision level (§5.3), not as an evidence error. `physical_rule_component_ids`, when present, must all be in `region_components`. Duplicate triple -> `boundary_evidence_duplicate_ref`; disagreement inside a group -> `boundary_evidence_mismatch`. |
+ | `table_bbox` | `edge`, `page_number`, `table_bbox` | only for outer boundaries; `page_number` and `table_bbox` equal the fresh `DetectedTable` exactly; `x` equals `table_bbox[0]` (left) or `table_bbox[2]` (right) within tolerance. Stale page/bbox -> `boundary_evidence_stale`. An internal boundary may not use this kind. |
+@@ -919,16 +1050,164 @@
+ parser and parameters reproduce the same indices. This is the only primitive
+ provenance chain; S2b does not copy `primitive_indices` a second time.
+ 
++#### 5.3.1 Normative geometric predicates (D3)
++
++These predicates are normative. They restate the existing geometry so an
++independent validator can recompute it from `grid.xs`, `grid.ys`,
++`layout.words`, `DetectedCell` records and the S2a tuples without calling S1
++helpers.
++
++**Preconditions.** Before any predicate, require `n_rows >= 1` and
++`len(grid.ys) == n_rows + 1`, with `grid.ys` strictly ascending. If either
++fails, the existing grid/mapping validation fails and word row assignment is
++not run.
++
++**Word universe.** The universe consists exactly of the words actually
++assigned to `grid.cells` by §5.6. A word not assigned to any cell is excluded,
++including a word outside the table bbox. Assignment tolerance, if any, is
++governed exclusively by §5.6 and is not redefined here. Assigned-word and
++`unassigned_words` counts are computable from the retained grid. An
++out-of-cell page-word count is computable by the validator only when it can
++read a fresh `layout.words`
++(`len(layout.words) - assigned - len(grid.unassigned_words)`); it is never
++serialized, S2c may not require it, and an unavailable value is reported as
++"not available" rather than invalidating the table.
++
++*1. Run predicate.* Sort only the universe words assigned to one
++`DetectedCell` by `(x0, word_id)`. Never sort or run-split across cells. For
++adjacent words `prev` and `next`, let `gap = next.x0 - prev.x1`. They are in
++the same run iff `gap` is at most `cell_gap_pt`; `next` starts a new run iff
++`gap` is strictly greater than `cell_gap_pt`. A negative gap is at most the
++threshold, so overlapping words stay in one run. No second tolerance and no
++rounding are applied. This is the only run definition; it matches the
++`crossed` test in `icpdf.parser.structure::_rule_grid` but is not delegated to
++it at validation time. The parser helper is not itself the normative
++definition.
++
++*2. Word crossing predicate.* A word crosses x iff both conditions hold:
++`word.x0` is strictly less than x, and x is strictly less than `word.x1`.
++Horizontal extent alone decides. `word.x0 == x` and `word.x1 == x` do not
++cross. A zero-width word (`x0 == x1`) never crosses. `crossing_bands` is the
++number of body rows containing at least one crossing word; several crossing
++words in one row count once, and header rows never count. A word in
++`grid.unassigned_words` is excluded from every predicate; its count is reported
++separately. Crossing uses no second tolerance and no margin.
++
++Gutter and crossing are evaluated independently. A body row can be a rule row
++and a crossing row at the same time. It cannot be a gutter row and a crossing
++row at the same time, because the gutter predicate requires that no word
++crosses x.
++
++*3. Rule matching predicates.* `rule_at(x, row)` and `row_coverage(x, row)` are
++separate quantities.
++
++`rule_at(x, row)` is true iff an S2a internal boundary resolves to x and at
++least one of its segments, clipped to the row interval
++`[grid.ys[row], grid.ys[row + 1]]`, has positive length. It is an existence
++test only; it says nothing about how much of the row is covered.
++
++`row_coverage(x, row)` is the covered proportion:
++
++1. Clip every segment of the matching boundary to the row interval; discard
++   non-positive lengths.
++2. Sort by start. Merge an interval into the current one when its start is at
++   most the current end plus `visual_boundary_tol_pt`. Sum the merged lengths.
++3. `row_coverage = min(1.0, merged_length / (grid.ys[row + 1] - grid.ys[row]))`.
++
++The tolerance is the local seam tolerance used by S2a
++`icpdf.parser.visual_structure::_union_length`: every gap at most `visual_boundary_tol_pt`
++between adjacent segments is absorbed. It is not a global gap budget; several
++absorbed seams can accumulate, and `row_coverage` may be 1.0 while the raw
++union has small gaps. This is intentional and matches S2a. A row with no
++segment has `row_coverage == 0.0` and `rule_at == False`.
++
++Matching boundary x:
++
++- no matching internal boundary means `rule_at` is false;
++- exactly one internal boundary within `visual_boundary_tol_pt` of x is
++  selected;
++- more than one matching internal boundary is `boundary_evidence_mismatch` and
++  the candidate is `unresolved`, regardless of whether the distances are
++  equal; `rule_at` is then not evaluated;
++- x is `boundary.x`; `VisualSegment` has no x field, and per-segment x is not
++  re-tested;
++- the row interval uses `grid.ys`, whose strict ascent is a precondition.
++
++Evidence thresholds use the S2a overall coverage, not `row_coverage`:
++
++- `printed_rule` requires the matching boundary's S2a `coverage` to be at least
++  `visual_full_height_coverage`. There is no per-body-row coverage requirement:
++  a boundary may meet the overall threshold while one or more body rows have no
++  segment. `printed_rule` classification and `rule_bands` membership are
++  independent checks, and `PrintedRuleEvidence` carries no `rule_bands`.
++- `subrule_partial` requires that `coverage` be strictly greater than 0 and
++  strictly less than `visual_full_height_coverage`.
++  `SubrulePartialEvidence.coverage` is exactly that S2a value, copied; it is
++  never a row coverage and is never recomputed by S2b.
++- `rule_bands` in both `SubrulePromotedEvidence` and
++  `SubrulePartialEvidence` is the sorted tuple of body rows where
++  `rule_at(x, row)` is true. It records rows with rule evidence, not rows fully
++  covered; a partial rule legitimately contributes such rows. An empty
++  `rule_bands` means no body-row rule evidence and cannot produce
++  `demote_condition_path`; such a candidate falls to `demote_no_evidence`.
++- `row_coverage` is recomputed by the validator as a diagnostic. It gates
++  neither `printed_rule` nor `subrule_partial`, and it is not stored.
++
++*4. Band (body-row) word assignment predicate.* Only words in the §5.6
++universe are assigned. For a word, let `cy = (word.y0 + word.y1) / 2`. Its
++physical row `row_of(word)` is the largest `r` in `0 .. n_rows - 1` with
++`grid.ys[r]` at most `cy`; if no such `r` exists, the row is 0. Because
++`grid.ys` is sorted, the result is unique and is clamped to
++`0 .. n_rows - 1`. A word whose center is above the first boundary maps to row
++0; a word whose center is on or below the last boundary maps to
++`n_rows - 1`.
++
++Every assigned word belongs to exactly one physical row, hence to either the
++header rows or one body row. A word is never counted in two rows, and no
++assigned word is dropped by this rule. A body row is non-empty iff at least one
++assigned word maps to it. This y assignment is independent of
++`_assign_words`, which selects a physical cell by the full center point; their
++disagreement is not an error, because the cell assignment owns word partitions
++and the row assignment owns evidence counting.
++
++#### 5.3.2 Section-like body rows (D16)
++
++S2b does not classify section or label semantics. The section exemption is
++therefore purely geometric and reads only persisted physical cells, `grid_ys`
++and the table bbox. It never reads cell text, never consults a section
++classifier, and never tests `column_span` as the sole criterion.
++
++A body row `r` (`header_rows <= r < n_rows`) is **section-like** iff there
++exists a persisted `DetectedCell` `c` such that:
++
++- the row coverage of `c` contains `r`:
++  `c.grid_row <= r <= c.grid_row + c.row_span - 1`; and
++- the bbox of `c` spans the table horizontally:
++  `c.bbox[0] <= grid.bbox[0] + visual_boundary_tol_pt` and
++  `c.bbox[2] >= grid.bbox[2] - visual_boundary_tol_pt`.
++
++Header rows (`r < header_rows`) are exempt by that range alone and are never
++tested with this predicate. A section-like row is removed from
++`rule_bands`, `gutter_bands` and the structural source **before**
++`supporting_bands` is counted, so it is neither a supporting row nor a
++crossing row; a crossing there is recorded on the evidence record as a
++diagnostic only. It remains in `band_count` and in `LogicalBoundaryDecision.row_bands`,
++because those describe the body row range, not the evidence set. The same
++predicate is used by §5.2, §6.2, §8.1 and §11 invariant 20. When the predicate
++is absent or cannot be evaluated, the row is not exempt and the candidate fails
++closed through the ordinary supporting-row rules.
++
+ ### 5.4 Projection models (R3, P1-2, P1-4)
+ 
+ ```text
+ PhysicalColumnOverlap
++  band_index: int                      # full-table projection band index
+   physical_column: int                 # 0-based interval index into the one grid.xs
+   physical_left: float                 # grid.xs[physical_column]
+   physical_right: float                # grid.xs[physical_column + 1]
+   region_component_ids: tuple[int, ...]  # provenance only; may be empty
+-  grid_row_start: int                  # inclusive
+-  grid_row_end: int                    # inclusive
++  grid_row_start: int                  # copied from the band, inclusive
++  grid_row_end: int                    # copied from the band, inclusive
+   overlap_left: float
+   overlap_right: float
+   overlap_fraction: float              # overlap width / physical column width
+@@ -937,8 +1216,20 @@
+   logical_column: int
+   left: float
+   right: float
+-  physical_columns: tuple[PhysicalColumnOverlap, ...]  # non-empty
++  physical_columns: tuple[PhysicalColumnOverlap, ...]  # coverage, not a partition
+   visual_column_indices: tuple[int, ...]                # visual interval indices
++
++BandCellShape
++  column: int            # DetectedCell.column_index
++  column_span: int
++  row_span: int
++
++BandObservation
++  band_index: int        # full-table index; includes header bands
++  section: "header" | "body"
++  grid_row_start: int    # inclusive
++  grid_row_end: int      # inclusive
++  shape: tuple[BandCellShape, ...]
+ ```
+ 
+ `physical_column` is unique **within one table** because one table has exactly
+@@ -946,33 +1237,100 @@
+ lattice at derivation time and are the self-checking locator; the validator
+ re-derives `grid.xs` from a fresh parse and requires
+ `physical_left == grid.xs[i]` and `physical_right == grid.xs[i + 1]`.
+-`grid_row_start` / `grid_row_end` are inclusive and inside
+-`[0, n_rows - 1]`.
++`band_index` is an index into `logical_row_bands`; `grid_row_start` and
++`grid_row_end` are that band's closed row interval, copied for locator and
++readability only and never an independent row authority. Any disagreement
++between the three is `mapping_row_band_not_canonical`.
+ 
+ `region_component_ids` records which components contributed the physical
+ column. It is provenance, not a lattice selector; there is no
+ `region_local_column` field because no region-local x lattice exists in the
+ current repository.
+ 
+-**Canonical row bands (S2, N6).** The projection is derived per logical column
+-as follows:
++**Table-level projection bands (D1).** The bands are a property of the table,
++not of a logical column, and are derived before any projection:
+ 
+-1. For each physical row `r` in `[0, n_rows - 1]`, compute the set
+-   `S(r)` of physical column indices whose interval has positive width overlap
+-   with the logical interval.
+-2. Split `[0, n_rows - 1]` at every row where `S(r)` changes. The resulting
+-   maximal runs are the rows of the projection; adjacent runs never carry the
+-   same `S`.
+-3. Emit one `PhysicalColumnOverlap` per (run, physical column in `S`), sorted
+-   by `(grid_row_start, physical_column)`.
+-4. The runs of one logical column partition `[0, n_rows - 1]` exactly: no gap,
+-   no overlap, first `grid_row_start == 0`, last `grid_row_end == n_rows - 1`.
+-5. Inside a run, physical columns are unique and ascending.
+-
+-This is the "complete projection" rule: every logical column is projected over
+-every physical row, not only the rows where text happens to exist. A missing
+-or non-canonical band is `mapping_row_band_not_canonical`; a gap or overlap is
+-`mapping_row_band_overlap`.
++1. For each physical row `r` in `[0, n_rows - 1]`, build the signature `S(r)`:
++   the multiset of `BandCellShape(column, column_span, row_span)` over every
++   `DetectedCell` whose row coverage contains `r`.
++2. Sort each signature ascending by `(column, column_span, row_span)`.
++   Duplicates are retained: two cells with the same triple produce two entries.
++   Two signatures are equal iff they have the same length and are equal item by
++   item in canonical order.
++3. Forced split points are row `0`, row `n_rows`, and row `header_rows` when
++   `0 < header_rows < n_rows`. A forced split wins: the two rows on either side
++   are never merged even when their signatures are equal.
++4. Between adjacent forced split points, merge maximal consecutive runs of equal
++   signature. A row with no covering cell has the empty signature `()`; empty
++   rows merge with empty rows. The empty signature is a normal signature and is
++   never dropped. A table with no empty row has no empty band.
++5. Emit one `BandObservation` per run in ascending row order: `band_index` is
++   its 0-based position, the row interval is closed, and `section` is
++   `"header"` iff `grid_row_end < header_rows`, otherwise `"body"`. The forced
++   split guarantees that no band straddles `header_rows`.
++6. The bands partition `0 .. n_rows - 1` exactly: the first start is 0, the last
++   end is `n_rows - 1`, and every next start equals the previous end plus 1.
++7. A cell whose row coverage crosses the header/body split appears with the
++   same triple in the bands on both sides. It is deliberately not decomposed;
++   cell identity is not part of the signature, so two different cells with the
++   same triple are indistinguishable here.
++
++`logical_row_bands` is the ordered tuple of all `BandObservation` records. Its
++`band_index` is the full-table space and includes header bands. A body-relative
++band index is `band_index - header_band_count`, derived only when needed, never
++stored, and never compared with an absolute index. §5.2's `BoundarySupport`
++uses body **rows**, not these bands; the two spaces never mix.
++
++**Projection over occupied band columns (choice B).**
++`PhysicalColumnOverlap` records physical structure coverage, not a purely
++geometric interval intersection. A band with an empty shape has no cell
++coverage and therefore emits no overlap for any logical column.
++
++Define `occupied_columns(band)` as the set of physical column indices `j` for
++which some `BandCellShape` in `band.shape` satisfies
++`shape.column <= j <= shape.column + shape.column_span - 1`. `row_span`
++participates in the signature but not in this x-occupancy test. A shape whose
++`column` is outside `0 .. n_columns - 1`, whose `column_span` is not positive,
++or whose covered interval leaves the lattice is
++`mapping_row_band_not_canonical`.
++
++For each logical column `[L, R]` and each `BandObservation`:
++
++1. If `band.shape == ()`, emit no `PhysicalColumnOverlap`.
++2. Otherwise compute the expected set
++   `E = { j in occupied_columns(band) : min(R, grid.xs[j + 1]) - max(L, grid.xs[j]) is positive }`.
++3. Emit exactly one record per `j` in `E`, in ascending `physical_column`
++   order. An empty `E` emits no record and is not an error.
++4. Emit nothing for a `j` outside `E`; an extra record is
++   `mapping_row_band_not_canonical`.
++5. Sort records by `(band_index, physical_column)`.
++
++`ColumnProjection` is a coverage relation, not a partition of bands. A band may
++contribute zero, one or several overlaps to a logical column. Empty bands
++contribute zero to every logical column and are still part of
++`logical_row_bands`. Adjacent bands may carry the same, different or empty
++sets. No rule requires every band to appear in every logical column. "Complete
++projection" means every occupied band is examined, not that every physical row
++appears in the overlap list.
++
++**Band failure ownership (5.4a / 5.4b / 5.4c).**
++
++- 5.4a `mapping_row_band_not_canonical`: a `band_index` outside
++  `0 .. len(logical_row_bands) - 1`; a row field that differs from its band; a
++  band signature run that is not maximal; a band order other than ascending
++  `(grid_row_start, physical_column)`; a missing or duplicated band; a shape
++  outside the lattice; an overlap emitted for an empty band; a duplicate
++  `(band_index, physical_column)`; a missing member of `E`; or a
++  `physical_column` that repeats or is not ascending within a band.
++- 5.4b `mapping_row_band_overlap`: an uncovered row between two existing
++  bands. The code name explicitly includes a gap; an implementation must test
++  both gap and intersection, and testing only intersection is a defect.
++- 5.4c `mapping_row_band_overlap`: two existing band row ranges intersect, or a
++  band is fully duplicated.
++
++`mapping_row_band_overlap` is checked once on the table bands, not per logical
++column. `mapping_lattice_index_mismatch` does not absorb any of these three
++checks.
+ 
+ **Overlap geometry is recomputable.** For a logical interval `[L, R]` and
+ physical interval `[grid.xs[i], grid.xs[i + 1]]`:
+@@ -984,10 +1342,31 @@
+                    / (grid.xs[i + 1] - grid.xs[i])
+ ```
+ 
+-The validator recomputes all three from the fresh `grid.xs` and the
+-authoritative logical interval. Absolute tolerance `1e-6` for coordinates and
+-fraction; a zero or negative overlap is `mapping_physical_overlap_missing`. An
+-`overlap_fraction` outside `(0, 1]` is `boundary_evidence_mismatch`.
++**Overlap checks are two ordered checks.**
++
++6.1a Range check (construction stage; owns range failures).
++
++- The authoritative overlap width between the logical interval and the
++  physical interval must be positive. Zero or negative width is
++  `mapping_physical_overlap_missing`; the table is unresolved.
++- With positive width, the stored `overlap_fraction` must lie in `(0, 1]`. A
++  stored value outside that range is `boundary_evidence_mismatch`; the table is
++  unresolved. This is a range failure of the projection payload, not a
++  recompute-consistency failure.
++- 6.1a runs before 6.1b for each projection record. A record that fails 6.1a is
++  not passed to 6.1b, so one record produces one code.
++
++6.1b Recompute-consistency check (validation stage; namespace A).
++
++- For a record that passes 6.1a, recompute `overlap_left`, `overlap_right` and
++  `overlap_fraction` from the authoritative logical interval and the physical
++  width.
++- Any absolute difference greater than `1e-6` is an artifact-integrity hard
++  error: namespace A, validator failure, no B code, and never added to
++  `logical_mapping_reason`.
++- 6.1b does not re-emit `mapping_physical_overlap_missing` or
++  `boundary_evidence_mismatch` for the same record; 6.1a already owns the range
++  failures.
+ 
+ **Visual intervals are reconstructed, not guessed (S2).**
+ 

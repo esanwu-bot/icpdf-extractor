@@ -1,0 +1,286 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -3063,6 +4029,283 @@
+ If a required change falls outside the allowlist, the stage stops and returns
+ to review.
+ 
++### 13.1 Regression test matrix (T1–T26)
++
++The T1–T26 matrix locked by the batch-5 review is the regression gate for the
++schema, prototype and integration stages. r15 revises the eight entries named
++by the Reviewer — T7, T13, T16, T20, T21, T22, T25 and T26 — and leaves every
++other entry's text unchanged. Status after the r15 merges:
++
++| ID | Title | Status |
++| --- | --- | --- |
++| T1 | Physical cell split by a promoted boundary | writeable, unchanged |
++| T2 | One logical column over two physical columns (demoted sub-rule) | writeable, unchanged |
++| T3 | `row_span` 2 inside the body | writeable, unchanged |
++| T4 | `row_span` across header and body | writeable, unchanged |
++| T5 | Two-level header with a canopy over several columns | writeable, unchanged |
++| T6 | Two same-level cells touching x; one side missing | writeable, unchanged |
++| T7 | Partial rule with `TA = 25 °C`, ratio below 0.25 | revised below |
++| T8 | Full-width section/label merged cell with a body-supported boundary | constructible after §5.3.2; text unchanged, not named for revision |
++| T9 | Partial rule with `5 V` or `Data` | writeable, unchanged |
++| T10 | Word centre exactly on an internal boundary | writeable, unchanged |
++| T11 | Word centre 0.8pt outside the table | writeable, unchanged |
++| T12 | Rule table with an empty grid row | writeable, unchanged (D1 merged) |
++| T13 | Predicate boundary values | revised below; gutter half OPEN |
++| T14 | Artificial corruption | writeable, unchanged (A/L split fixed by §11.0) |
++| T15 | Old artifact without logical fields | writeable, unchanged |
++| T16 | Physical zero regression before and after S2b-2 | revised below |
++| T17 | Same input built twice | writeable, unchanged |
++| T18 | Two tables on one page | writeable, unchanged |
++| T19 | One physical cell split across three logical cells | writeable, unchanged |
++| T20 | Two header cells with the same four-tuple | revised below |
++| T21 | Reason closure | revised below |
++| T22 | Supporting band crossing | revised below |
++| T23 | Promoted role ownership | writeable, unchanged |
++| T24 | Selected run consistency | writeable, unchanged (D7 closed) |
++| T25 | Empty-row persistence | revised below |
++| T26 | Physical cell identity | revised below |
++
++```text
++T7 (revised). Partial rule with a condition-like right side below the
++ambiguous ratio.
++
++Construction. An internal candidate x carrying exactly one subrule_partial
++evidence: 0 < S2a coverage < visual_full_height_coverage, rule_bands
++non-empty. In every band the selected right-side run (unique source cell, no
++tie) is classified condition_expression, and short_label_ratio is below
++logical_subrule_ambiguous_min_ratio (0.25), so condition_bands >= 1.
++
++Expectation. Decision demote_condition_path with reasons exactly
++("boundary_condition_subrule",). The decision retains candidate_x, anchor_x,
++source_xs, row_bands with one entry per body row (header_rows .. n_rows - 1,
++D2), the count fields, the selected source cell ref per band and the selected
++run. SubrulePartialEvidence.condition_observations carries exactly one record
++per member of condition_bands, each holding the selected run's word ids,
++lexical class and relational markers. Exactly one ConditionPathRecord
++references the decision (the §6.5 bijection): its row_bands equals
++partial_rule.condition_bands and is a subset of the decision's row_bands. S2b
++emits no ConditionBand and no ConditionContext. This candidate alone does not
++make the table unresolved.
++
++Precondition. If any band has a run tie (two right-side runs whose left edges
++differ from the minimum by at most 1e-6), that band emits no
++ConditionObservation, does not enter condition_bands, and makes the candidate
++unresolved with subrule_run_tie; no ConditionPathRecord may reference that
++decision, and T7 does not apply.
++
++Coverage. §5.2 (row_bands, D13 selected run), §5.3 SubrulePartialEvidence,
++§5.3.1 run predicate, §6.2 row 5, §6.3 steps 2-6, §6.5, §11.20, §11.21.
++
++Failure semantics. A ConditionPathRecord without its decision or vice versa, an
++emitted ConditionBand or ConditionContext, a decision without row_bands, a
++ConditionPathRecord whose row_bands copies the decision instead of
++condition_bands, boundary_no_evidence instead of boundary_condition_subrule, or
++a silently resolved tie all fail.
++```
++
++```text
++T13 (revised). Predicate boundary values.
++
++Construction.
++Crossing side, strict straddle bbox[0] < x < bbox[2]:
++word A starts right of x and ends at x + 0.1 (does not cross);
++word B starts at x - 0.1 and ends at x + 0.1 (crosses);
++word C ends exactly at x (does not cross).
++Rule side: one row whose segment covers only part of the row, and one row
++whose segment covers all of it.
++Section side: a body cell that spans the table horizontally and whose left
++edge is exactly grid.bbox[0] + visual_boundary_tol_pt in one case, and beyond
++that value in another.
++Gutter side: adjacent-word gaps 7.9, 8.0 and 8.1 against cell_gap_pt = 8.0.
++
++Expectation. A not crossing, B crossing, C not crossing; no margin of any
++size, and the former 1.9/2.1 construction is withdrawn. A partially covered
++row has rule_at true and row_coverage < 1.0; neither gates printed_rule, which
++uses only the S2a overall coverage (§5.3.1 item 3). The D16 predicate includes
++the tolerance: a cell edge exactly at grid.bbox[0] + visual_boundary_tol_pt is
++section-like and one beyond it is not. For the run predicate, gaps 7.9 and 8.0
++stay in one run and 8.1 starts a new run, because the split is strict.
++
++Coverage. §5.3.1 items 1-3; §5.3.2; §11.20.
++
++Failure semantics. A or C counted as crossing, B not counted, any margin,
++row_coverage used to gate printed_rule, a D16 boundary that excludes the exact
++tolerance, or 8.0 treated as a new run all fail.
++
++OPEN (gutter half). r14 and r15 define no geometric gutter predicate. §5.3.1
++says a gutter row cannot be a crossing row because the gutter predicate
++requires that no word crosses x, while §9.2 (LabelAlignedEvidence ratio) says
++a word crossing x in a gutter row is not an evidence error and only removes
++that row's support. The two statements cannot both hold, and neither defines
++gutter geometry. Until §14 item 23 is ruled, only the 7.9/8.0/8.1 run vectors
++are normative and the gutter half of T13 is not writeable.
++```
++
++```text
++T16 (revised). Physical zero regression before and after S2b-2.
++
++Construction. Same PDF and same TableParams. Run A is the frozen pre-S2b-2
++build; run B is the post-S2b-2 build; neither the YAML config nor the params
++change.
++
++Expectation. Compare canonical values, never raw JSON bytes:
++1. elementwise float equality of grid.xs and grid.ys;
++2. equality of cell bbox, cell text, column_index, row_span, column_span,
++   candidate ids and the S2a visual fields listed in §11 invariant 14, after
++   canonical serialization with json.dumps(value, ensure_ascii=False,
++   sort_keys=True, separators=(",", ":")) and allow_nan=False;
++3. equality of the named hashes: parser_config_sha256 (the YAML config hash,
++   which is unchanged) and table_params_sha256 (the canonical snapshot hash of
++   §5.8).
++
++This design defines no table-level evidence hash, so a test must not invent an
++unnamed one. If S2b-2 later adds one, the test names it and it stays
++auxiliary, never a substitute for items 1 and 2.
++
++Coverage. §5.8 (canonical JSON and the two named hashes); §11 invariant 14 and
++§11.0 row 14.1; §13.
++
++Failure semantics. Any changed physical or S2a value fails. Byte comparison of
++raw JSON, or equality of a hash not named above, is evidence of neither
++regression nor equality.
++```
++
++```text
++T20 (revised). Two header cells with the same identity key.
++
++Construction. Two DetectedHeaderCell records with identical
++(level, source_row, source_column, column); a HeaderCellRef declared on a
++canopy edge resolves that key.
++
++Expectation. Identity resolution is step one of the two-step model. More than
++one match yields header_ref_ambiguous (L code 27) and the candidate and table
++are unresolved; neither cell is selected and no content check is attempted.
++The other outcomes keep their own codes and never mix: zero matches is
++boundary_evidence_missing_ref; one match failing its text, bbox or level check
++is boundary_evidence_mismatch; a ref repeated inside one list is
++boundary_evidence_duplicate_ref; two same-level cells geometrically touching x
++within visual_boundary_tol_pt is header_level_tie; a side with no cell at that
++level at all is header_missing_for_canopy.
++
++Coverage. §5.3 header_canopy row; §9.2 header_cell_refs (steps 1-2); §10.2
++code 27; §11.0 rows 8.3 and 8.8; §11 invariant 8.
++
++Failure semantics. Silent first match, boundary_evidence_mismatch or
++header_level_tie emitted for a multi-match, or header_ref_ambiguous emitted
++for a zero or single match all fail.
++```
++
++```text
++T21 (revised). Reason closure.
++
++Construction. Enumerate every branch of §6.2, every evidence branch of
++§5.3-§9.2, and every code of §10.2.
++
++Expectation. Five namespaces stay separate: A-schema, A-wrapper, A-audit, L
++(27 codes) and Diagnostic. logical_mapping_reason contains L codes only, and
++the L set is closed at exactly 27. Each L code has at least one producing
++branch, every L-producing branch emits exactly one L code, and keep branches
++emit none (§10.2 closure table, §11.21 (b) and (c)). header_ref_ambiguous is
++reachable from HC-2b. The deleted codes
++boundary_header_gap_too_wide and boundary_partial_rule_not_condition are
++absent. word_boundary_tie is a diagnostic count, never a reason code and never
++persisted. Schema, wrapper and audit codes never enter logical_mapping_reason
++and never set logical_mapping_status.
++
++Coverage. §10.2 (namespaces, the 27-code list, closure and §6.2 map); §11.0;
++§11.21.
++
++Failure semantics. Any code without a branch, any branch without a code, a
++26-code set, a deleted code, a diagnostic code in the reason tuple, or an A
++code in the reason tuple fails.
++```
++
++```text
++T22 (revised). Supporting band crossing.
++
++Construction. Case 1: exactly two supporting body rows, one crossed by a body
++data cell or word. Case 2: the same two rows, both crossed. Case 3: a
++section-like body row carrying a full-width merged cell and a full-height rule
++at x, with the other body rows supporting x.
++
++Expectation. Case 1 removes only the crossed row's support; with
++supporting_bands = 2 and crossing_bands = 1 the candidate is not unresolved
++because of crossing and its keep or demote outcome is still decided by §6.2.
++Case 2 gives supporting_bands = 2, crossing_bands = 2 and unresolved with
++boundary_data_cell_crossing. Case 3 removes the section-like row from
++rule_bands, gutter_bands and the structural source before counting, so it is
++neither supporting nor crossing and its crossing is diagnostic only. Counting
++is per row, never per word or per cell, and every decision satisfies
++0 <= crossing_bands <= supporting_bands <= band_count. Header rows are never
++counted. Every body row, including the section-like one, stays in row_bands
++and band_count.
++
++Coverage. §5.2 supporting and crossed rows; §5.3.2; §6.2 crossing row and D14
++objects; §8.1; §11.20.
++
++Failure semantics. A single crossed row making the candidate unresolved,
++counting words or cells instead of rows, a header or section-like row entering
++the denominator, or an all-crossed candidate other than
++boundary_data_cell_crossing all fail.
++```
++
++```text
++T25 (revised). Empty-row persistence.
++
++Construction. A ruled table whose grid has a row with no non-empty text cell,
++so len(rows) < n_rows.
++
++Expectation. grid.ys (n_rows + 1 coordinates), n_rows and header_rows are
++persisted; len(rows) < n_rows is legal and is never used to derive n_rows. The
++empty row keeps its place in 0 .. n_rows - 1, stays in band_count, and takes
++part in a D1 band whose signature is the empty tuple (); it may share that
++band with an adjacent row of the same signature. The projection emits no
++PhysicalColumnOverlap for an empty band, but the band itself exists. Logical
++payload row indices stay inside 0 .. n_rows - 1, and len(row_bands) ==
++band_count includes the empty row.
++
++Coverage. §5.4 bands and occupancy; §5.7 additive fields; §7.3 D6; §11.0
++rows 5.3-5.5 and 18.1; §11 invariants 18 and 20.
++
++Failure semantics. Deriving n_rows from len(rows), dropping or duplicating a
++band, a wrong band row range, or a gap or overlap between consecutive bands
++fail, with mapping_lattice_index_mismatch, mapping_row_band_not_canonical and
++mapping_row_band_overlap respectively.
++```
++
++```text
++T26 (revised). Physical cell identity.
++
++Construction. (a) A persisted cell preceded in its row by an empty grid cell,
++so the row-local index and the flat TableGrid.cells index differ. (b) A grid
++cell whose stripped text is empty but which carries words.
++
++Expectation. (a) PhysicalCellRef.cell_index is the row-local index inside
++DetectedRow.cells, not the flat index;
++flat = offset(r) + j + skipped_before(r, j) resolves the intended GridCell;
++column_index matches that cell; cell_id is None at parser level and is filled
++after rebuild. (b) The cell is not persisted as a DetectedCell by
++detect_tables, its words remain in the §5.6 universe (they are assigned to
++grid.cells), no logical cell can carry them, and the table fails closed as
++unresolved with mapping_word_not_assigned (code 18; §11.0 row 10.5a, a word of
++the §5.6 universe missing from the table union). No empty cell is invented and
++no word is silently dropped.
++
++Coverage. §5.6 D5 (two index spaces and the conversion), §5.6 item 5 (word
++universe), §5.7, §7.3, §11.0 rows 10.2/10.4a/10.5a, §10.2 code 18.
++
++Failure semantics. Writing the flat index into cell_index, resolving a
++different cell, inventing an empty cell, dropping the words, or emitting any
++code other than mapping_word_not_assigned for (b) fails.
++
++OPEN (code choice). The batch-5 review suggested
++mapping_word_partition_mismatch for (b). §10.2 assigns a missing universe word
++to mapping_word_not_assigned (18) and duplicates or extras to
++mapping_word_partition_mismatch (20), so using 20 here would contradict the
++code-to-branch closure and T21. r15 uses 18; §14 item 24 asks the Reviewer to
++confirm this reading.
++```
++
+ ## 14. Open decisions for Reviewer
+ 
+ 1. Approve the proposed logical parameters and the version-dispatched

@@ -1,0 +1,292 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -2180,6 +2645,85 @@
+ `unresolved`, not `demote_condition_path`; a content class never overrides the
+ ratio branch.
+ 
++**`ConditionPathRecord` (D2).**
++
++```text
++ConditionPathRecord
++  condition_path_index: int            # position in logical_condition_paths
++  decision_index: int                  # position in logical_boundary_decisions
++  candidate_x: float
++  anchor_x: float
++  source_xs: tuple[float, ...]
++  row_bands: tuple[int, ...]           # condition-bearing body rows; absolute grid rows
++  support: BoundarySupport
++  partial_rule: SubrulePartialEvidence
++```
++
++`ConditionPathRecord` is the only authoritative condition-path payload. A
++record exists iff its referenced decision has
++`decision == "demote_condition_path"`; the relation is a bijection:
++
++- every `demote_condition_path` decision has exactly one record;
++- every record references exactly one such decision;
++- no two records share a `decision_index`;
++- `condition_path_index` equals the record's 0-based position, and
++  `decision_index` is strictly ascending.
++
++Scalar fields are copied from the referenced decision: `candidate_x`,
++`anchor_x`, `source_xs` and `support` verbatim; `row_bands` equals
++`partial_rule.condition_bands`, is non-empty, ordered, unique and body-only.
++The referenced decision's `evidence` must contain exactly one
++`kind == "subrule_partial"` member, and `partial_rule` must equal it field for
++field. Zero or several members, an unequal copy, or unequal `row_bands` is
++`condition_path_decision_mismatch`.
++
++Three row sets are not interchangeable:
++
++- `LogicalBoundaryDecision.row_bands`: every body grid row;
++- `ConditionPathRecord.row_bands`: condition-bearing body rows, equal to
++  `partial_rule.condition_bands`;
++- `SubrulePartialEvidence.condition_bands`: the same condition-bearing rows.
++
++The record's `row_bands` is a subset of the decision's, usually a strict
++subset; the validator checks both the subset relation and equality with the
++evidence. `BoundarySupport.condition_bands` is a count, not a set, and is never
++compared with these tuples.
++
++**Two-stage decision and unresolved withholding (D2).**
++
++1. Stage A classifies each candidate by §6.2 without knowing whether another
++   candidate or a mapping check will fail. A candidate may become
++   `demote_condition_path` here.
++2. Stage B runs after all candidates and all mapping checks. If any candidate is
++   `unresolved`, or any logical-payload check of invariant 21(e) fails, the
++   table is unresolved (§10.1).
++3. On an unresolved table, every Stage A `demote_condition_path` is rewritten to
++   `demote_no_evidence`: `decision = "demote_no_evidence"`,
++   `demoted_to = "no_evidence"`. The Stage A `reasons` are preserved in their
++   original order; no member is removed, reordered or de-duplicated.
++   `condition_path_withheld_unresolved` is appended once at the end.
++   `boundary_no_evidence` is appended only if it was already present in Stage A;
++   a withheld condition path does not add it. `row_bands` remains the standard
++   all-body-row tuple, the Stage A condition rows remain available in the
++   retained `subrule_partial` evidence, and `evidence` is unchanged with exactly
++   one `subrule_partial`.
++4. `condition_path_withheld_unresolved` is reserved for Stage B. Stage A must
++   never emit it. On a rewritten decision it occurs exactly once and is the
++   final reason. A normal Stage A `demote_no_evidence` must contain
++   `boundary_no_evidence`; only the Stage B withholding state may omit it.
++5. No decision on an unresolved table has `decision == "demote_condition_path"`,
++   and `logical_condition_paths` is empty. A record on an unresolved table is
++   `condition_path_decision_mismatch`.
++6. On a resolved table the bijection applies unchanged, and
++   `condition_path_withheld_unresolved` may not appear.
++
++`demote_no_evidence` with `demoted_to = "no_evidence"` in Stage B is a closed
++state meaning "no condition path may be emitted"; it is not a claim that the
++candidate lacked evidence. `condition_path_withheld_unresolved` is the only
++permitted reason why a `demote_no_evidence` decision omits
++`boundary_no_evidence`; the validator accepts that exception only when the code
++is present.
++
+ ## 7. Physical→logical mapping (deliverable 2)
+ 
+ ### 7.1 One physical lattice per table (R3, P0-1)
+@@ -2217,17 +2761,20 @@
+ - a logical column may span several physical columns across row bands within
+   the same table.
+ 
+-For each logical column `[left, right]`, the canonical row bands of §5.4 define
+-the row ranges; within each band, record the positive overlaps with every
+-physical column interval `[grid.xs[i], grid.xs[i + 1]]`. `overlap_fraction` is
+-recomputed from `overlap_left/right` and the physical width; a mismatch is an
+-error, not a warning. The bands of one logical column partition
+-`[0, n_rows - 1]` exactly and adjacent bands never carry the same physical
+-column set.
++For each logical column `[left, right]` and each `BandObservation`, record one
++`PhysicalColumnOverlap` for every physical column in `occupied_columns(band)`
++that has positive width overlap with `[left, right]`. An empty band, or a band
++whose occupied columns do not intersect the interval, records nothing. The
++records are sorted by `(band_index, physical_column)`. `overlap_fraction` is
++recomputed from `overlap_left`, `overlap_right` and the physical width; a
++mismatch is an error, not a warning. The `logical_row_bands` themselves still
++partition `[0, n_rows - 1]` exactly; the overlaps are a coverage relation over
++occupied cells, not a partition of bands. Adjacent bands may carry the same
++physical column set; set equality never merges bands.
+ 
+ `physical_column` plus `physical_left` / `physical_right` is the locator.
+-`grid_row_start` / `grid_row_end` is the canonical band, not an arbitrary text
+-extent.
++`band_index` plus `grid_row_start` / `grid_row_end` is the canonical band, not
++an arbitrary text extent.
+ 
+ ### 7.3 Cell projection and word assignment
+ 
+@@ -2242,8 +2789,8 @@
+    unresolved. A center outside the closed outer extent, `cx < b[0]` or
+    `cx > b[-1]`, is `mapping_word_outside_logical_extent` and the table is
+    unresolved; there is **no clamp, snap, tolerance or boundary widening**.
+-   This case is reachable: `_assign_words` accepts a word when its center is
+-   within `0.8` pt of a cell edge (`structure.py:326`), so a word can belong
++   This case is reachable: `icpdf.parser.structure::_assign_words` accepts a
++   word when its center is within `0.8` pt of a cell edge, so a word can belong
+    to a physical cell while its center lies just outside the outermost logical
+    boundary; the two decisions are independent and the mapping one fails
+    closed. Inside the extent every logical column uses the left-open,
+@@ -2264,8 +2811,9 @@
+ 4. `word_ids` across all logical cells are a disjoint partition of the word
+    universe defined in §5.6, item 5.
+ 
+-**D4 verifier (implemented, not yet wired).** `assign_words_to_logical_columns`
+-(`structure.py:381`) is item 2 as a pure function. It requires at least two
++**D4 verifier (implemented, not yet wired).**
++`icpdf.parser.structure::assign_words_to_logical_columns` is item 2 as a pure
++function. It requires at least two
+ boundaries and rejects a non-finite or non-strict lattice with `ValueError`. Per word it
+ raises `LogicalMappingError` carrying one of three codes and the `word_id`:
+ `mapping_word_not_assigned` for a non-finite center,
+@@ -2277,17 +2825,17 @@
+ boundaries are derived in S2b-2; the function is the frozen contract that
+ integration must call instead of re-implementing the interval test.
+ 
+-**D6 row lattice (implemented, additive).** `detect_tables` copies
+-`grid.ys` verbatim into `DetectedTable.grid_ys` and `grid.n_rows` into
+-`DetectedTable.n_rows` (`table_detector.py:192-193`); `build_table` copies both
+-to the domain `Table` (`table_rebuilder.py:79-80`). `rows` stays sparse:
+-`detect_tables` skips a grid row with no non-empty cell
+-(`table_detector.py:152-153`), so `len(rows) <= n_rows` and `len(rows)` is
+-**not** the row count. `DetectedRow.grid_row` is the logical row index, not
+-the sparse position. One shared function, `validate_grid_ys`
+-(`domain/table.py:15`), is called by both the domain `Table` validator
+-(`domain/table.py:166`) and the parser `DetectedTable` validator
+-(`table_detector.py:90`). A non-empty lattice needs at least two coordinates,
++**D6 row lattice (implemented, additive).**
++`icpdf.parser.table_detector::detect_tables` copies `grid.ys` verbatim into
++`DetectedTable.grid_ys` and `grid.n_rows` into `DetectedTable.n_rows`;
++`icpdf.parser.table_rebuilder::build_table` copies both to the domain `Table`.
++`rows` stays sparse: `detect_tables` skips a grid row with no non-empty cell,
++so `len(rows) <= n_rows` and `len(rows)` is **not** the row count.
++`DetectedRow.grid_row` is the logical row index, not the sparse position. One
++shared function, `icpdf.domain.table::validate_grid_ys`, is called by both the
++domain `Table` validator `icpdf.domain.table::_check_table` and the parser
++`DetectedTable` validator in `icpdf.parser.table_detector`. A non-empty lattice
++needs at least two coordinates,
+ `n_rows >= 1`, every coordinate finite, `len(grid_ys) == n_rows + 1`, and
+ strictly ascending adjacent pairs (`right` greater than `left`); an empty
+ lattice requires `n_rows == 0`. "Non-decreasing" is not acceptable because
+@@ -2335,11 +2883,15 @@
+   support. A printed full-height rule inside a merged data cell is conflicting
+   physical evidence and does not rescue an all-crossed candidate; there is no
+   printed-rule or header-canopy tie-break.
+-- A merged cell that spans an entire row band (section/label row) is retained as
+-  a physical cell and projected to the logical cells it overlaps; a crossing in
+-  a header/section row is not a supporting band, so it does not veto a boundary
+-  supported in body rows. S2b does not assign section semantics; that is
+-  deferred to S2c.
++- A section-like body row is identified by the geometric predicate of §5.3.2,
++  never by text. The row is removed before any supporting-band count, so a
++  crossing there is not a supporting row and does not veto a boundary supported
++  in ordinary body rows. The row is not removed from `band_count` or
++  `row_bands`: it is still a body row of the table, so it counts in
++  `band_count` but in neither `supporting_bands` nor `crossing_bands`. Its
++  cells are projected to the logical cells they overlap but never count as
++  `rule_bands`, `gutter_bands` or a structural source. Header rows are exempt
++  by range. S2b does not assign section semantics; that is deferred to S2c.
+ 
+ ### 8.2 Multi-level headers
+ 
+@@ -2419,13 +2971,23 @@
+   each segment resolves to a `VisualSegment` with the same `component_id`,
+   `y0`, `y1`; the component id is in `region_components`; the segment span is
+   inside the table bbox.
+-- `header_cell_refs`: resolve by `(level, source_row, source_column, column)`
+-  to exactly one `DetectedHeaderCell`; text and bbox must match; `level <
+-  header_rows`; the cell belongs to this table. For `header_canopy`, every left
+-  ref satisfies `bbox[2] <= x + tol`, every right ref `bbox[0] >= x - tol`, each
+-  anchor is the head of its nearest-first list, the anchors satisfy the
+-  `boundary_edge` rule of §5.3, and `left_label` / `right_label` equal the
+-  anchors' normalized text.
++- `header_cell_refs` resolve in two ordered steps (D15). Step 1 is identity:
++  the key `(level, source_row, source_column, column)` is matched against every
++  `DetectedHeaderCell` of this table. Zero matches is
++  `boundary_evidence_missing_ref`; more than one match is
++  `header_ref_ambiguous` (code 27); exactly one match proceeds to step 2.
++  Step 2 is content: `text` and `bbox` must equal the matched cell, and
++  `level < header_rows`; any mismatch is `boundary_evidence_mismatch`. The two
++  steps never swap and never merge: identity failure is not relabelled as a
++  content mismatch, and a content mismatch is not relabelled as a missing ref.
++  For `header_canopy`, every left ref satisfies `bbox[2] <= x + tol`, every
++  right ref `bbox[0] >= x - tol`, each anchor is the head of its nearest-first
++  list, the anchors satisfy the `boundary_edge` rule of §5.3, and
++  `left_label` / `right_label` equal the anchors' normalized text. A repeated
++  ref inside one declared list is `boundary_evidence_duplicate_ref`; a
++  geometric tie between two header cells at one level is `header_level_tie`; an
++  empty required side list is `header_missing_for_canopy`. These three checks
++  are distinct from step 1 and from each other.
+ - `subrule label_assignments`: `grid_row`s are unique and inside `rule_bands`;
+   each `physical_cell_ref` resolves; each word id is in that cell and strictly
+   right of x; `selected_run_bbox` equals the word union; `nonempty_bands` and
+@@ -2442,12 +3004,19 @@
+   `boundary_source` and `page_number` must match that record.
+ - `grid_rows`: in `[header_rows, n_rows)`; each row is a real band; no row is
+   repeated.
+-- `word_ids`: each id exists exactly once on the page; its center is inside the
+-  referenced physical cell bbox (same 0.8pt tolerance as `_assign_words`) and
+-  inside the logical cell bbox. Across every `PhysicalCellAssignment` of the
+-  table a word id appears at most once. If one physical cell is referenced by
+-  more than one logical cell, those assignments must carry disjoint `word_ids`
+-  sets; the union over the table equals the recomputed word universe of §5.6.
++- `word_ids`: each id exists exactly once on the page. Membership is checked
++  three times under one code and three distinct rules (§11.0, W-1, W-2a, W-2b):
++  W-1 requires the word centre inside the closed outer extent with no
++  tolerance, clamp, snap or boundary widening; W-2a requires it inside the
++  referenced physical cell bbox with the 0.8pt inclusive tolerance of
++  `_assign_words`; W-2b requires it inside the logical cell bbox with the same
++  0.8pt inclusive tolerance. The rules are not interchangeable: W-1 never
++  inherits 0.8pt and W-2a / W-2b never inherit the closed-extent rule. A word
++  centre that is not finite belongs to `mapping_word_not_assigned` (§5.6).
++  Across every `PhysicalCellAssignment` of the table a word id appears at most
++  once. If one physical cell is referenced by more than one logical cell, those
++  assignments must carry disjoint `word_ids` sets; the union over the table
++  equals the recomputed word universe of §5.6.
+ - `physical_cell_edge_refs`: `(grid_row, cell_index)` resolves to a real
+   `DetectedCell`; `column_index` matches; the edge x is within tolerance of the
+   logical boundary; refs are sorted and unique per `(grid_row, cell_index,
+@@ -2456,10 +3025,18 @@
+   distinct `grid_row` values remain across groups.
+ - `physical_column`, `physical_left`, `physical_right`: `physical_column` is a
+   valid interval index; `physical_left == grid.xs[i]` and `physical_right ==
+-  grid.xs[i + 1]`; the canonical bands of one logical column partition
+-  `[0, n_rows - 1]` with no gap, overlap or duplicate band; `overlap_left`,
+-  `overlap_right` and `overlap_fraction` recompute from the authoritative
+-  logical interval and physical width within `1e-6`.
++  grid.xs[i + 1]`. Overlaps reference the table-level layout bands through
++  `band_index`: the index is in range, the band shape is non-empty,
++  `grid_row_start` and `grid_row_end` equal the band exactly, and
++  `physical_column` is in `occupied_columns(band)`. The layout bands partition
++  `0 .. n_rows - 1`: a signature run that is not maximal is 5.4a, an uncovered
++  row between two bands is 5.4b, and an intersection or duplicate is 5.4c, both
++  the latter reported as `mapping_row_band_overlap`. Within one
++  `(band_index, logical_column)` pair `physical_column` is unique and
++  ascending. 6.1a checks range and 6.1b checks recompute:
++  `overlap_left`, `overlap_right` and `overlap_fraction` must recompute from the
++  authoritative logical interval and physical width within `1e-6`, and that
++  recompute is an A failure, not a reason code.
+ - `visual_column_indices`: `len(visual_boundaries) == visual_columns + 1` when
+   not `None`; indices are sorted, unique and in range; each has positive width
+   overlap by the §5.4 rule.
+@@ -2478,8 +3055,8 @@
+    its center lies inside the physical cell and inside the logical cell bbox;
+ 3. recompute `bbox` as the union of the assigned word bboxes; it must equal
+    `LogicalCell.bbox`;
+-4. recompute `text` with `_words_to_text` over the assigned words
+-   (`structure.py:335-352`); it must equal `LogicalCell.text`;
++4. recompute `text` with `icpdf.parser.structure::_words_to_text` over the
++   assigned words; it must equal `LogicalCell.text`;
+ 5. take the union of all assignment word ids in stored reading order; it must
+    equal `LogicalCell.word_ids`;
+ 6. across all logical cells of the table, the assignment word ids must be
+@@ -2502,7 +3079,8 @@
+ 
+ ### 10.1 Table-level fail-closed
+ 
+-If any candidate is `unresolved`, or any mapping invariant fails:
++If any candidate is `unresolved`, or any logical-payload check of §11
++invariant 21(e) fails:
+ 
+ ```text
+ logical_mapping_status = "unresolved"

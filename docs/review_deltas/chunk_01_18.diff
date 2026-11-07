@@ -1,0 +1,381 @@
+--- docs/PHASE1_4_S2B_DESIGN.md
++++ PHASE1_4_S2B_DESIGN_r15.md
+@@ -1,9 +1,12 @@
+ # Phase 1.4 S2b — Logical Boundary Lattice and Projection
+ 
+-**Status:** design proposal only (revision r14, based on `6f3e58d` plus the
+-additive code slice recorded in §3.1, §5.6, §5.7 and §7.3). No implementation,
+-schema change, Gold change or pipeline integration is authorized by this
+-document. Implementation starts only after the Reviewer closes the items in §1.
++**Status:** design proposal only (revision r15, a revision of r14; based on
++`6f3e58d` plus the additive code slice recorded in §3.1, §5.6, §5.7 and §7.3).
++r15 carries design text only: it merges the group 1, group 2 and batch-5
++rulings recorded in §1 and adds no code, schema, Gold or threshold change. No
++implementation, schema change, Gold change or pipeline integration is
++authorized by this document. Implementation starts only after the Reviewer
++closes the items in §1.
+ 
+ **Relationship to the approved S2 design:** `docs/PHASE1_4_S2.md` remains the
+ umbrella design. S2b narrows its §5–§7 to the logical column lattice and the
+@@ -21,11 +24,29 @@
+ the r7 review, and the `kind` misreading and second transport loss found in the
+ r8 review, the four N7/N8 closure items found in the r9 re-review, the five
+ residual constraints in the r10 re-review, and the two remaining boundaries in
+-the r11 re-review.
++the r11 re-review, and the batch-5 findings on D7, D14–D16 and the T1–T26
++matrix that this r15 revision closes.
+ Nothing below is an implementation claim; every repository statement is backed
+ by a path and line reference in §3.
+ 
+-**r14 review findings (current round).**
++**r15 review findings (current round).**
++
++| Item | Reviewer finding | Answer in |
++| --- | --- | --- |
++| R15-B5-D1 | No table-level projection band or `BandObservation` carrier; `row_bands` and band counts used two index spaces without a canonical partition | §5.2 `row_bands`; §5.4 bands; §11 invariants 18 and 20; §13.1 T7/T25 |
++| R15-B5-D2 | `LogicalBoundaryDecision.row_bands` was absent, so T7 could not assert retained bands | §5.2 `row_bands`; §5.3; §11.20; §13.1 T7 |
++| R15-B5-D3 | Run split, word crossing, rule matching and band word assignment were implementation details with no single normative text | §5.3.1 items 1–4; §11.20; §13.1 T13 |
++| R15-B5-D7 | One tie rule was stated three different ways (§5.3, §6.3, §9.2); near-equal runs flipped the decision | §5.3.1 run predicate; §5.2 D13; §6.3 step 3; §11.21; §13.1 T7/T24 |
++| R15-B5-D10 | 31 codes included two unreachable and three schema codes; there was no branch-to-code map | §10.2 five namespaces and 27 L codes; closure and branch maps; §11.21 |
++| R15-B5-D11 | A and L namespaces mixed; a schema failure could set logical status | §10.1; §10.2 namespaces; §11.0; §11.21(a) |
++| R15-B5-D12 | No closure table from branches to codes; `header_ref_ambiguous` was not in any closed set | §10.2 closure; §11.0 row 8.8; §11.21; §13.1 T21 |
++| R15-B5-D14 | Keep thresholds existed only in evidence validation; "band" mixed body rows with projection bands; ratio denominators were undefined | §5.2 band definition; §6.1; §6.2 D14 objects; §9.2 ratio; §11.20 |
++| R15-B5-D15 | Zero and multiple matches for a header ref had no stable codes; first match was silent | §5.3 header_canopy; §9.2 two-step resolution; §10.2 code 27; §11.8; §13.1 T20 |
++| R15-B5-D16 | "Section-like row" had no definition, so a full-width body cell could enter the veto denominator | §5.3.2; §6.2; §8.1; §11.20; §13.1 T22 |
++| R15-B5-T | T7/T13/T16/T20/T21/T22/T25/T26 expectations were blocked, wrong, or measured the wrong object | §13.1 |
++| R15-B5-OPEN | No geometric gutter predicate exists, and two texts disagree on whether a gutter row may be crossed | §14 item 23 |
++
++**r14 review findings.**
+ 
+ | Item | Reviewer finding | Answer in |
+ | --- | --- | --- |
+@@ -195,7 +216,12 @@
+ These are the current definitions, not proposed models. Excerpts are abridged
+ to fields only; the source is authoritative.
+ 
+-`src/icpdf/parser/table_detector.py:29`:
++Code references in this document use `module::symbol`, for example
++`icpdf.parser.structure::_assign_words`, and never file line numbers: line
++numbers drift between commits and are not normative. A field reference appends
++the field to its owner, for example `icpdf.parser.structure::TableGrid.xs`.
++
++`icpdf.parser.table_detector::DetectedCell`:
+ 
+ ```python
+ class DetectedCell(BaseModel):
+@@ -208,7 +234,7 @@
+     word_ids: tuple[str, ...] = ()      # D5 additive; no cell identity
+ ```
+ 
+-`src/icpdf/parser/table_detector.py:38`:
++`icpdf.parser.table_detector::DetectedRow`:
+ 
+ ```python
+ class DetectedRow(BaseModel):
+@@ -218,7 +244,7 @@
+     grid_row: int = Field(default=0, ge=0)
+ ```
+ 
+-`src/icpdf/parser/table_detector.py:45`:
++`icpdf.parser.table_detector::DetectedHeaderCell`:
+ 
+ ```python
+ class DetectedHeaderCell(BaseModel):
+@@ -231,7 +257,7 @@
+     source_column: int = Field(ge=0)
+ ```
+ 
+-`src/icpdf/parser/table_detector.py:55`:
++`icpdf.parser.table_detector::DetectedTable`:
+ 
+ ```python
+ class DetectedTable(BaseModel):
+@@ -291,7 +317,7 @@
+ 
+ ### 3.2 `grid.xs` is one lattice per detected table
+ 
+-`grid.xs` is `TableGrid.xs` in `src/icpdf/parser/structure.py:68`, not a field of
++`grid.xs` is `icpdf.parser.structure::TableGrid.xs`, not a field of
+ `DetectedTable`:
+ 
+ ```python
+@@ -305,7 +331,8 @@
+     source: str = "rule_lattice"
+ ```
+ 
+-`src/icpdf/parser/table_detector.py:127` builds exactly one grid per region:
++`icpdf.parser.table_detector::detect_tables` builds exactly one grid per
++region:
+ 
+ ```python
+ for region in detect_table_regions(layout, params):
+@@ -313,25 +340,25 @@
+     ...
+ ```
+ 
+-`recognize_structure()` (`structure.py:567`) delegates to `_rule_grid()` or
+-`_alignment_grid()`. `_rule_grid()` creates one `all_xs` at
+-`structure.py:454`:
++`icpdf.parser.structure::recognize_structure` delegates to
++`icpdf.parser.structure::_rule_grid` or
++`icpdf.parser.structure::_alignment_grid`. `_rule_grid` creates one `all_xs`:
+ 
+ ```python
+ all_xs = _unique(edges + hard_xs + header_candidates + soft_xs, 4.0)
+ ```
+ 
+-and one `TableGrid(bbox, all_xs, ys, cells, source=region.source)` at
+-`structure.py:500`. `_alignment_grid()` likewise creates one `xs` list
+-(`structure.py:536-538`). There is no per-row or per-component x lattice.
++and one `TableGrid(bbox, all_xs, ys, cells, source=region.source)` at the end
++of the same function. `icpdf.parser.structure::_alignment_grid` likewise
++creates one `xs` list. There is no per-row or per-component x lattice.
+ 
+-`GridCell` (`structure.py:57`) is:
++`icpdf.parser.structure::GridCell` is:
+ 
+ ```python
+ row, column, row_span, column_span, bbox, text="", word_count=0
+ ```
+ 
+-It does not retain word ids. `_assign_words()` (`structure.py:313-332`) assigns
++It does not retain word ids. `icpdf.parser.structure::_assign_words` assigns
+ each `TextWord` by center to one cell and then discards the list after setting
+ `cell.text` and `cell.word_count`. S2b must therefore capture word ids in the
+ same pass or recompute the same deterministic assignment; §9 defines the rule.
+@@ -339,15 +366,16 @@
+ ### 3.3 `region_components` is provenance, not a second lattice
+ 
+ `src/icpdf/parser/table_regions.py` merges stacked components into one
+-`TableRegion`. `_merge_pair` requires shared column rules, a minimum shared
+-ratio, horizontal-extent alignment and no caption in the gap
+-(`TableParams.merge_*`). `_region_from_cluster()` then builds one region and
+-`_union_component()` unions the members' segments into one `RuleComponent`
+-(`table_regions.py:251-299`). `_region_from_cluster()` also emits structured
++`TableRegion`. `icpdf.parser.table_regions::_merge_pair` requires shared
++column rules, a minimum shared ratio, horizontal-extent alignment and no
++caption in the gap (`TableParams.merge_*`).
++`icpdf.parser.table_regions::_region_from_cluster` then builds one region and
++`icpdf.parser.table_regions::_union_component` unions the members' segments
++into one `RuleComponent`. `_region_from_cluster` also emits structured
+ `RegionEvidence` with kinds `merge`, `absorbed` and `implied_outer`.
+ 
+-`DetectedTable.region_components` is filled at
+-`table_detector.py:176-177`:
++`DetectedTable.region_components` is filled in
++`icpdf.parser.table_detector::detect_tables`:
+ 
+ ```python
+ region_components=[component.component_id for component in region.components]
+@@ -357,7 +385,8 @@
+ table. It does **not** select a per-region x lattice, and it cannot be used to
+ reinterpret `physical_column`.
+ 
+-`TableRegion` and `RegionEvidence` are at `structure.py:28-53`:
++`icpdf.parser.structure::TableRegion` and
++`icpdf.parser.structure::RegionEvidence` are:
+ 
+ ```python
+ @dataclass(frozen=True)
+@@ -387,7 +416,7 @@
+ 
+ ### 3.4 Header cells and role provenance
+ 
+-`HeaderCellRef` (`src/icpdf/parser/header_semantics.py:49`) is:
++`icpdf.parser.header_semantics::HeaderCellRef` is:
+ 
+ ```python
+ level: int
+@@ -398,8 +427,7 @@
+ source_column: int
+ ```
+ 
+-The existing `Candidate` role fields (`src/icpdf/domain/candidate.py:62-67`)
+-are:
++The existing `icpdf.domain.candidate::Candidate` role fields are:
+ 
+ ```python
+ column_role: ColumnRole = ColumnRole.UNKNOWN
+@@ -407,8 +435,8 @@
+ role_header_cell_id: str | None = None
+ ```
+ 
+-`build_candidates()` uses exactly three values for `role_source`
+-(`src/icpdf/parser/candidate_registry.py:64-69`):
++`icpdf.parser.candidate_registry::build_candidates` uses exactly three values
++for `role_source`:
+ 
+ ```text
+ "header_text"   role equals the role derived from a printed header
+@@ -416,19 +444,19 @@
+ "fail_closed"   no evidence; role is UNKNOWN
+ ```
+ 
+-`ColumnRole` values are `min`, `typ`, `max`, `value`, `condition`, `unit`,
+-`symbol`, `unknown` (`src/icpdf/domain/candidate.py:13-21`).
++`icpdf.domain.candidate::ColumnRole` values are `min`, `typ`, `max`, `value`,
++`condition`, `unit`, `symbol`, `unknown`.
+ 
+ ### 3.5 Word ids
+ 
+ `TextWord.word_id` is deterministic
+-(`src/icpdf/parser/text_blocks.py:84`):
++(`icpdf.parser.text_blocks::extract_text_blocks`):
+ 
+ ```python
+ f"p{page_number}-b{block_index}-l{line_index}-w{i}"
+ ```
+ 
+-Spans use `...-s{span_index}` (`text_blocks.py:69`). Word ids are page-level and
++Spans use `...-s{span_index}` in the same function. Word ids are page-level and
+ stable for the same PDF, page and text extraction parameters. They are not
+ stored on `DetectedCell`; S2b must persist the ids it assigns.
+ 
+@@ -470,7 +498,7 @@
+   columns; the 46 v1 tables are untyped for logical metrics."
+ 
+ The existing evaluator uses `gold_table.get("logical_columns", gold_columns)`
+-(`tools/goldset/evaluate.py:177`), so a v1 table falls back to its legacy
++in `goldset.evaluate::_score_pair`, so a v1 table falls back to its legacy
+ `n_columns`. That fallback is a compatibility behavior for historical reports.
+ It is **not** an annotation decision and S2b must not use it as one (§12.2).
+ 
+@@ -567,21 +595,55 @@
+ 
+ ```text
+ BoundarySupport
+-  band_count: int              # canonical body bands the candidate intersects
+-  rule_bands: int              # bands with a printed rule at x
+-  gutter_bands: int            # bands with a body gutter at x
+-  supported_bands: int         # union of rule/gutter bands, each counted once
+-  supporting_bands: int        # bands whose evidence backs the candidate (veto denominator)
+-  crossing_bands: int          # supporting bands crossed by a body data cell or word
+-  short_label_bands: int       # bands whose selected right-side run is a short label
+-  condition_bands: int         # bands whose selected right-side run is condition-like
+-  nonempty_bands: int          # evidence-specific denominator, see below
+-  support_ratio: float         # supported_bands / nonempty_bands
+-```
+-
+-**Supporting bands (D8).** The *supporting bands* of a candidate are the
+-canonical body bands that carry at least one of its body evidence kinds at x.
+-A band is counted at most once, as the union of these three sources:
++  band_count: int              # body rows in the table, n_rows - header_rows
++  rule_bands: int              # body rows with a printed rule at x
++  gutter_bands: int            # body rows with a body gutter at x
++  supported_bands: int         # distinct body rows with rule or gutter
++  supporting_bands: int        # body rows whose evidence backs the candidate (veto denominator)
++  crossing_bands: int          # supporting body rows crossed by a body data cell or word
++  short_label_bands: int       # body rows whose selected right-side run is a short label
++  condition_bands: int         # body rows whose selected right-side run is condition-like
++  nonempty_bands: int          # evidence-specific body-row denominator, see below
++  support_ratio: float | None  # supported_bands / nonempty_bands; None iff the denominator is 0
++```
++
++**`band` means one physical body row (D1/D14).** In `BoundarySupport`, and only
++here, a band is a physical body row `r` with `header_rows <= r < n_rows`. Every
++count is over absolute grid-row indices; no field is an index into
++`logical_row_bands`, and no field is body-relative. `band_count` is the
++normative body-row count, `n_rows - header_rows` (this requires
++`header_rows <= n_rows`; otherwise `mapping_row_band_not_canonical`), and
++`LogicalBoundaryDecision.row_bands` always has that same length. The field name
++`band_count` is retained only for compatibility; no implementation or document
++may read it as `len(logical_row_bands)`. The projection bands of §5.4 use a
++separate full-table index space that includes header bands; the two index
++spaces never mix. An empty body row stays in `band_count`; it is excluded only
++from an evidence-specific denominator that requires a word.
++
++**`supported_bands`, `nonempty_bands` and `support_ratio` (D1).**
++`supported_bands` is the number of distinct body rows in the union of the
++rule-row set and the gutter-row set. `nonempty_bands` is the evidence-specific
++denominator below and may be a narrower row set. There is no required ordering
++between the two: `supported_bands` may be greater than `nonempty_bands`, and
++`support_ratio` may therefore exceed 1.0. `support_ratio` is diagnostic: it is
++never a probability, never clamped, never NaN or infinite, and never decides a
++boundary by itself. It is `None` exactly when `nonempty_bands == 0`; otherwise
++it equals `supported_bands / nonempty_bands` and the validator recomputes it
++within `1e-9`. Count constraints are per set, not one global bound:
++
++- `nonempty_bands`, `rule_bands`, `gutter_bands`, `crossing_bands`,
++  `short_label_bands` and `condition_bands` are each at most `band_count`;
++- `supported_bands` is at most `rule_bands + gutter_bands` and at most
++  `band_count`;
++- for `subrule_promoted`, `short_label_bands` is at most `nonempty_bands`;
++- for `subrule_partial`, `condition_bands` is at most `rule_bands`;
++- `gutter_bands` is bounded only by `band_count`: a body row may expose a
++  gutter while carrying no word, so it counts in `gutter_bands` and not in
++  `nonempty_bands`.
++
++**Supporting rows (D8).** The *supporting rows* of a candidate are the physical
++body rows that carry at least one of its body evidence kinds at x. A row is
++counted at most once, as the union of these three sources:
+ 
+ - a printed rule at x (`rule_bands`);
+ - a body gutter at x (`gutter_bands`);
+@@ -590,38 +652,36 @@
+   groups and never twice inside one group (the de-duplication of §5.3 below).
+   This is the same repetition threshold as the structural keep row of §6.2.
+ 
+-A band holding several structural refs, or a rule and a gutter and a structural
+-ref, still contributes exactly one supporting band. Structural refs that do not
+-reach the two-band repetition threshold contribute zero to `supporting_bands`
++A row holding several structural refs, or a rule and a gutter and a structural
++ref, still contributes exactly one supporting row. Structural refs that do not
++reach the two-row repetition threshold contribute zero to `supporting_bands`
+ and stay diagnostic on the evidence record, so scattered edge refs can never
+-expand the veto denominator. Header and section rows are never supporting
+-bands; `header_canopy` and `table_bbox` evidence alone therefore yields
+-`supporting_bands == 0`. `supported_bands` remains the diagnostic union of rule
+-and gutter bands used by `support_ratio` and is not the veto denominator.
+-
+-A supporting band is **crossed** when a body data-cell bbox or a body word
+-bbox strictly straddles x, `bbox[0] < x < bbox[2]`, and its row coverage
+-includes that band. A band increments `crossing_bands` at most once, no matter
+-how many body data cells or words cross it. `crossing_bands` counts only
+-supporting bands, so `crossing_bands <= supporting_bands` by construction; a
+-crossing in a non-supporting, header or section band is recorded on the
+-evidence record but never counted here and never vetoes. The veto is
+-all-or-nothing over the supporting set: one crossed band removes that band's
+-support only, and an internal candidate is `unresolved` only when
+-`supporting_bands > 0` and `crossing_bands == supporting_bands` (§8.1).
+-
+-`support_ratio` is diagnostic only and never decides a boundary by itself; the
+-decision uses the named thresholds in §6.2. A band that has both a rule and a
+-gutter increments `rule_bands` and `gutter_bands` individually but only once in
+-`supported_bands`, so the ratio is `<= 1.0` by construction. `band_count` and
+-`nonempty_bands` are computed over the canonical bands of §5.4 (body bands for
+-`label_aligned`); a candidate that intersects no band has
+-`nonempty_bands == 0` and no ratio. The denominator is:
+-
+-- `subrule_promoted`: bands **in `rule_bands`** with at least one word center
+-  strictly right of x, whether or not a source cell was found;
+-- `label_aligned`: body bands with at least one word anywhere in the table;
+-- other kinds: bands with at least one word anywhere in the table.
++expand the veto denominator. Header rows and section-like body rows (§5.3.2)
++are never supporting rows: they are removed from all three sources before
++`supporting_bands` is counted, so `header_canopy` and `table_bbox` evidence
++alone yields `supporting_bands == 0`. `supported_bands` remains the diagnostic
++union of rule and gutter rows used by `support_ratio` and is not the veto
++denominator.
++
++A supporting row is **crossed** when a body data-cell bbox or a body word bbox
++strictly straddles x, `bbox[0] < x < bbox[2]`, and its row coverage includes
++that row. A row increments `crossing_bands` at most once, no matter how many
++body data cells or words cross it. `crossing_bands` counts only supporting
++rows, so `crossing_bands <= supporting_bands`; a crossing in a non-supporting,
++header or section-like row is recorded on the evidence record but never counted
++here and never vetoes. The veto is all-or-nothing over the supporting set: one
++crossed row removes that row's support only, and an internal candidate is
++`unresolved` only when `supporting_bands > 0` and
++`crossing_bands == supporting_bands` (§8.1).
++
++The decision uses the explicit thresholds of §6.2, never `support_ratio`. A row
++that has both a rule and a gutter increments `rule_bands` and `gutter_bands`
++individually but only once in `supported_bands`. The denominator is:
++
++- `subrule_promoted`: body rows **in `rule_bands`** with at least one word
++  center strictly right of x, whether or not a source cell was found;
++- `label_aligned`: body rows with at least one word anywhere in the table;
++- other kinds: body rows with at least one word anywhere in the table.
+ 
+ Both denominators are restated on the corresponding evidence record, so the
+ validator never has to infer which one a decision used.
